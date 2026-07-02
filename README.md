@@ -1,10 +1,10 @@
-# UVCI — Gestion des Heures des Enseignants (Vues)
+# UVCI — Gestion des Heures des Enseignants
 
 Application web (maquette **front-end uniquement**) pour l'automatisation de la
-gestion des heures d'enseignement de l'**Université Virtuelle de Côte d'Ivoire (UVCI)**.
+gestion des heures d'enseignement de l'**Université Virtuelle de Côte d'Ivoire (UVCI)** dans le cadre du PCT.
 
 > ⚠️ Ce dépôt contient **uniquement les vues et la navigation** (aucune logique
-> backend : pas de base de données, d'authentification réelle ni de traitement).
+> backend : pas d'authentification réelle ni de traitement).
 > Les données affichées sont fictives et servent à illustrer le design.
 
 ## Stack
