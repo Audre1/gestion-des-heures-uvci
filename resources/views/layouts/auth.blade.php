@@ -23,7 +23,7 @@
         {{-- Panneau illustratif --}}
         <div class="auth-visual" id="authVisual">
             <div class="brand-badge">
-                <img src="{{ asset('images/logo-long.png') }}" alt="UVCI">
+                <img src="{{ asset('images/logo-long.png') }}" alt="Logo UVCI">
             </div>
             <h1 class="mt-5">Gestion des Heures<br>des Enseignants</h1>
             <p class="mt-3 mb-0" style="max-width:420px;position:relative;opacity:.9">
@@ -41,7 +41,7 @@
         <div class="auth-form-side">
             <div class="auth-card">
                 <div class="auth-logo">
-                    <img src="{{ asset('images/logo-long.png') }}" alt="UVCI">
+                    <img src="{{ asset('images/logo-long.png') }}" alt="Logo UVCI">
                 </div>
                 @yield('content')
             </div>
