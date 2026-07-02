@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes — Vues uniquement (aucune logique backend)
+| Web Routes — Vues uniquement
 |--------------------------------------------------------------------------
 | Chaque route retourne simplement une vue. La navigation (sidebar, liens,
 | formulaires) est entièrement fonctionnelle côté affichage.

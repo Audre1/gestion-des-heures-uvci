@@ -54,7 +54,8 @@
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fa-solid fa-chart-column text-uvci-green me-2"></i>Volume horaire par département</span>
+                    <span><i class="fa-solid fa-chart-column text-uvci-green me-2"></i>Volume horaire par
+                        département</span>
                     <button class="btn btn-sm btn-light border">Ce semestre</button>
                 </div>
                 <div class="card-body">
@@ -70,10 +71,11 @@
                         ];
                     @endphp
                     <div class="d-flex align-items-end justify-content-around gap-3" style="height:230px">
-                        @foreach($bars as [$label, $h, $color])
+                        @foreach ($bars as [$label, $h, $color])
                             <div class="text-center flex-fill">
                                 <div class="mx-auto rounded-top"
-                                     style="width:60%;height:{{ $h * 2 }}px;background:{{ $color === 'green' ? 'var(--uvci-green)' : 'var(--uvci-purple)' }};transition:height .3s"></div>
+                                    style="width:60%;height:{{ $h * 2 }}px;background:{{ $color === 'green' ? 'var(--uvci-green)' : 'var(--uvci-purple)' }};transition:height .3s">
+                                </div>
                                 <div class="small text-muted mt-2">{{ $label }}</div>
                             </div>
                         @endforeach
@@ -85,7 +87,8 @@
         {{-- Répartition des activités --}}
         <div class="col-lg-4">
             <div class="card h-100">
-                <div class="card-header"><i class="fa-solid fa-chart-pie text-uvci-purple me-2"></i>Répartition des activités</div>
+                <div class="card-header"><i class="fa-solid fa-chart-pie text-uvci-purple me-2"></i>Répartition des
+                    activités</div>
                 <div class="card-body">
                     @php
                         $activs = [
@@ -95,13 +98,14 @@
                             ['Mise à jour', 20, '#d97706'],
                         ];
                     @endphp
-                    @foreach($activs as [$label, $pct, $c])
+                    @foreach ($activs as [$label, $pct, $c])
                         <div class="mb-3">
                             <div class="d-flex justify-content-between small mb-1">
                                 <span>{{ $label }}</span><span class="fw-semibold">{{ $pct }}%</span>
                             </div>
                             <div class="progress" style="height:8px">
-                                <div class="progress-bar" style="width:{{ $pct }}%;background:{{ $c }}"></div>
+                                <div class="progress-bar"
+                                    style="width:{{ $pct }}%;background:{{ $c }}"></div>
                             </div>
                         </div>
                     @endforeach
@@ -121,7 +125,13 @@
                 <div class="table-responsive">
                     <table class="table align-middle mb-0">
                         <thead>
-                            <tr><th>Enseignant</th><th>Type</th><th>Séq.</th><th>VHT</th><th>Statut</th></tr>
+                            <tr>
+                                <th>Enseignant</th>
+                                <th>Type</th>
+                                <th>Séq.</th>
+                                <th>VHT</th>
+                                <th>Statut</th>
+                            </tr>
                         </thead>
                         <tbody>
                             @php
@@ -132,11 +142,16 @@
                                     ['S. Koné', 'Création — Niv. 1', 40, '16h', 'En cours', 'amber'],
                                 ];
                             @endphp
-                            @foreach($rows as [$n, $t, $s, $v, $st, $c])
+                            @foreach ($rows as [$n, $t, $s, $v, $st, $c])
                                 <tr>
-                                    <td><span class="avatar-sm me-2">{{ strtoupper(substr($n,0,1)) }}</span>{{ $n }}</td>
-                                    <td>{{ $t }}</td><td>{{ $s }}</td><td class="fw-semibold">{{ $v }}</td>
-                                    <td><span class="badge badge-soft-{{ $c }}">{{ $st }}</span></td>
+                                    <td><span
+                                            class="avatar-sm me-2">{{ strtoupper(substr($n, 0, 1)) }}</span>{{ $n }}
+                                    </td>
+                                    <td>{{ $t }}</td>
+                                    <td>{{ $s }}</td>
+                                    <td class="fw-semibold">{{ $v }}</td>
+                                    <td><span class="badge badge-soft-{{ $c }}">{{ $st }}</span>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -147,7 +162,8 @@
 
         <div class="col-lg-5">
             <div class="card h-100">
-                <div class="card-header"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Enseignants en dépassement de charge</div>
+                <div class="card-header"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Enseignants
+                    en dépassement de charge</div>
                 <ul class="list-group list-group-flush">
                     @php
                         $over = [
@@ -156,10 +172,10 @@
                             ['Dr. C. N\'Guessan', '208h / 192h', '+16h'],
                         ];
                     @endphp
-                    @foreach($over as [$n, $r, $d])
+                    @foreach ($over as [$n, $r, $d])
                         <li class="list-group-item d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="avatar-sm">{{ strtoupper(substr($n,0,1)) }}</span>
+                                <span class="avatar-sm">{{ strtoupper(substr($n, 0, 1)) }}</span>
                                 <div>
                                     <div class="fw-semibold" style="line-height:1.1">{{ $n }}</div>
                                     <div class="text-muted small">{{ $r }}</div>

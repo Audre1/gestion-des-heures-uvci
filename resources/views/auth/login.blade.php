@@ -3,7 +3,7 @@
 @section('title', 'Connexion')
 
 @section('content')
-    <h2>Bienvenue 👋</h2>
+    <h2>Bienvenue</h2>
     <p class="subtitle">Connectez-vous à votre espace de travail UVCI.</p>
 
     <form action="{{ route('dashboard') }}" method="GET">
@@ -12,7 +12,7 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                 <input type="text" class="form-control" id="login" name="login"
-                       placeholder="ex : k.kouassi@uvci.edu.ci" required>
+                    placeholder="ex : k.kouassi@uvci.edu.ci" required>
             </div>
         </div>
 
@@ -21,7 +21,7 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                 <input type="password" class="form-control border-end-0" id="password" name="password"
-                       placeholder="••••••••" required>
+                    placeholder="••••••••" required>
                 <span class="input-group-text bg-white" style="cursor:pointer" onclick="togglePwd()">
                     <i class="fa-solid fa-eye" id="pwdIcon"></i>
                 </span>
@@ -47,14 +47,14 @@
 @endsection
 
 @section('scripts')
-<script>
-    function togglePwd() {
-        const input = document.getElementById('password');
-        const icon = document.getElementById('pwdIcon');
-        const show = input.type === 'password';
-        input.type = show ? 'text' : 'password';
-        icon.classList.toggle('fa-eye', !show);
-        icon.classList.toggle('fa-eye-slash', show);
-    }
-</script>
+    <script>
+        function togglePwd() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('pwdIcon');
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', !show);
+            icon.classList.toggle('fa-eye-slash', show);
+        }
+    </script>
 @endsection
