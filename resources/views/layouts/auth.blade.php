@@ -29,7 +29,7 @@
             <p class="mt-3 mb-0" style="max-width:420px;position:relative;opacity:.9">
                 Plateforme officielle de l'Université Virtuelle de Côte d'Ivoire pour
                 l'automatisation du calcul des volumes horaires et des états de paiement.
-            </p>
+            </p> 
             <ul class="feature-list">
                 <li><i class="fa-solid fa-calculator"></i> Calcul automatique des volumes horaires</li>
                 <li><i class="fa-solid fa-clock"></i> Suivi des heures complémentaires</li>
