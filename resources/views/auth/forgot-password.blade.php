@@ -7,11 +7,6 @@
         <i class="fa-solid fa-arrow-left"></i> Retour à la connexion
     </a>
 
-    <div class="mb-3 d-inline-flex align-items-center justify-content-center"
-         style="width:60px;height:60px;border-radius:16px;background:var(--uvci-purple-light);color:var(--uvci-purple);font-size:1.5rem">
-        <i class="fa-solid fa-key"></i>
-    </div>
-
     <h2>Mot de passe oublié ?</h2>
     <p class="subtitle">
         Saisissez l'adresse email associée à votre compte. Un code de vérification
