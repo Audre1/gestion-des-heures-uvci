@@ -23,13 +23,13 @@
         {{-- Panneau illustratif --}}
         <div class="auth-visual" id="authVisual">
             <div class="brand-badge">
-                <img src="{{ asset('images/logo-long.png') }}" alt="Logo UVCI">
+                <img src="{{ asset('images/logo-long.png') }}" alt="logo uvci">
             </div>
             <h1 class="mt-5">Gestion des Heures<br>des Enseignants</h1>
             <p class="mt-3 mb-0" style="max-width:420px;position:relative;opacity:.9">
                 Plateforme officielle de l'Université Virtuelle de Côte d'Ivoire pour
                 l'automatisation du calcul des volumes horaires et des états de paiement.
-            </p> 
+            </p>
             <ul class="feature-list">
                 <li><i class="fa-solid fa-calculator"></i> Calcul automatique des volumes horaires</li>
                 <li><i class="fa-solid fa-clock"></i> Suivi des heures complémentaires</li>
@@ -41,7 +41,7 @@
         <div class="auth-form-side">
             <div class="auth-card">
                 <div class="auth-logo">
-                    <img src="{{ asset('images/logo-long.png') }}" alt="Logo UVCI">
+                    <img src="{{ asset('images/logo-long.png') }}" alt="logo uvci">
                 </div>
                 @yield('content')
             </div>

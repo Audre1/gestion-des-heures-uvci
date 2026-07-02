@@ -456,6 +456,12 @@ a {
     align-items: center;
     justify-content: center;
 }
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
 .content {
     padding: 1.75rem;

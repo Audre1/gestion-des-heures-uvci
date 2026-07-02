@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'auth.login')->name('login');
 Route::view('/mot-de-passe-oublie', 'auth.forgot-password')->name('password.request');
 Route::view('/reinitialisation', 'auth.reset-password')->name('password.reset');
+Route::view('/deconnexion', 'auth.login')->name('logout');
 
 // Tableau de bord
 Route::view('/tableau-de-bord', 'dashboard')->name('dashboard');
@@ -24,7 +25,7 @@ Route::view('/tableau-de-bord', 'dashboard')->name('dashboard');
 |--------------------------------------------------------------------------
 */
 Route::view('/utilisateurs', 'admin.utilisateurs')->name('utilisateurs.index');
-Route::view('/roles', 'admin.roles')->name('roles.index');
+// Route::view('/roles', 'admin.roles')->name('roles.index');
 Route::view('/annees-academiques', 'admin.annees')->name('annees.index');
 Route::view('/parametres-calcul', 'admin.parametres')->name('parametres.index');
 Route::view('/taux-horaires', 'admin.taux')->name('taux.index');
