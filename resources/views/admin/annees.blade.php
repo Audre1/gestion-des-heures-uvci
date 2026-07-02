@@ -6,7 +6,11 @@
 
     <x-data-table search-placeholder="Rechercher une année..." :count="4" :show-filters="false">
         <x-slot:head>
-            <th>Libellé</th><th>Date début</th><th>Date fin</th><th>Statut</th><th class="text-end">Actions</th>
+            <th>Libellé</th>
+            <th>Date début</th>
+            <th>Date fin</th>
+            <th>Statut</th>
+            <th class="text-end">Actions</th>
         </x-slot:head>
         @php
             $annees = [
@@ -19,8 +23,11 @@
         @foreach($annees as [$lib, $d1, $d2, $st, $c])
             <tr>
                 <td class="fw-semibold"><i class="fa-solid fa-calendar text-uvci-purple me-2"></i>{{ $lib }}</td>
-                <td>{{ $d1 }}</td><td>{{ $d2 }}</td>
-                <td><span class="badge badge-soft-{{ $c }}">{{ $st }}</span></td>
+                <td>{{ $d1 }}</td>
+                <td>{{ $d2 }}</td>
+                <td>
+                    <span class="badge badge-soft-{{ $c }}">{{ $st }}</span>
+                </td>
                 <td>
                     <div class="action-btns justify-content-end">
                         <button class="btn btn-light border" title="Activer"><i class="fa-solid fa-power-off text-uvci-green"></i></button>

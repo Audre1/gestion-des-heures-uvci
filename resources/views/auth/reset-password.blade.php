@@ -7,11 +7,6 @@
         <i class="fa-solid fa-arrow-left"></i> Retour
     </a>
 
-    <div class="mb-3 d-inline-flex align-items-center justify-content-center"
-         style="width:60px;height:60px;border-radius:16px;background:var(--uvci-green-light);color:var(--uvci-green);font-size:1.5rem">
-        <i class="fa-solid fa-shield-halved"></i>
-    </div>
-
     <h2>Vérification du code</h2>
     <p class="subtitle">
         Saisissez le code à 6 chiffres envoyé à
@@ -43,8 +38,7 @@
             <label class="form-label" for="password">Nouveau mot de passe</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                <input type="password" class="form-control" id="password" name="password"
-                       placeholder="••••••••" required>
+                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
             </div>
         </div>
 
@@ -53,7 +47,7 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                 <input type="password" class="form-control" id="password_confirm" name="password_confirm"
-                       placeholder="••••••••" required>
+                    placeholder="••••••••" required>
             </div>
         </div>
 
@@ -64,48 +58,53 @@
 @endsection
 
 @section('scripts')
-<script>
-    // Navigation automatique entre les cases du code
-    const inputs = [...document.querySelectorAll('.otp-input')];
-    inputs.forEach((input, index) => {
-        input.addEventListener('input', () => {
-            input.value = input.value.replace(/[^0-9]/g, '');
-            input.classList.toggle('filled', input.value !== '');
-            if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
-        });
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
-        });
-        input.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const digits = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g, '').slice(0, inputs.length);
-            digits.split('').forEach((d, i) => {
-                inputs[i].value = d;
-                inputs[i].classList.add('filled');
+    <script>
+        // Navigation automatique entre les cases du code
+        const inputs = [...document.querySelectorAll('.otp-input')];
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+                input.classList.toggle('filled', input.value !== '');
+                if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
             });
-            if (digits.length) inputs[Math.min(digits.length, inputs.length - 1)].focus();
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
+            });
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const digits = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g, '').slice(0,
+                    inputs.length);
+                digits.split('').forEach((d, i) => {
+                    inputs[i].value = d;
+                    inputs[i].classList.add('filled');
+                });
+                if (digits.length) inputs[Math.min(digits.length, inputs.length - 1)].focus();
+            });
         });
-    });
 
-    // Minuteur de renvoi
-    let seconds = 60;
-    const timerEl = document.getElementById('timer');
-    const resend = document.getElementById('resendLink');
-    function tick() {
-        if (seconds > 0) {
-            resend.classList.add('pe-none', 'opacity-50');
-            timerEl.textContent = '(' + seconds + 's)';
-            seconds--;
-            setTimeout(tick, 1000);
-        } else {
-            resend.classList.remove('pe-none', 'opacity-50');
-            timerEl.textContent = '';
+        // Minuteur de renvoi
+        let seconds = 60;
+        const timerEl = document.getElementById('timer');
+        const resend = document.getElementById('resendLink');
+
+        function tick() {
+            if (seconds > 0) {
+                resend.classList.add('pe-none', 'opacity-50');
+                timerEl.textContent = '(' + seconds + 's)';
+                seconds--;
+                setTimeout(tick, 1000);
+            } else {
+                resend.classList.remove('pe-none', 'opacity-50');
+                timerEl.textContent = '';
+            }
         }
-    }
-    tick();
-    resend.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (seconds <= 0) { seconds = 60; tick(); }
-    });
-</script>
+        tick();
+        resend.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (seconds <= 0) {
+                seconds = 60;
+                tick();
+            }
+        });
+    </script>
 @endsection

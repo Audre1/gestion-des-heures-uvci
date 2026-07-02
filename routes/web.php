@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompteController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EspaceController;
+use App\Http\Controllers\PaiementController;
+use App\Http\Controllers\PedagogieController;
+use App\Http\Controllers\RapportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -11,68 +19,68 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Authentification
-Route::view('/', 'auth.login')->name('login');
-Route::view('/mot-de-passe-oublie', 'auth.forgot-password')->name('password.request');
-Route::view('/reinitialisation', 'auth.reset-password')->name('password.reset');
-Route::view('/deconnexion', 'auth.login')->name('logout');
+Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::get('/reinitialisation', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::get('/deconnexion', [AuthController::class, 'logout'])->name('logout');
 
 // Tableau de bord
-Route::view('/tableau-de-bord', 'dashboard')->name('dashboard');
+Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
 | Administration
 |--------------------------------------------------------------------------
 */
-Route::view('/utilisateurs', 'admin.utilisateurs')->name('utilisateurs.index');
-// Route::view('/roles', 'admin.roles')->name('roles.index');
-Route::view('/annees-academiques', 'admin.annees')->name('annees.index');
-Route::view('/parametres-calcul', 'admin.parametres')->name('parametres.index');
-Route::view('/taux-horaires', 'admin.taux')->name('taux.index');
-Route::view('/journaux', 'admin.journaux')->name('journaux.index');
-Route::view('/sauvegardes', 'admin.sauvegardes')->name('sauvegardes.index');
+Route::get('/utilisateurs', [AdminController::class, 'utilisateurs'])->name('utilisateurs.index');
+// Route::get('/roles', [AdminController::class, 'roles'])->name('roles.index');
+Route::get('/annees-academiques', [AdminController::class, 'annees'])->name('annees.index');
+Route::get('/parametres-calcul', [AdminController::class, 'parametres'])->name('parametres.index');
+Route::get('/taux-horaires', [AdminController::class, 'taux'])->name('taux.index');
+Route::get('/journaux', [AdminController::class, 'journaux'])->name('journaux.index');
+Route::get('/sauvegardes', [AdminController::class, 'sauvegardes'])->name('sauvegardes.index');
 
 /*
 |--------------------------------------------------------------------------
 | Gestion pédagogique (Secrétaire Principal)
 |--------------------------------------------------------------------------
 */
-Route::view('/enseignants', 'pedagogie.enseignants')->name('enseignants.index');
-Route::view('/grades', 'pedagogie.grades')->name('grades.index');
-Route::view('/departements', 'pedagogie.departements')->name('departements.index');
-Route::view('/filieres', 'pedagogie.filieres')->name('filieres.index');
-Route::view('/cours', 'pedagogie.cours')->name('cours.index');
-Route::view('/affectations', 'pedagogie.affectations')->name('affectations.index');
-Route::view('/sequences', 'pedagogie.sequences')->name('sequences.index');
-Route::view('/ressources', 'pedagogie.ressources')->name('ressources.index');
-Route::view('/types-ressources', 'pedagogie.types-ressources')->name('types.index');
-Route::view('/niveaux-complexite', 'pedagogie.niveaux')->name('niveaux.index');
-Route::view('/activites', 'pedagogie.activites')->name('activites.index');
-Route::view('/volumes-horaires', 'pedagogie.volumes')->name('volumes.index');
-Route::view('/heures-complementaires', 'pedagogie.complementaires')->name('complementaires.index');
+Route::get('/enseignants', [PedagogieController::class, 'enseignants'])->name('enseignants.index');
+Route::get('/grades', [PedagogieController::class, 'grades'])->name('grades.index');
+Route::get('/departements', [PedagogieController::class, 'departements'])->name('departements.index');
+Route::get('/filieres', [PedagogieController::class, 'filieres'])->name('filieres.index');
+Route::get('/cours', [PedagogieController::class, 'cours'])->name('cours.index');
+Route::get('/affectations', [PedagogieController::class, 'affectations'])->name('affectations.index');
+Route::get('/sequences', [PedagogieController::class, 'sequences'])->name('sequences.index');
+Route::get('/ressources', [PedagogieController::class, 'ressources'])->name('ressources.index');
+Route::get('/types-ressources', [PedagogieController::class, 'typesRessources'])->name('types.index');
+Route::get('/niveaux-complexite', [PedagogieController::class, 'niveauxComplexite'])->name('niveaux.index');
+Route::get('/activites', [PedagogieController::class, 'activites'])->name('activites.index');
+Route::get('/volumes-horaires', [PedagogieController::class, 'volumes'])->name('volumes.index');
+Route::get('/heures-complementaires', [PedagogieController::class, 'complementaires'])->name('complementaires.index');
 
 /*
 |--------------------------------------------------------------------------
 | Paiements & Rapports
 |--------------------------------------------------------------------------
 */
-Route::view('/etats-paiement', 'paiements.index')->name('paiements.index');
-Route::view('/rapports', 'rapports.index')->name('rapports.index');
+Route::get('/etats-paiement', [PaiementController::class, 'index'])->name('paiements.index');
+Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
 
 /*
 |--------------------------------------------------------------------------
 | Espace Enseignant
 |--------------------------------------------------------------------------
 */
-Route::view('/espace/activites', 'espace.activites')->name('espace.activites');
-Route::view('/espace/volume-horaire', 'espace.volume')->name('espace.volume');
-Route::view('/espace/heures-complementaires', 'espace.complementaires')->name('espace.complementaires');
-Route::view('/espace/ressources', 'espace.ressources')->name('espace.ressources');
-Route::view('/espace/documents', 'espace.documents')->name('espace.documents');
+Route::get('/espace/activites', [EspaceController::class, 'activites'])->name('espace.activites');
+Route::get('/espace/volume-horaire', [EspaceController::class, 'volume'])->name('espace.volume');
+Route::get('/espace/heures-complementaires', [EspaceController::class, 'complementaires'])->name('espace.complementaires');
+Route::get('/espace/ressources', [EspaceController::class, 'ressources'])->name('espace.ressources');
+Route::get('/espace/documents', [EspaceController::class, 'documents'])->name('espace.documents');
 
 /*
 |--------------------------------------------------------------------------
 | Compte
 |--------------------------------------------------------------------------
 */
-Route::view('/profil', 'compte.profil')->name('profil.index');
+Route::get('/profil', [CompteController::class, 'profil'])->name('profil.index');
