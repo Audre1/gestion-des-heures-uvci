@@ -1,5 +1,5 @@
 <x-app-page title="Tableau de bord" section="Général"
-    subtitle="Vue d'ensemble de l'activité pédagogique — Année académique 2024-2025.">
+    subtitle="Vue d'ensemble de l'activité pédagogique — Année académique 2025-2026.">
 
     {{-- Cartes statistiques --}}
     <div class="row g-3 mb-4">

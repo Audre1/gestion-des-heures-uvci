@@ -35,7 +35,7 @@
                 {{-- @if (Auth::user()->avatar)
                     <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="avatar-img">
                 @else --}}
-                    <img src="{{ asset('images/avatar-default.jpg') }}" alt="Avatar" class="avatar-img">
+                <img src="{{ asset('images/avatar-default.jpg') }}" alt="Avatar" class="avatar-img">
                 {{-- @endif --}}
                 <div class="user-meta">
                     <div class="fw-semibold" style="line-height:1.1">{{ Auth::user()->name ?? 'Utilisateur' }}</div>
@@ -51,8 +51,15 @@
                 <li>
                     <hr class="dropdown-divider">
                 </li>
-                <li><a class="dropdown-item text-danger" href="{{ route('logout') }}"><i
-                            class="fa-solid fa-right-from-bracket me-2"></i> Déconnexion</a></li>
+                <li>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit"
+                            class="dropdown-item text-danger w-100 text-start border-0 bg-transparent">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Déconnexion
+                        </button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>

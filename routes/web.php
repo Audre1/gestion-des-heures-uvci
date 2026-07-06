@@ -20,9 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 // Authentification
 Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::post('/connexion', [AuthController::class, 'authenticate'])->name('authenticate');
+Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
 Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
+Route::post('/mot-de-passe-oublie', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reinitialisation', [AuthController::class, 'resetPassword'])->name('password.reset');
-Route::get('/deconnexion', [AuthController::class, 'logout'])->name('logout');
+Route::post('/reinitialisation', [AuthController::class, 'updatePassword'])->name('password.update');
 
 // Tableau de bord
 Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('dashboard');

@@ -9,17 +9,32 @@
 
     <h2>Mot de passe oublié ?</h2>
     <p class="subtitle">
-        Saisissez l'adresse email associée à votre compte. Un code de vérification
-        à 6 chiffres vous sera envoyé.
+        Saisissez l'adresse email associée à votre compte. Un lien de réinitialisation
+        vous sera envoyé par email.
     </p>
 
-    <form action="{{ route('password.reset') }}" method="GET">
+    @if (session('status'))
+        <div class="alert alert-success">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    <form action="{{ route('password.email') }}" method="POST">
+        @csrf
         <div class="mb-4">
             <label class="form-label" for="email">Adresse email</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                 <input type="email" class="form-control" id="email" name="email"
-                       placeholder="ex : k.kouassi@uvci.edu.ci" required>
+                    placeholder="ex : k.kouassi@uvci.edu.ci" required>
             </div>
         </div>
 

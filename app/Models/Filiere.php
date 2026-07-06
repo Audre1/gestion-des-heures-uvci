@@ -15,6 +15,7 @@ class Filiere extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'code_filiere',
         'nom_filiere',
         'id_departement',
     ];
