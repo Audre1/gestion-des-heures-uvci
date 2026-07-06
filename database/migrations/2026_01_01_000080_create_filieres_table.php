@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('filieres', function (Blueprint $table) {
             $table->id();
+            $table->string('code_filiere', 50)->unique();
             $table->string('nom_filiere', 200);
             $table->unsignedBigInteger('id_departement');
             $table->foreign('id_departement')->references('id')->on('departements')->restrictOnDelete();

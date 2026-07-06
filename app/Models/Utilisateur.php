@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\CanResetPassword;
 
-class Utilisateur extends Authenticatable
+class Utilisateur extends Authenticatable implements CanResetPassword
 {
     use Notifiable, SoftDeletes;
 
@@ -17,7 +19,10 @@ class Utilisateur extends Authenticatable
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'nom',
+        'prenom',
         'email',
+        'telephone',
         'login',
         'mot_de_passe',
         'date_creation',
@@ -37,7 +42,10 @@ class Utilisateur extends Authenticatable
     /**
      * Mappe le champ 'password' de Laravel Auth sur notre 'mot_de_passe'.
      */
-    protected string $authPasswordName = 'mot_de_passe';
+    public function getAuthPassword(): string
+    {
+        return $this->mot_de_passe;
+    }
 
     protected function casts(): array
     {
@@ -63,5 +71,13 @@ class Utilisateur extends Authenticatable
     public function enseignant(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Enseignant::class, 'id_utilisateur', 'id');
+    }
+
+    /**
+     * Envoie la notification de réinitialisation de mot de passe.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

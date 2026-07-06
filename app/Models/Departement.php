@@ -14,6 +14,7 @@ class Departement extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'code_departement',
         'nom_departement',
     ];
 

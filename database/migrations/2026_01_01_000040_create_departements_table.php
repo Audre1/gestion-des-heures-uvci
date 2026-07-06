@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('departements', function (Blueprint $table) {
             $table->id();
+            $table->string('code_departement', 50)->unique();
             $table->string('nom_departement', 200)->unique();
             $table->timestamps();
             $table->softDeletes();

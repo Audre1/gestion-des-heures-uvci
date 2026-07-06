@@ -6,7 +6,16 @@
     <h2>Bienvenue</h2>
     <p class="subtitle">Connectez-vous à votre espace de travail UVCI.</p>
 
-    <form action="{{ route('dashboard') }}" method="GET">
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    <form action="{{ route('authenticate') }}" method="POST">
+        @csrf
         <div class="mb-3">
             <label class="form-label" for="login">Identifiant / Email</label>
             <div class="input-group">

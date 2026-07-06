@@ -7,32 +7,38 @@
         <i class="fa-solid fa-arrow-left"></i> Retour
     </a>
 
-    <h2>Vérification du code</h2>
+    <h2>Réinitialisation du mot de passe</h2>
     <p class="subtitle">
-        Saisissez le code à 6 chiffres envoyé à
-        <strong class="text-uvci-purple">k.k***@uvci.edu.ci</strong>, puis définissez
-        votre nouveau mot de passe.
+        Définissez votre nouveau mot de passe.
     </p>
 
-    <form action="{{ route('login') }}" method="GET" id="resetForm">
-        {{-- Code OTP en digits --}}
-        <label class="form-label d-block text-center">Code de vérification</label>
-        <div class="otp-group" id="otpGroup">
-            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autofocus>
-            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+    @if (session('status'))
+        <div class="alert alert-success">
+            {{ session('status') }}
         </div>
+    @endif
 
-        <p class="text-center small text-muted mb-4">
-            Vous n'avez pas reçu de code ?
-            <a href="#" class="text-uvci-green fw-semibold" id="resendLink">Renvoyer</a>
-            <span id="timer" class="ms-1"></span>
-        </p>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
 
-        <hr class="my-4">
+    <form action="{{ route('password.update') }}" method="POST">
+        @csrf
+        <input type="hidden" name="token" value="{{ $token }}">
+        <input type="hidden" name="email" value="{{ $email ?? old('email') }}">
+
+        <div class="mb-3">
+            <label class="form-label" for="email">Adresse email</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" class="form-control" id="email" name="email"
+                    value="{{ $email ?? old('email') }}" readonly>
+            </div>
+        </div>
 
         <div class="mb-3">
             <label class="form-label" for="password">Nouveau mot de passe</label>
@@ -43,10 +49,10 @@
         </div>
 
         <div class="mb-4">
-            <label class="form-label" for="password_confirm">Confirmer le mot de passe</label>
+            <label class="form-label" for="password_confirmation">Confirmer le mot de passe</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                <input type="password" class="form-control" id="password_confirm" name="password_confirm"
+                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
                     placeholder="••••••••" required>
             </div>
         </div>
@@ -55,56 +61,4 @@
             <i class="fa-solid fa-check me-1"></i> Réinitialiser le mot de passe
         </button>
     </form>
-@endsection
-
-@section('scripts')
-    <script>
-        // Navigation automatique entre les cases du code
-        const inputs = [...document.querySelectorAll('.otp-input')];
-        inputs.forEach((input, index) => {
-            input.addEventListener('input', () => {
-                input.value = input.value.replace(/[^0-9]/g, '');
-                input.classList.toggle('filled', input.value !== '');
-                if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
-            });
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
-            });
-            input.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const digits = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g, '').slice(0,
-                    inputs.length);
-                digits.split('').forEach((d, i) => {
-                    inputs[i].value = d;
-                    inputs[i].classList.add('filled');
-                });
-                if (digits.length) inputs[Math.min(digits.length, inputs.length - 1)].focus();
-            });
-        });
-
-        // Minuteur de renvoi
-        let seconds = 60;
-        const timerEl = document.getElementById('timer');
-        const resend = document.getElementById('resendLink');
-
-        function tick() {
-            if (seconds > 0) {
-                resend.classList.add('pe-none', 'opacity-50');
-                timerEl.textContent = '(' + seconds + 's)';
-                seconds--;
-                setTimeout(tick, 1000);
-            } else {
-                resend.classList.remove('pe-none', 'opacity-50');
-                timerEl.textContent = '';
-            }
-        }
-        tick();
-        resend.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (seconds <= 0) {
-                seconds = 60;
-                tick();
-            }
-        });
-    </script>
 @endsection

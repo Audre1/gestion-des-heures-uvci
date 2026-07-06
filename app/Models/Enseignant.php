@@ -16,10 +16,6 @@ class Enseignant extends Model
 
     protected $fillable = [
         'matricule',
-        'nom',
-        'prenom',
-        'email',
-        'telephone',
         'statut',
         'date_recrutement',
         'id_grade',
@@ -65,10 +61,10 @@ class Enseignant extends Model
     }
 
     /**
-     * Accesseur : nom complet de l'enseignant.
+     * Accesseur : nom complet de l'enseignant (récupéré depuis la table users).
      */
     public function getNomCompletAttribute(): string
     {
-        return "{$this->prenom} {$this->nom}";
+        return "{$this->utilisateur->prenom} {$this->utilisateur->nom}";
     }
 }
