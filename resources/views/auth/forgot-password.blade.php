@@ -20,10 +20,10 @@
     @endif
 
     @if ($errors->any())
-        <div class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
+        <div class="alert alert-danger text-center">
+            {{-- @foreach ($errors->all() as $error) --}}
+            <div>{{ $errors->first() }}</div>
+            {{-- @endforeach --}}
         </div>
     @endif
 
@@ -34,7 +34,7 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                 <input type="email" class="form-control" id="email" name="email"
-                    placeholder="ex : k.kouassi@uvci.edu.ci" required>
+                    placeholder="ex : k.kouassi@uvci.edu.ci" value="{{ old('email') }}" required>
             </div>
         </div>
 

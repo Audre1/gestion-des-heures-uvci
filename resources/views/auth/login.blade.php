@@ -7,10 +7,10 @@
     <p class="subtitle">Connectez-vous à votre espace de travail UVCI.</p>
 
     @if ($errors->any())
-        <div class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
+        <div class="alert alert-danger text-center">
+            {{-- @foreach ($errors->all() as $error) --}}
+            <div>{{ $errors->first() }}</div>
+            {{-- @endforeach --}}
         </div>
     @endif
 
@@ -21,7 +21,7 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                 <input type="text" class="form-control" id="login" name="login"
-                    placeholder="ex : k.kouassi@uvci.edu.ci" required>
+                    placeholder="ex : k.kouassi@uvci.edu.ci" value="{{ old('login') }}">
             </div>
         </div>
 
@@ -30,7 +30,7 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                 <input type="password" class="form-control border-end-0" id="password" name="password"
-                    placeholder="••••••••" required>
+                    placeholder="••••••••">
                 <span class="input-group-text bg-white" style="cursor:pointer" onclick="togglePwd()">
                     <i class="fa-solid fa-eye" id="pwdIcon"></i>
                 </span>
@@ -39,7 +39,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="remember">
+                <input class="form-check-input" type="checkbox" id="remember" name="remember">
                 <label class="form-check-label" for="remember">Se souvenir de moi</label>
             </div>
             <a href="{{ route('password.request') }}" class="text-uvci-purple fw-semibold">Mot de passe oublié ?</a>
