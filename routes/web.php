@@ -25,7 +25,10 @@ Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
 Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
 Route::post('/mot-de-passe-oublie', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reinitialisation', [AuthController::class, 'resetPassword'])->name('password.reset');
-Route::post('/reinitialisation', [AuthController::class, 'updatePassword'])->name('password.update');
+Route::post('/verifier-code', [AuthController::class, 'verifyCode'])->name('password.verify');
+Route::get('/nouveau-mot-de-passe', [AuthController::class, 'newPassword'])->name('password.new');
+Route::post('/nouveau-mot-de-passe', [AuthController::class, 'updatePassword'])->name('password.update');
+Route::post('/renvoyer-code', [AuthController::class, 'resendCode'])->name('password.resend');
 
 // Tableau de bord
 Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('dashboard');
