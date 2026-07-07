@@ -38,8 +38,8 @@
                 <img src="{{ asset('images/avatar-default.jpg') }}" alt="Avatar" class="avatar-img">
                 {{-- @endif --}}
                 <div class="user-meta">
-                    <div class="fw-semibold" style="line-height:1.1">{{ Auth::user()->name ?? 'Utilisateur' }}</div>
-                    <div class="text-muted" style="font-size:.75rem">{{ Auth::user()->role ?? 'Utilisateur' }}</div>
+                    <div class="fw-semibold" style="line-height:1.1">{{ Auth::user()->nom. ' '. Auth::user()->prenom ?? 'Utilisateur' }}</div>
+                    <div class="text-muted" style="font-size:.75rem">{{ Auth::user()->role->libelle ?? 'Utilisateur' }}</div>
                 </div>
                 <i class="fa-solid fa-chevron-down text-muted ms-1" style="font-size:.7rem"></i>
             </div>

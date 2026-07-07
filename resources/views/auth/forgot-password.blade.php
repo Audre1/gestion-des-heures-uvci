@@ -38,8 +38,9 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-uvci w-100 py-2 mb-3">
-            <i class="fa-solid fa-paper-plane me-1"></i> Envoyer le code
+        <button type="submit" class="btn btn-uvci w-100 py-2 mb-3 btn-with-spinner">
+            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            <span class="btn-text"><i class="fa-solid fa-paper-plane me-1"></i> Envoyer le code</span>
         </button>
     </form>
 

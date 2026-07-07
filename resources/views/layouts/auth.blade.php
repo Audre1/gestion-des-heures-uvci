@@ -69,6 +69,27 @@
                 authVisual.style.backgroundPosition = 'center';
                 authVisual.style.backgroundRepeat = 'no-repeat';
             }
+
+            document.querySelectorAll('.alert.alert-success').forEach(alert => {
+                setTimeout(() => {
+                    alert.classList.add('d-none');
+                }, 5000);
+            });
+
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    const btn = this.querySelector('button[type="submit"].btn-with-spinner');
+                    if (!btn) return;
+
+                    btn.disabled = true;
+                    btn.classList.add('disabled');
+
+                    const spinner = btn.querySelector('.spinner-border');
+                    if (spinner) {
+                        spinner.classList.remove('d-none');
+                    }
+                });
+            });
         });
     </script>
 

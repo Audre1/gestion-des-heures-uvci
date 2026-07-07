@@ -49,7 +49,7 @@ class AuthController extends Controller
         }
 
         throw ValidationException::withMessages([
-            'login' => ['Le mot de passe est incorrect.'],
+            'login' => ['Les identifiants fournis sont incorrects.'],
         ]);
     }
 
@@ -68,7 +68,12 @@ class AuthController extends Controller
 
     public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate([
+            'email' => 'required|email'
+        ], [
+            'email.required' => 'Une adresse email est requise pour recevoir le code.',
+            'email.email' => 'Veuillez saisir une adresse email valide.',
+        ]);
 
         $user = Utilisateur::where('email', $request->email)->first();
 
@@ -101,9 +106,20 @@ class AuthController extends Controller
 
     public function verifyCode(Request $request)
     {
+        $code = $request->input('code');
+        if (is_array($code)) {
+            $code = implode('', $code);
+            $request->merge(['code' => $code]);
+        }
+
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|digits:6',
+        ], [
+            'email.required' => 'L’adresse email est requise.',
+            'email.email' => 'Veuillez saisir une adresse email valide.',
+            'code.required' => 'Le code de vérification est requis.',
+            'code.digits' => 'Le code doit contenir exactement 6 chiffres.',
         ]);
 
         // Vérifier le code OTP
@@ -113,13 +129,13 @@ class AuthController extends Controller
             ->first();
 
         if (!$resetRecord) {
-            return back()->withInput($request->only('email'))
+            return back()->withInput($request->only('email', 'code'))
                 ->withErrors(['code' => 'Le code de vérification est invalide.']);
         }
 
         // Vérifier l'expiration (15 minutes)
         if (now()->diffInMinutes($resetRecord->created_at) > 15) {
-            return back()->withInput($request->only('email'))
+            return back()->withInput($request->only('email', 'code'))
                 ->withErrors(['code' => 'Le code de vérification a expiré. Veuillez demander un nouveau code.']);
         }
 
@@ -137,10 +153,24 @@ class AuthController extends Controller
 
     public function updatePassword(Request $request)
     {
+        $code = $request->input('code');
+        if (is_array($code)) {
+            $code = implode('', $code);
+            $request->merge(['code' => $code]);
+        }
+
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|digits:6',
             'password' => 'required|min:8|confirmed',
+        ], [
+            'email.required' => 'L’adresse email est requise.',
+            'email.email' => 'Veuillez saisir une adresse email valide.',
+            'code.required' => 'Le code de vérification est requis.',
+            'code.digits' => 'Le code doit contenir exactement 6 chiffres.',
+            'password.required' => 'Le nouveau mot de passe est requis.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ]);
 
         // Vérifier le code OTP
@@ -177,7 +207,12 @@ class AuthController extends Controller
 
     public function resendCode(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate([
+            'email' => 'required|email'
+        ], [
+            'email.required' => 'Une adresse email est requise pour renvoyer le code.',
+            'email.email' => 'Veuillez saisir une adresse email valide.',
+        ]);
 
         $user = Utilisateur::where('email', $request->email)->first();
 

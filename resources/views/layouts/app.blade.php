@@ -37,6 +37,14 @@
         }
         document.getElementById('menuToggle')?.addEventListener('click', toggleSidebar);
         overlay?.addEventListener('click', toggleSidebar);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.alert.alert-success').forEach(alert => {
+                setTimeout(() => {
+                    alert.classList.add('d-none');
+                }, 5000);
+            });
+        });
     </script>
     @yield('scripts')
 </body>

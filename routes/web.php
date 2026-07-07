@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Authentification
-Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::get('/connexion', [AuthController::class, 'login'])->name('login');
 Route::post('/connexion', [AuthController::class, 'authenticate'])->name('authenticate');
 Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
 Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
@@ -31,7 +31,8 @@ Route::post('/nouveau-mot-de-passe', [AuthController::class, 'updatePassword'])-
 Route::post('/renvoyer-code', [AuthController::class, 'resendCode'])->name('password.resend');
 
 // Tableau de bord
-Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/tableau-de-bord', [DashboardController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
