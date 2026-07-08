@@ -45,8 +45,9 @@
             <a href="{{ route('password.request') }}" class="text-uvci-purple fw-semibold">Mot de passe oublié ?</a>
         </div>
 
-        <button type="submit" class="btn btn-uvci w-100 py-2 mb-3">
-            <i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter
+        <button type="submit" class="btn btn-uvci w-100 py-2 mb-3 btn-with-spinner">
+            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            <span class="btn-text"><i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter</span>
         </button>
     </form>
 

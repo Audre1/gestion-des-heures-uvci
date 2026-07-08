@@ -46,8 +46,9 @@
             <a href="#" onclick="resendCode(); return false;" class="text-uvci-green fw-semibold">Renvoyer le code</a>
         </p>
 
-        <button type="submit" class="btn btn-uvci-purple w-100 py-2">
-            <i class="fa-solid fa-check me-1"></i> Vérifier le code
+        <button type="submit" class="btn btn-uvci-purple w-100 py-2 btn-with-spinner">
+            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            <span class="btn-text"><i class="fa-solid fa-check me-1"></i> Vérifier le code</span>
         </button>
     </form>
 
@@ -100,13 +101,24 @@
             const codeInputs = document.querySelectorAll('.otp-input');
             const code = Array.from(codeInputs).map(input => input.value).join('');
 
+            if (code.length !== codeInputs.length) {
+                e.preventDefault();
+                alert('Veuillez saisir les 6 chiffres du code de vérification.');
+                return;
+            }
+
             // Mettre à jour le champ caché avec le code complet
             document.getElementById('fullCode').value = code;
 
-            // Supprimer les champs individuels
+            // Supprimer les champs individuels pour ne pas envoyer de code[]
             codeInputs.forEach(input => input.remove());
-
-            console.log('Code soumis:', code);
         });
+
+        function resendCode() {
+            const resendForm = document.getElementById('resendForm');
+            if (resendForm) {
+                resendForm.submit();
+            }
+        }
     </script>
 @endsection

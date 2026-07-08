@@ -14,6 +14,8 @@
     @yield('styles')
 </head>
 <body>
+    <x-notifications />
+    
     <div class="app-layout">
         @include('partials.sidebar')
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -37,6 +39,14 @@
         }
         document.getElementById('menuToggle')?.addEventListener('click', toggleSidebar);
         overlay?.addEventListener('click', toggleSidebar);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.alert.alert-success').forEach(alert => {
+                setTimeout(() => {
+                    alert.classList.add('d-none');
+                }, 5000);
+            });
+        });
     </script>
     @yield('scripts')
 </body>

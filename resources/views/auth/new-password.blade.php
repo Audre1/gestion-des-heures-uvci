@@ -50,8 +50,9 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-uvci-purple w-100 py-2">
-            <i class="fa-solid fa-check me-1"></i> Modifier le mot de passe
+        <button type="submit" class="btn btn-uvci-purple w-100 py-2 btn-with-spinner">
+            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            <span class="btn-text"><i class="fa-solid fa-check me-1"></i> Modifier le mot de passe</span>
         </button>
     </form>
 @endsection

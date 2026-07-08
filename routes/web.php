@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Authentification
-Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::get('/connexion', [AuthController::class, 'login'])->name('login');
 Route::post('/connexion', [AuthController::class, 'authenticate'])->name('authenticate');
 Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
 Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
@@ -31,7 +31,8 @@ Route::post('/nouveau-mot-de-passe', [AuthController::class, 'updatePassword'])-
 Route::post('/renvoyer-code', [AuthController::class, 'resendCode'])->name('password.resend');
 
 // Tableau de bord
-Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/tableau-de-bord', [DashboardController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -39,8 +40,15 @@ Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('das
 |--------------------------------------------------------------------------
 */
 Route::get('/utilisateurs', [AdminController::class, 'utilisateurs'])->name('utilisateurs.index');
+Route::post('/utilisateurs', [AdminController::class, 'store'])->name('utilisateurs.store');
+Route::put('/utilisateurs/{id}', [AdminController::class, 'update'])->name('utilisateurs.update');
+Route::delete('/utilisateurs/{id}', [AdminController::class, 'destroy'])->name('utilisateurs.destroy');
 // Route::get('/roles', [AdminController::class, 'roles'])->name('roles.index');
 Route::get('/annees-academiques', [AdminController::class, 'annees'])->name('annees.index');
+Route::post('/annees-academiques', [AdminController::class, 'storeAnnee'])->name('annees.store');
+Route::put('/annees-academiques/{id}', [AdminController::class, 'updateAnnee'])->name('annees.update');
+Route::delete('/annees-academiques/{id}', [AdminController::class, 'destroyAnnee'])->name('annees.destroy');
+Route::patch('/annees-academiques/{id}/activate', [AdminController::class, 'activateAnnee'])->name('annees.activate');
 Route::get('/parametres-calcul', [AdminController::class, 'parametres'])->name('parametres.index');
 Route::get('/taux-horaires', [AdminController::class, 'taux'])->name('taux.index');
 Route::get('/journaux', [AdminController::class, 'journaux'])->name('journaux.index');
@@ -52,6 +60,7 @@ Route::get('/sauvegardes', [AdminController::class, 'sauvegardes'])->name('sauve
 |--------------------------------------------------------------------------
 */
 Route::get('/enseignants', [PedagogieController::class, 'enseignants'])->name('enseignants.index');
+Route::post('/enseignants', [PedagogieController::class, 'storeEnseignant'])->name('enseignants.store');
 Route::get('/grades', [PedagogieController::class, 'grades'])->name('grades.index');
 Route::get('/departements', [PedagogieController::class, 'departements'])->name('departements.index');
 Route::get('/filieres', [PedagogieController::class, 'filieres'])->name('filieres.index');
