@@ -14,6 +14,8 @@
     @yield('styles')
 </head>
 <body>
+    <x-notifications />
+    
     <div class="app-layout">
         @include('partials.sidebar')
         <div class="sidebar-overlay" id="sidebarOverlay"></div>

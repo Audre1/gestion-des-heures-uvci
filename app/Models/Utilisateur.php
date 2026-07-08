@@ -28,6 +28,7 @@ class Utilisateur extends Authenticatable implements CanResetPassword
         'date_creation',
         'statut_compte',
         'id_role',
+        'created_by',
     ];
 
     protected $casts = [
@@ -71,6 +72,14 @@ class Utilisateur extends Authenticatable implements CanResetPassword
     public function enseignant(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Enseignant::class, 'id_utilisateur', 'id');
+    }
+
+    /**
+     * Un utilisateur peut être créé par un autre utilisateur.
+     */
+    public function createdBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Utilisateur::class, 'created_by', 'id');
     }
 
     /**
