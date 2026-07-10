@@ -39,10 +39,10 @@
                 {{-- @endif --}}
 
                 <div class="user-meta">
-
-
-                    <div class="fw-semibold" style="line-height:1.1">{{ Auth::user()->nom. ' '. Auth::user()->prenom ?? 'Utilisateur' }}</div>
-                    <div class="text-muted" style="font-size:.75rem">{{ Auth::user()->role->libelle ?? 'Utilisateur' }}</div>
+                    <div class="fw-semibold" style="line-height:1.1">
+                        {{ Auth::check() ? Auth::user()->nom . ' ' . Auth::user()->prenom : 'Utilisateur' }}</div>
+                    <div class="text-muted" style="font-size:.75rem">
+                        {{ Auth::check() && Auth::user()->role ? Auth::user()->role->libelle : 'Utilisateur' }}</div>
                 </div>
 
     <div class="fw-semibold" style="line-height:1.1">

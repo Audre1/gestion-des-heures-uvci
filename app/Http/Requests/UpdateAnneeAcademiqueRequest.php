@@ -23,9 +23,9 @@ class UpdateAnneeAcademiqueRequest extends FormRequest
     public function rules(): array
     {
         $anneeId = $this->route('id');
-        
+
         return [
-            'libelle' => 'required|string|max:100|unique:annees_academiques,libelle,' . $anneeId,
+            'libelle' => 'required|string|max:100|unique:annees_academiques,libelle,' . $anneeId . '|regex:/^\d{4}-\d{4}$/',
             'date_debut' => 'required|date|before:date_fin',
             'date_fin' => 'required|date|after:date_debut',
             'statut' => 'required|in:a_venir,en_cours,cloturee',
@@ -38,6 +38,7 @@ class UpdateAnneeAcademiqueRequest extends FormRequest
             'libelle.required' => 'Le libellé est requis.',
             'libelle.max' => 'Le libellé ne doit pas dépasser 100 caractères.',
             'libelle.unique' => 'Ce libellé existe déjà.',
+            'libelle.regex' => 'Le libellé doit être au format "YYYY-YYYY" (ex: 2024-2025).',
             'date_debut.required' => 'La date de début est requise.',
             'date_debut.date' => 'Veuillez saisir une date valide.',
             'date_debut.before' => 'La date de début doit être antérieure à la date de fin.',

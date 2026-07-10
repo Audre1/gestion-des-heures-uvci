@@ -1,28 +1,46 @@
 <x-app-page title="Journaux d'activités" section="Administration" icon="fa-solid fa-clipboard-list"
     subtitle="Traçabilité des actions réalisées dans le système.">
 
-    <x-data-table search-placeholder="Rechercher dans les journaux..." :count="7">
+    <x-data-table search-placeholder="Rechercher dans les journaux..." :count="$journaux->count()">
         <x-slot:head>
-            <th>Date / Heure</th><th>Utilisateur</th><th>Action</th><th>Cible</th><th>Adresse IP</th>
+            <th>Date / Heure</th>
+            <th>Utilisateur</th>
+            <th>Action</th>
+            <th>Description</th>
+            <th>Adresse IP</th>
         </x-slot:head>
-        @php
-            $logs = [
-                ['01/07/2025 14:32', 'k.kouassi', 'Connexion', 'Session', '196.201.x.x'],
-                ['01/07/2025 14:10', 'a.traore', 'Validation activité', 'Activité #1042', '196.201.x.x'],
-                ['01/07/2025 13:55', 'a.traore', 'Création enseignant', 'Enseignant #248', '196.201.x.x'],
-                ['01/07/2025 11:20', 'k.kouassi', 'Modification taux', 'Taux #12', '196.201.x.x'],
-                ['30/06/2025 17:02', 'f.ouattara', 'Génération état', 'Paiement #88', '196.201.x.x'],
-                ['30/06/2025 16:44', 'k.kouassi', 'Sauvegarde', 'Base de données', '196.201.x.x'],
-                ['30/06/2025 09:15', 'm.diabate', 'Consultation', 'Volume horaire', '154.72.x.x'],
-            ];
-        @endphp
-        @foreach($logs as [$dt, $u, $act, $cible, $ip])
+
+        @forelse ($journaux as $journal)
             <tr>
-                <td class="text-muted">{{ $dt }}</td>
-                <td><span class="badge badge-soft-purple">{{ $u }}</span></td>
-                <td>{{ $act }}</td><td>{{ $cible }}</td>
-                <td class="text-muted font-monospace small">{{ $ip }}</td>
+                <td class="text-muted">{{ $journal->created_at->format('d/m/Y H:i') }}</td>
+                <td>
+                    @if ($journal->utilisateur)
+                        <span class="badge badge-soft-purple">{{ $journal->utilisateur->login }}</span>
+                    @else
+                        <span class="badge badge-soft-gray">Système</span>
+                    @endif
+                </td>
+                <td>
+                    <span
+                        class="badge badge-soft-{{ $journal->action === 'création' ? 'green' : ($journal->action === 'modification' ? 'blue' : ($journal->action === 'suppression' ? 'red' : ($journal->action === 'connexion' ? 'green' : ($journal->action === 'déconnexion' ? 'gray' : 'gray')))) }}">
+                        {{ ucfirst($journal->action) }}
+                    </span>
+                </td>
+                <td>{{ $journal->description }}</td>
+                <td class="text-muted font-monospace small">{{ $journal->ip_address ?? 'N/A' }}</td>
             </tr>
-        @endforeach
+        @empty
+            <tr>
+                <td colspan="5" class="text-center py-5">
+                    <div class="text-muted">
+                        <i class="fa-solid fa-clipboard-list fa-3x mb-3 text-muted"></i>
+                        <p class="mb-0">Aucune activité enregistrée.</p>
+                        <small>Les actions des utilisateurs apparaîtront ici.</small>
+                    </div>
+                </td>
+            </tr>
+        @endforelse
     </x-data-table>
+
+    {{ $journaux->links() }}
 </x-app-page>

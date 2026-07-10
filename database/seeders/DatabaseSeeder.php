@@ -14,22 +14,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        
-$this->call([
-    RoleSeeder::class,
-    UserSeeder::class,
-    DepartementSeeder::class,
-    GradeSeeder::class,
-    EnseignantSeeder::class,
-    AnneeAcademiqueSeeder::class,
-    TauxHoraireSeeder::class,
-    CoursSeeder::class,
-    SequencePedagogiqueSeeder::class,
-    TypeRessourceSeeder::class,
-    RessourcePedagogiqueSeeder::class,
-    AffectationCoursSeeder::class,
-    NiveauComplexiteSeeder::class,
-    ActivitePedagogiqueSeeder::class,
-]);
-}
+        $this->call([
+            RoleSeeder::class,
+            GradeSeeder::class,
+            AdminSeeder::class,
+            ParametreCalculSeeder::class,
+        ]);
+    }
 }

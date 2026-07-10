@@ -72,6 +72,7 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $user->email, 'password' => $credentials['password']], $request->boolean('remember'))) {
             $request->session()->regenerate();
+            logActivite('connexion', 'Connexion de l\'utilisateur ' . $user->login, $user);
             return redirect()->intended(route('dashboard'));
         }
 
@@ -82,9 +83,13 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = Auth::user();
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        if ($user) {
+            logActivite('déconnexion', 'Déconnexion de l\'utilisateur ' . $user->login, $user);
+        }
         return redirect()->route('login');
     }
 

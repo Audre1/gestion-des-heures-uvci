@@ -9,8 +9,19 @@ class GradeSeeder extends Seeder
 {
     public function run(): void
     {
-        Grade::create([
-            'libelle' => 'Professeur titulaire',
-        ]);
+        $grades = [
+            ['libelle' => 'Professeur'],
+            ['libelle' => 'Maître-Assistant'],
+            ['libelle' => 'Assistant'],
+        ];
+
+        foreach ($grades as $grade) {
+            Grade::firstOrCreate(
+                ['libelle' => $grade['libelle']],
+                $grade
+            );
+        }
+
+        $this->command->info('Grades initialisés avec succès.');
     }
 }
