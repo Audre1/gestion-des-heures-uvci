@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,9 +14,10 @@
     <link href="{{ asset('css/uvci.css') }}" rel="stylesheet">
     @yield('styles')
 </head>
+
 <body>
     <x-notifications />
-    
+
     <div class="app-layout">
         @include('partials.sidebar')
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -33,6 +35,7 @@
         // Ouverture / fermeture de la sidebar sur mobile
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
+
         function toggleSidebar() {
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
@@ -50,4 +53,5 @@
     </script>
     @yield('scripts')
 </body>
+
 </html>

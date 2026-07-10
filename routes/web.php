@@ -50,9 +50,17 @@ Route::put('/annees-academiques/{id}', [AdminController::class, 'updateAnnee'])-
 Route::delete('/annees-academiques/{id}', [AdminController::class, 'destroyAnnee'])->name('annees.destroy');
 Route::patch('/annees-academiques/{id}/activate', [AdminController::class, 'activateAnnee'])->name('annees.activate');
 Route::get('/parametres-calcul', [AdminController::class, 'parametres'])->name('parametres.index');
+Route::put('/parametres-calcul', [AdminController::class, 'updateParametres'])->name('parametres.update');
 Route::get('/taux-horaires', [AdminController::class, 'taux'])->name('taux.index');
+Route::post('/taux-horaires', [AdminController::class, 'storeTaux'])->name('taux.store');
+Route::put('/taux-horaires/{id}', [AdminController::class, 'updateTaux'])->name('taux.update');
+Route::delete('/taux-horaires/{id}', [AdminController::class, 'destroyTaux'])->name('taux.destroy');
 Route::get('/journaux', [AdminController::class, 'journaux'])->name('journaux.index');
 Route::get('/sauvegardes', [AdminController::class, 'sauvegardes'])->name('sauvegardes.index');
+Route::post('/sauvegardes', [AdminController::class, 'createBackup'])->name('sauvegardes.create');
+Route::get('/sauvegardes/{filename}/download', [AdminController::class, 'downloadBackup'])->name('sauvegardes.download');
+Route::post('/sauvegardes/{filename}/restore', [AdminController::class, 'restoreBackup'])->name('sauvegardes.restore');
+Route::delete('/sauvegardes/{filename}', [AdminController::class, 'deleteBackup'])->name('sauvegardes.destroy');
 
 /*
 |--------------------------------------------------------------------------

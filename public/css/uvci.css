@@ -610,6 +610,10 @@ a {
     background: var(--uvci-purple-light);
     color: var(--uvci-purple-dark);
 }
+.badge-soft-blue {
+    background: #e6f0ff;
+    color: #1d4ed8;
+}
 .badge-soft-amber {
     background: #fef3e2;
     color: #b45309;
