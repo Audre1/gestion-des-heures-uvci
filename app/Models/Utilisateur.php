@@ -43,12 +43,13 @@ class Utilisateur extends Authenticatable implements CanResetPassword
     /**
      * Mappe le champ 'password' de Laravel Auth sur notre 'mot_de_passe'.
      */
-    public function getAuthPassword(): string
-    {
-        return $this->mot_de_passe;
-    }
 
-    protected function casts(): array
+public function getAuthPassword(): string
+{
+    return $this->mot_de_passe;
+}
+
+protected function casts(): array
     {
         return [
             'date_creation' => 'datetime',
@@ -74,6 +75,7 @@ class Utilisateur extends Authenticatable implements CanResetPassword
         return $this->hasOne(Enseignant::class, 'id_utilisateur', 'id');
     }
 
+
     /**
      * Un utilisateur peut être créé par un autre utilisateur.
      */
@@ -89,4 +91,11 @@ class Utilisateur extends Authenticatable implements CanResetPassword
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+    
+public function getAuthPasswordName()
+{
+    return 'mot_de_passe';
+}
+
+
 }

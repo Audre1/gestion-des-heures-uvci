@@ -9,6 +9,7 @@ use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\PedagogieController;
 use App\Http\Controllers\RapportController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +20,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Authentification
+
+
 Route::get('/connexion', [AuthController::class, 'login'])->name('login');
-Route::post('/connexion', [AuthController::class, 'authenticate'])->name('authenticate');
+Route::post('/connexion', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
+
 Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
 Route::post('/mot-de-passe-oublie', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reinitialisation', [AuthController::class, 'resetPassword'])->name('password.reset');
@@ -29,6 +33,7 @@ Route::post('/verifier-code', [AuthController::class, 'verifyCode'])->name('pass
 Route::get('/nouveau-mot-de-passe', [AuthController::class, 'newPassword'])->name('password.new');
 Route::post('/nouveau-mot-de-passe', [AuthController::class, 'updatePassword'])->name('password.update');
 Route::post('/renvoyer-code', [AuthController::class, 'resendCode'])->name('password.resend');
+
 
 // Tableau de bord
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -92,7 +97,9 @@ Route::get('/espace/volume-horaire', [EspaceController::class, 'volume'])->name(
 Route::get('/espace/heures-complementaires', [EspaceController::class, 'complementaires'])->name('espace.complementaires');
 Route::get('/espace/ressources', [EspaceController::class, 'ressources'])->name('espace.ressources');
 Route::get('/espace/documents', [EspaceController::class, 'documents'])->name('espace.documents');
-
+Route::get('/documents/recapitulatif-activites', [DocumentController::class, 'recapitulatifActivites']) ->name('documents.recapitulatif');
+Route::get('/documents/fiche-individuelle', [DocumentController::class, 'ficheIndividuelle']) ->name('documents.fiche');
+Route::get('/documents/etat-heures', [DocumentController::class, 'etatHeures']) ->name('documents.heures');
 /*
 |--------------------------------------------------------------------------
 | Compte

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use App\Models\Utilisateur;
@@ -12,6 +14,31 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+
+    public function authenticate(Request $request)
+{
+
+
+    $credentials = $request->validate([
+        'login' => ['required'],
+        'password' => ['required'],
+    ]);
+
+    if (Auth::attempt([
+        'email' => $credentials['login'],
+        'password' => $credentials['password']
+    ])) {
+
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard');
+    }
+
+    return back()->withErrors([
+        'login' => 'Identifiant ou mot de passe incorrect.',
+    ]);
+}
+
     public function login()
     {
         return view('auth.login');
