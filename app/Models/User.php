@@ -9,12 +9,32 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Enseignant;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable([
+    'email',
+    'login',
+    'mot_de_passe',
+    'statut_compte',
+    'id_role'
+])]
 #[Hidden(['password', 'remember_token'])]
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
+
+
+public function role()
+{
+    return $this->belongsTo(Role::class, 'id_role');
+}
+    
+public function getAuthPassword()
+{
+    return $this->mot_de_passe;
+}
+
+/** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -23,10 +43,14 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+{
+    return [
+        'email_verified_at' => 'datetime',
+    ];
+}
+
+   public function enseignant()
+{
+    return $this->hasOne(Enseignant::class, 'id_utilisateur', 'id');
+}
 }

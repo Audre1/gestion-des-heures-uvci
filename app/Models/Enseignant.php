@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\User;
 
 class Enseignant extends Model
 {
@@ -46,9 +47,9 @@ class Enseignant extends Model
      * Lié à l'utilisateur via la table 'users'.
      */
     public function utilisateur(): BelongsTo
-    {
-        return $this->belongsTo(Utilisateur::class, 'id_utilisateur', 'id');
-    }
+{
+    return $this->belongsTo(User::class, 'id_utilisateur', 'id');
+}
 
     public function affectationsCours(): HasMany
     {

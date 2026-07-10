@@ -6,17 +6,17 @@
     <h2>Bienvenue</h2>
     <p class="subtitle">Connectez-vous à votre espace de travail UVCI.</p>
 
-    @if ($errors->any())
-        <div class="alert alert-danger text-center">
-            {{-- @foreach ($errors->all() as $error) --}}
-            <div>{{ $errors->first() }}</div>
-            {{-- @endforeach --}}
-        </div>
-    @endif
 
-    <form action="{{ route('authenticate') }}" method="POST">
-        @csrf
-        <div class="mb-3">
+@if ($errors->any())
+    <div class="alert alert-danger text-center">
+        <div>{{ $errors->first() }}</div>
+    </div>
+@endif
+
+<form action="{{ route('login.authenticate') }}" method="POST">
+    @csrf
+
+<div class="mb-3">
             <label class="form-label" for="login">Identifiant / Email</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
