@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateParametreCalculRequest extends FormRequest
@@ -17,14 +16,9 @@ class UpdateParametreCalculRequest extends FormRequest
         return [
             // Règles générales
             'heures_par_credit'     => 'required|integer|min:1|max:100',
-            'sequences_par_credit'  => 'required|integer|min:1|max:200',
+            'sequences_par_credit'  => 'required|integer|min:1|max:200|gt:heures_par_credit',
             'service_statutaire'    => 'required|integer|min:1|max:500',
-            'reduction_mise_a_jour' => 'required|integer|min:0|max:100',
-
-            // Coefficients création
-            'coeff_creation_niv1'   => 'required|numeric|min:0|max:10',
-            'coeff_creation_niv2'   => 'required|numeric|min:0|max:10',
-            'coeff_creation_niv3'   => 'required|numeric|min:0|max:10',
+            'reduction_mise_a_jour' => 'required|integer|min:0|max:99',
         ];
     }
 
@@ -40,6 +34,7 @@ class UpdateParametreCalculRequest extends FormRequest
             'sequences_par_credit.integer'   => 'Le nombre de séquences par crédit doit être un entier.',
             'sequences_par_credit.min'       => 'Le nombre de séquences par crédit doit être au moins 1.',
             'sequences_par_credit.max'       => 'Le nombre de séquences par crédit ne peut excéder 200.',
+            'sequences_par_credit.gt'        => 'Le nombre de séquences par crédit doit être supérieur au nombre d\'heures par crédit.',
 
             'service_statutaire.required'    => 'Le service statutaire est requis.',
             'service_statutaire.integer'     => 'Le service statutaire doit être un entier.',
@@ -50,10 +45,6 @@ class UpdateParametreCalculRequest extends FormRequest
             'reduction_mise_a_jour.integer'  => 'La réduction mise à jour doit être un entier.',
             'reduction_mise_a_jour.min'      => 'La réduction mise à jour ne peut être négative.',
             'reduction_mise_a_jour.max'      => 'La réduction mise à jour ne peut excéder 100%.',
-
-            'coeff_creation_niv1.required'   => 'Le coefficient création niveau 1 est requis.',
-            'coeff_creation_niv2.required'   => 'Le coefficient création niveau 2 est requis.',
-            'coeff_creation_niv3.required'   => 'Le coefficient création niveau 3 est requis.',
 
             '*.numeric'                      => 'Ce champ doit être un nombre.',
             '*.min'                          => 'Ce champ doit être positif.',

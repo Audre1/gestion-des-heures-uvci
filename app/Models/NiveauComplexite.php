@@ -15,6 +15,8 @@ class NiveauComplexite extends Model
 
     protected $fillable = [
         'libelle',
+        'coefficient',
+        'description',
     ];
 
     // ─── Relations ───────────────────────────────────────────────────────────

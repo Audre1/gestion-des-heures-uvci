@@ -15,9 +15,6 @@ class ParametreCalcul extends Model
         'sequences_par_credit',
         'service_statutaire',
         'reduction_mise_a_jour',
-        'coeff_creation_niv1',
-        'coeff_creation_niv2',
-        'coeff_creation_niv3',
     ];
 
     protected $casts = [
@@ -25,9 +22,6 @@ class ParametreCalcul extends Model
         'sequences_par_credit'  => 'integer',
         'service_statutaire'    => 'integer',
         'reduction_mise_a_jour' => 'integer',
-        'coeff_creation_niv1'   => 'decimal:3',
-        'coeff_creation_niv2'   => 'decimal:3',
-        'coeff_creation_niv3'   => 'decimal:3',
     ];
 
     // ─── Relation ───────────────────────────────────────────
@@ -59,12 +53,25 @@ class ParametreCalcul extends Model
     public function getCoefficient(string $type, int $niveau): float
     {
         if (!in_array($type, ['creation', 'maj']) || !in_array($niveau, [1, 2, 3])) {
-            throw new \InvalidArgumentException(
-                "Coefficient introuvable pour type={$type} niveau={$niveau}"
-            );
+            return 0.0;
         }
 
-        $coeffCreation = (float) $this->{"coeff_creation_niv{$niveau}"};
+        // Récupérer le coefficient depuis la table niveaux_complexite
+        $niveauComplexite = NiveauComplexite::where('libelle', 'like', "%{$niveau}%")
+            ->where(function ($query) {
+                $query->where('libelle', 'like', '%Niveau%')
+                    ->orWhere('libelle', 'like', '%niveau%');
+            })
+            ->first();
+
+        // Valeurs par défaut si aucun niveau n'est trouvé
+        $defaultCoefficients = [
+            1 => 0.400,
+            2 => 0.750,
+            3 => 1.500,
+        ];
+
+        $coeffCreation = $niveauComplexite ? (float) $niveauComplexite->coefficient : $defaultCoefficients[$niveau];
 
         if ($type === 'creation') {
             return $coeffCreation;

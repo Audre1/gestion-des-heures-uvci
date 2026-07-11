@@ -14,8 +14,6 @@ return new class extends Migration
             $table->string('intitule', 255);
             $table->integer('nombre_heures');
             $table->integer('nombre_credits');
-            $table->enum('semestre', ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']);
-            $table->string('niveau', 20); // ex: L1, L2, L3, M1, M2
             $table->timestamps();
             $table->softDeletes();
         });
