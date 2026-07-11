@@ -19,8 +19,6 @@ class Cours extends Model
         'intitule',
         'nombre_heures',
         'nombre_credits',
-        'semestre',
-        'niveau',
     ];
 
     // ─── Relations ───────────────────────────────────────────────────────────
@@ -32,7 +30,8 @@ class Cours extends Model
             'filiere_cours',
             'id_cours',
             'id_filiere'
-        )->withTimestamps();
+        )->withPivot('semestre', 'niveau')
+            ->withTimestamps();
     }
 
     public function sequencesPedagogiques(): HasMany

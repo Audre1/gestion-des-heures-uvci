@@ -15,6 +15,20 @@
                         Grille des coefficients par séquence
                     </div>
                     <div class="table-responsive">
+                        @php
+                            $niveauxExist = \App\Models\NiveauComplexite::count() > 0;
+                        @endphp
+
+                        @if (!$niveauxExist)
+                            <div class="alert alert-info m-3">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                Aucun niveau de complexité défini. Les coefficients par défaut sont utilisés.
+                                <a href="{{ route('niveaux.index') }}" class="text-decoration-none fw-semibold">
+                                    Gérer les niveaux de complexité
+                                </a>
+                            </div>
+                        @endif
+
                         <table class="table align-middle mb-0">
                             <thead>
                                 <tr>
@@ -56,23 +70,9 @@
 
                                         {{-- Coefficient --}}
                                         <td>
-                                            @if ($ligne['type'] === 'creation')
-                                                {{-- Création : input modifiable --}}
-                                                @php
-                                                    $champCoeff = 'coeff_creation_niv' . $ligne['niveau'];
-                                                @endphp
-                                                <input type="number" step="0.001" name="{{ $champCoeff }}"
-                                                    class="form-control form-control-sm @error($champCoeff) is-invalid @enderror"
-                                                    value="{{ $parametres->$champCoeff }}" required>
-                                                @error($champCoeff)
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            @else
-                                                {{-- Mise à jour : calculé dynamiquement, lecture seule --}}
-                                                <span class="badge bg-light text-uvci-purple border">
-                                                    {{ $ligne['coeff'] }}
-                                                </span>
-                                            @endif
+                                            <span class="badge bg-light text-uvci-purple border">
+                                                {{ $ligne['coeff'] }}
+                                            </span>
                                         </td>
 
                                     </tr>
@@ -84,6 +84,8 @@
                     {{-- Note explicative --}}
                     <div class="card-footer text-muted small">
                         <i class="fa-solid fa-circle-info me-1"></i>
+                        Les coefficients sont gérés via la page <a href="{{ route('niveaux.index') }}"
+                            class="text-decoration-none">Niveaux de complexité</a>.
                         Les coefficients de mise à jour sont calculés automatiquement :
                         <strong>coeff_création × (1 - réduction / 100)</strong>
                     </div>

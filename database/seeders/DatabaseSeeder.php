@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             GradeSeeder::class,
             AdminSeeder::class,
             ParametreCalculSeeder::class,
+            TypeRessourceSeeder::class,
         ]);
     }
 }

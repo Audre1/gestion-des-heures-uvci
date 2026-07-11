@@ -45,18 +45,7 @@
                         {{ Auth::check() && Auth::user()->role ? Auth::user()->role->libelle : 'Utilisateur' }}</div>
                 </div>
 
-    <div class="fw-semibold" style="line-height:1.1">
-        {{ Auth::user()->enseignant->prenom ?? '' }}
-        {{ Auth::user()->enseignant->nom ?? 'Utilisateur' }}
-    </div>
-
-    <div class="text-muted" style="font-size:.75rem">
-        Enseignant
-    </div>
-</div>
-
-
-<i class="fa-solid fa-chevron-down text-muted ms-1" style="font-size:.7rem"></i>
+                <i class="fa-solid fa-chevron-down text-muted ms-1" style="font-size:.7rem"></i>
             </div>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{{ route('profil.index') }}"><i

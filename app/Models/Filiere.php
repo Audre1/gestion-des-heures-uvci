@@ -34,6 +34,7 @@ class Filiere extends Model
             'filiere_cours',
             'id_filiere',
             'id_cours'
-        )->withTimestamps();
+        )->withPivot('semestre', 'niveau')
+            ->withTimestamps();
     }
 }

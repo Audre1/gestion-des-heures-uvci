@@ -26,6 +26,10 @@
             <i class="fa-solid fa-calendar-days"></i> Années académiques
         </a>
 
+        <a href="{{ route('niveaux.index') }}" class="nav-link {{ request()->routeIs('niveaux.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-signal"></i> Niveaux de complexité
+        </a>
+
         <a href="{{ route('parametres.index') }}"
             class="nav-link {{ request()->routeIs('parametres.*') ? 'active' : '' }}">
             <i class="fa-solid fa-sliders"></i> Paramètres de calcul
@@ -88,10 +92,6 @@
 
         <a href="{{ route('types.index') }}" class="nav-link {{ request()->routeIs('types.*') ? 'active' : '' }}">
             <i class="fa-solid fa-shapes"></i> Types de ressources
-        </a>
-
-        <a href="{{ route('niveaux.index') }}" class="nav-link {{ request()->routeIs('niveaux.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-signal"></i> Niveaux de complexité
         </a>
 
         <a href="{{ route('activites.index') }}"

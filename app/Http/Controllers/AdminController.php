@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAnneeAcademiqueRequest;
+use App\Http\Requests\StoreNiveauComplexiteRequest;
 use App\Http\Requests\StoreTauxHoraireRequest;
 use App\Http\Requests\StoreUtilisateurRequest;
 use App\Http\Requests\UpdateAnneeAcademiqueRequest;
+use App\Http\Requests\UpdateNiveauComplexiteRequest;
 use App\Http\Requests\UpdateParametreCalculRequest;
 use App\Http\Requests\UpdateTauxHoraireRequest;
 use App\Http\Requests\UpdateUtilisateurRequest;
 use App\Models\AnneeAcademique;
 use App\Models\Grade;
+use App\Models\NiveauComplexite;
 use App\Models\ParametreCalcul;
 use App\Models\JournalActivite;
 use App\Models\Role;
@@ -22,7 +25,7 @@ use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
-    // Page - Liste des utilisateurs
+    // === Utilisateur ===
     public function utilisateurs()
     {
         $utilisateurs = Utilisateur::with(['role', 'createdBy'])->get();
@@ -34,6 +37,7 @@ class AdminController extends Controller
         ]);
     }
 
+    // === Store utilisateur ===
     public function store(StoreUtilisateurRequest $request)
     {
         // Récupérer uniquement le premier prénom
@@ -73,6 +77,7 @@ class AdminController extends Controller
             ->with('success', 'Utilisateur créé avec succès. Login : ' . $login);
     }
 
+    // === Update Utulisateur ===
     public function update(UpdateUtilisateurRequest $request, int $id)
     {
         $utilisateur = Utilisateur::findOrFail($id);
@@ -100,6 +105,7 @@ class AdminController extends Controller
             ->with('success', 'Utilisateur modifié avec succès.');
     }
 
+    // === Delete Utilisateur ===
     public function destroy(int $id)
     {
         $utilisateur = Utilisateur::findOrFail($id);
@@ -112,7 +118,7 @@ class AdminController extends Controller
             ->with('success', 'Utilisateur supprimé avec succès.');
     }
 
-    // Page - Liste des années académiques
+    // === Année académique ===
     public function annees()
     {
         $annees = AnneeAcademique::orderByRaw("CASE WHEN statut = 'en_cours' THEN 0 ELSE 1 END")
@@ -121,6 +127,7 @@ class AdminController extends Controller
         return view('admin.annees', compact('annees'));
     }
 
+    // === Store année académique ===
     public function storeAnnee(StoreAnneeAcademiqueRequest $request)
     {
         $annee = AnneeAcademique::create([
@@ -137,6 +144,7 @@ class AdminController extends Controller
             ->with('success', 'Année académique créée avec succès.');
     }
 
+    // === Update année académique ===
     public function updateAnnee(UpdateAnneeAcademiqueRequest $request, int $id)
     {
         $annee = AnneeAcademique::findOrFail($id);
@@ -160,6 +168,7 @@ class AdminController extends Controller
             ->with('success', 'Année académique modifiée avec succès.');
     }
 
+    // === Delete année académique ===
     public function destroyAnnee(int $id)
     {
         $annee = AnneeAcademique::findOrFail($id);
@@ -197,6 +206,92 @@ class AdminController extends Controller
             ->with('success', 'Année académique activée avec succès.');
     }
 
+    // === Niveau complexite ===
+    public function niveauxComplexite()
+    {
+        $niveaux = NiveauComplexite::withCount('activitesPedagogiques')->get();
+        return view('admin.niveaux', compact('niveaux'));
+    }
+
+    // === Store niveau complexite ===
+    public function storeNiveauComplexite(StoreNiveauComplexiteRequest $request)
+    {
+        // Vérifier si un niveau existe déjà avec ce libellé
+        $existing = NiveauComplexite::withTrashed()
+            ->where('libelle', $request->libelle)
+            ->first();
+
+        if ($existing) {
+            if ($existing->trashed()) {
+                // Restaurer le niveau soft-deleted
+                $existing->restore();
+                $existing->update([
+                    'coefficient' => $request->coefficient,
+                    'description' => $request->description,
+                ]);
+
+                if (function_exists('logActivite')) {
+                    logActivite('création', "Restauration du niveau de complexité : {$request->libelle}", $existing);
+                }
+
+                return redirect()->route('niveaux.index')->with('success', 'Niveau de complexité restauré avec succès.');
+            } else {
+                return redirect()->back()->with('error', 'Ce libellé existe déjà.');
+            }
+        }
+
+        // Créer un nouveau niveau de complexité
+        $niveau = NiveauComplexite::create([
+            'libelle' => $request->libelle,
+            'coefficient' => $request->coefficient,
+            'description' => $request->description,
+        ]);
+
+        if (function_exists('logActivite')) {
+            logActivite('création', "Création du niveau de complexité : {$request->libelle}", $niveau);
+        }
+
+        return redirect()->route('niveaux.index')->with('success', 'Niveau de complexité créé avec succès.');
+    }
+
+    // === Update niveau complexite ===
+    public function updateNiveauComplexite(UpdateNiveauComplexiteRequest $request, int $id)
+    {
+        $niveau = NiveauComplexite::findOrFail($id);
+
+        $niveau->update([
+            'libelle' => $request->libelle,
+            'coefficient' => $request->coefficient,
+            'description' => $request->description,
+        ]);
+
+        if (function_exists('logActivite')) {
+            logActivite('modification', "Modification du niveau de complexité : {$request->libelle}", $niveau);
+        }
+
+        return redirect()->route('niveaux.index')->with('success', 'Niveau de complexité modifié avec succès.');
+    }
+
+    // === Destroy niveau complexite ===
+    public function destroyNiveauComplexite(int $id)
+    {
+        $niveau = NiveauComplexite::withCount('activitesPedagogiques')->findOrFail($id);
+
+        // Vérifier s'il y a des activités pédagogiques associées
+        if ($niveau->activites_pedagogiques_count > 0) {
+            return redirect()->back()->with('error', 'Impossible de supprimer ce niveau car il a des activités pédagogiques associées.');
+        }
+
+        $niveau->delete();
+
+        if (function_exists('logActivite')) {
+            logActivite('suppression', "Suppression du niveau de complexité : {$niveau->libelle}", $niveau);
+        }
+
+        return redirect()->route('niveaux.index')->with('success', 'Niveau de complexité supprimé avec succès.');
+    }
+
+    // === Paramètres ===
     public function parametres()
     {
         $parametres = ParametreCalcul::anneeActive()->first();
@@ -215,15 +310,13 @@ class AdminController extends Controller
                 'sequences_par_credit'  => 40,
                 'service_statutaire'    => 192,
                 'reduction_mise_a_jour' => 50,
-                'coeff_creation_niv1'   => 0.400,
-                'coeff_creation_niv2'   => 0.750,
-                'coeff_creation_niv3'   => 1.500,
             ]);
         }
 
         return view('admin.parametres', compact('parametres'));
     }
 
+    // === Update paramètres ===
     public function updateParametres(UpdateParametreCalculRequest $request)
     {
         $parametres = ParametreCalcul::anneeActive()->first();
@@ -242,6 +335,7 @@ class AdminController extends Controller
             ->with('success', 'Paramètres de calcul mis à jour avec succès.');
     }
 
+    // === Taux horaire ===
     public function taux()
     {
         $taux = TauxHoraire::with(['grade', 'anneeAcademique'])
@@ -260,6 +354,7 @@ class AdminController extends Controller
         ]);
     }
 
+    // === Store taux horaire ===
     public function storeTaux(StoreTauxHoraireRequest $request)
     {
         $taux = TauxHoraire::create($request->validated());
@@ -271,6 +366,7 @@ class AdminController extends Controller
             ->with('success', 'Taux horaire créé avec succès.');
     }
 
+    // === Update taux horaire ===
     public function updateTaux(UpdateTauxHoraireRequest $request, int $id)
     {
         $taux = TauxHoraire::findOrFail($id);
@@ -283,6 +379,7 @@ class AdminController extends Controller
             ->with('success', 'Taux horaire modifié avec succès.');
     }
 
+    // === Delete taux horaire ===
     public function destroyTaux(int $id)
     {
         $taux = TauxHoraire::findOrFail($id);
@@ -295,6 +392,7 @@ class AdminController extends Controller
             ->with('success', 'Taux horaire supprimé avec succès.');
     }
 
+    // === Journal des activités ===
     public function journaux()
     {
         $journaux = JournalActivite::with('utilisateur')
@@ -304,13 +402,14 @@ class AdminController extends Controller
         return view('admin.journaux', compact('journaux'));
     }
 
+    // === Sauvegardes ===
     public function sauvegardes()
     {
         $backupService = new BackupService();
         $backups = $backupService->getBackups();
         $lastBackupDate = $backupService->getLastBackupDate();
         $totalSize = $backupService->getTotalSize();
-        
+
         return view('admin.sauvegardes', [
             'backups' => $backups,
             'lastBackupDate' => $lastBackupDate,
@@ -318,6 +417,7 @@ class AdminController extends Controller
         ]);
     }
 
+    // === Create backup ===
     public function createBackup()
     {
         try {
@@ -334,6 +434,7 @@ class AdminController extends Controller
         }
     }
 
+    // === Download backup ===
     public function downloadBackup(string $filename)
     {
         try {
@@ -354,6 +455,7 @@ class AdminController extends Controller
         }
     }
 
+    // === Restore backup ===
     public function restoreBackup(string $filename)
     {
         try {
@@ -370,6 +472,7 @@ class AdminController extends Controller
         }
     }
 
+    // === Delete backup ===
     public function deleteBackup(string $filename)
     {
         try {

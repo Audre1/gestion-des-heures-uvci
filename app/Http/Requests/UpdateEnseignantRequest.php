@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreEnseignantRequest extends FormRequest
+class UpdateEnseignantRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,15 +22,18 @@ class StoreEnseignantRequest extends FormRequest
      */
     public function rules(): array
     {
+        $enseignantId = $this->route('id');
+        $enseignant = \App\Models\Enseignant::findOrFail($enseignantId);
+
         return [
             // Champs Utilisateur
             'nom' => 'required|string|max:100',
             'prenom' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,NULL,id,deleted_at,NULL|max:150',
+            'email' => 'required|email|unique:users,email,' . $enseignant->id_utilisateur . ',id|max:150',
             'telephone' => 'nullable|string|max:20',
-            'mot_de_passe' => 'required|string|min:8|confirmed',
+            'mot_de_passe' => 'nullable|string|min:8|confirmed',
             // Champs Enseignant
-            'matricule' => 'required|string|unique:enseignants,matricule,NULL,id,deleted_at,NULL|max:50',
+            'matricule' => 'required|string|unique:enseignants,matricule,' . $enseignantId . ',id,deleted_at,NULL|max:50',
             'statut' => 'required|in:Permanent,Vacataire',
             'taux_horaire_perso' => 'nullable|numeric|min:0',
             'date_recrutement' => 'required|date',
@@ -52,8 +55,8 @@ class StoreEnseignantRequest extends FormRequest
             'email.unique' => 'Cet email est déjà utilisé.',
             'email.max' => 'L\'email ne doit pas dépasser 150 caractères.',
             'telephone.max' => 'Le téléphone ne doit pas dépasser 20 caractères.',
-            'mot_de_passe.required' => 'Le mot de passe est requis.',
             'mot_de_passe.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'mot_de_passe.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
             // Messages Enseignant
             'matricule.required' => 'Le matricule est requis.',
             'matricule.unique' => 'Ce matricule est déjà utilisé.',

@@ -6,7 +6,15 @@
 
     <x-data-table search-placeholder="Rechercher une activité..." :count="6">
         <x-slot:head>
-            <th>Enseignant</th><th>Type</th><th>Niveau</th><th>Séq.</th><th>Coeff.</th><th>VHT</th><th>Date</th><th>Statut</th><th class="text-end">Actions</th>
+            <th>Enseignant</th>
+            <th>Type</th>
+            <th>Niveau</th>
+            <th>Séq.</th>
+            <th>Coeff.</th>
+            <th>VHT</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th class="text-end">Actions</th>
         </x-slot:head>
         @php
             $act = [
@@ -18,21 +26,28 @@
                 ['F. Ouattara', 'Création', 'Niv. 2', 80, '0,75', '60h', '28/10/2024', 'En cours', 'amber'],
             ];
         @endphp
-        @foreach($act as [$ens, $type, $niv, $seq, $co, $vht, $date, $st, $c])
+        @foreach ($act as [$ens, $type, $niv, $seq, $co, $vht, $date, $st, $c])
             <tr>
                 <td class="fw-semibold">{{ $ens }}</td>
-                <td><span class="badge badge-soft-{{ $type === 'Création' ? 'green' : 'purple' }}">{{ $type }}</span></td>
-                <td>{{ $niv }}</td><td>{{ $seq }}</td><td>{{ $co }}</td>
+                <td><span
+                        class="badge badge-soft-{{ $type === 'Création' ? 'green' : 'purple' }}">{{ $type }}</span>
+                </td>
+                <td>{{ $niv }}</td>
+                <td>{{ $seq }}</td>
+                <td>{{ $co }}</td>
                 <td class="fw-semibold text-uvci-green">{{ $vht }}</td>
                 <td class="text-muted">{{ $date }}</td>
                 <td><span class="badge badge-soft-{{ $c }}">{{ $st }}</span></td>
                 <td>
                     <div class="action-btns justify-content-end">
-                        @if($st === 'En cours')
-                            <button class="btn btn-light border" title="Valider"><i class="fa-solid fa-check text-uvci-green"></i></button>
+                        @if ($st === 'En cours')
+                            <button class="btn btn-light border" title="Valider"><i
+                                    class="fa-solid fa-check text-uvci-green"></i></button>
                         @endif
-                        <button class="btn btn-light border"><i class="fa-solid fa-pen text-uvci-green"></i></button>
-                        <button class="btn btn-light border"><i class="fa-solid fa-trash text-danger"></i></button>
+                        <button class="btn btn-light border" title="Modifier"><i
+                                class="fa-solid fa-pen text-uvci-green"></i></button>
+                        <button class="btn btn-light border" title="Supprimer"><i
+                                class="fa-solid fa-trash text-danger"></i></button>
                     </div>
                 </td>
             </tr>

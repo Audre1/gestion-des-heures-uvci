@@ -3,7 +3,6 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +15,8 @@ use App\Models\Enseignant;
     'login',
     'mot_de_passe',
     'statut_compte',
-    'id_role'
+    'id_role',
+    'created_by'
 ])]
 #[Hidden(['password', 'remember_token'])]
 
@@ -24,17 +24,22 @@ class User extends Authenticatable
 {
 
 
-public function role()
-{
-    return $this->belongsTo(Role::class, 'id_role');
-}
-    
-public function getAuthPassword()
-{
-    return $this->mot_de_passe;
-}
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'id_role');
+    }
 
-/** @use HasFactory<UserFactory> */
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->mot_de_passe;
+    }
+
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -43,14 +48,14 @@ public function getAuthPassword()
      * @return array<string, string>
      */
     protected function casts(): array
-{
-    return [
-        'email_verified_at' => 'datetime',
-    ];
-}
+    {
+        return [
+            'email_verified_at' => 'datetime',
+        ];
+    }
 
-   public function enseignant()
-{
-    return $this->hasOne(Enseignant::class, 'id_utilisateur', 'id');
-}
+    public function enseignant()
+    {
+        return $this->hasOne(Enseignant::class, 'id_utilisateur', 'id');
+    }
 }

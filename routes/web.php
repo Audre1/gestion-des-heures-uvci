@@ -54,6 +54,10 @@ Route::post('/annees-academiques', [AdminController::class, 'storeAnnee'])->name
 Route::put('/annees-academiques/{id}', [AdminController::class, 'updateAnnee'])->name('annees.update');
 Route::delete('/annees-academiques/{id}', [AdminController::class, 'destroyAnnee'])->name('annees.destroy');
 Route::patch('/annees-academiques/{id}/activate', [AdminController::class, 'activateAnnee'])->name('annees.activate');
+Route::get('/niveaux-complexite', [AdminController::class, 'niveauxComplexite'])->name('niveaux.index');
+Route::post('/niveaux-complexite', [AdminController::class, 'storeNiveauComplexite'])->name('niveaux.store');
+Route::put('/niveaux-complexite/{id}', [AdminController::class, 'updateNiveauComplexite'])->name('niveaux.update');
+Route::delete('/niveaux-complexite/{id}', [AdminController::class, 'destroyNiveauComplexite'])->name('niveaux.destroy');
 Route::get('/parametres-calcul', [AdminController::class, 'parametres'])->name('parametres.index');
 Route::put('/parametres-calcul', [AdminController::class, 'updateParametres'])->name('parametres.update');
 Route::get('/taux-horaires', [AdminController::class, 'taux'])->name('taux.index');
@@ -74,15 +78,43 @@ Route::delete('/sauvegardes/{filename}', [AdminController::class, 'deleteBackup'
 */
 Route::get('/enseignants', [PedagogieController::class, 'enseignants'])->name('enseignants.index');
 Route::post('/enseignants', [PedagogieController::class, 'storeEnseignant'])->name('enseignants.store');
+Route::put('/enseignants/{id}', [PedagogieController::class, 'updateEnseignant'])->name('enseignants.update');
+Route::delete('/enseignants/{id}', [PedagogieController::class, 'destroyEnseignant'])->name('enseignants.destroy');
 Route::get('/grades', [PedagogieController::class, 'grades'])->name('grades.index');
+Route::post('/grades', [PedagogieController::class, 'storeGrade'])->name('grades.store');
+Route::put('/grades/{id}', [PedagogieController::class, 'updateGrade'])->name('grades.update');
+Route::delete('/grades/{id}', [PedagogieController::class, 'destroyGrade'])->name('grades.destroy');
 Route::get('/departements', [PedagogieController::class, 'departements'])->name('departements.index');
+Route::post('/departements', [PedagogieController::class, 'storeDepartement'])->name('departements.store');
+Route::put('/departements/{id}', [PedagogieController::class, 'updateDepartement'])->name('departements.update');
+Route::delete('/departements/{id}', [PedagogieController::class, 'destroyDepartement'])->name('departements.destroy');
 Route::get('/filieres', [PedagogieController::class, 'filieres'])->name('filieres.index');
+Route::post('/filieres', [PedagogieController::class, 'storeFiliere'])->name('filieres.store');
+Route::put('/filieres/{id}', [PedagogieController::class, 'updateFiliere'])->name('filieres.update');
+Route::delete('/filieres/{id}', [PedagogieController::class, 'destroyFiliere'])->name('filieres.destroy');
+Route::post('/filieres/{filiereId}/attach-cours', [PedagogieController::class, 'attachCoursToFiliere'])->name('filieres.attach-cours');
+Route::delete('/filieres/{filiereId}/detach-cours/{coursId}/{semestre}/{niveau}', [PedagogieController::class, 'detachCoursFromFiliere'])->name('filieres.detach-cours');
 Route::get('/cours', [PedagogieController::class, 'cours'])->name('cours.index');
+Route::post('/cours', [PedagogieController::class, 'storeCours'])->name('cours.store');
+Route::put('/cours/{id}', [PedagogieController::class, 'updateCours'])->name('cours.update');
+Route::delete('/cours/{id}', [PedagogieController::class, 'destroyCours'])->name('cours.destroy');
 Route::get('/affectations', [PedagogieController::class, 'affectations'])->name('affectations.index');
+Route::post('/affectations', [PedagogieController::class, 'storeAffectation'])->name('affectations.store');
+Route::put('/affectations/{id}', [PedagogieController::class, 'updateAffectation'])->name('affectations.update');
+Route::delete('/affectations/{id}', [PedagogieController::class, 'destroyAffectation'])->name('affectations.destroy');
 Route::get('/sequences', [PedagogieController::class, 'sequences'])->name('sequences.index');
+Route::post('/sequences', [PedagogieController::class, 'storeSequence'])->name('sequences.store');
+Route::put('/sequences/{id}', [PedagogieController::class, 'updateSequence'])->name('sequences.update');
+Route::delete('/sequences/{id}', [PedagogieController::class, 'destroySequence'])->name('sequences.destroy');
+Route::post('/sequences/reorder', [PedagogieController::class, 'reorderSequences'])->name('sequences.reorder');
 Route::get('/ressources', [PedagogieController::class, 'ressources'])->name('ressources.index');
+Route::post('/ressources', [PedagogieController::class, 'storeRessource'])->name('ressources.store');
+Route::put('/ressources/{id}', [PedagogieController::class, 'updateRessource'])->name('ressources.update');
+Route::delete('/ressources/{id}', [PedagogieController::class, 'destroyRessource'])->name('ressources.destroy');
 Route::get('/types-ressources', [PedagogieController::class, 'typesRessources'])->name('types.index');
-Route::get('/niveaux-complexite', [PedagogieController::class, 'niveauxComplexite'])->name('niveaux.index');
+Route::post('/types-ressources', [PedagogieController::class, 'storeTypeRessource'])->name('types.store');
+Route::put('/types-ressources/{id}', [PedagogieController::class, 'updateTypeRessource'])->name('types.update');
+Route::delete('/types-ressources/{id}', [PedagogieController::class, 'destroyTypeRessource'])->name('types.destroy');
 Route::get('/activites', [PedagogieController::class, 'activites'])->name('activites.index');
 Route::get('/volumes-horaires', [PedagogieController::class, 'volumes'])->name('volumes.index');
 Route::get('/heures-complementaires', [PedagogieController::class, 'complementaires'])->name('complementaires.index');
@@ -105,9 +137,9 @@ Route::get('/espace/volume-horaire', [EspaceController::class, 'volume'])->name(
 Route::get('/espace/heures-complementaires', [EspaceController::class, 'complementaires'])->name('espace.complementaires');
 Route::get('/espace/ressources', [EspaceController::class, 'ressources'])->name('espace.ressources');
 Route::get('/espace/documents', [EspaceController::class, 'documents'])->name('espace.documents');
-Route::get('/documents/recapitulatif-activites', [DocumentController::class, 'recapitulatifActivites']) ->name('documents.recapitulatif');
-Route::get('/documents/fiche-individuelle', [DocumentController::class, 'ficheIndividuelle']) ->name('documents.fiche');
-Route::get('/documents/etat-heures', [DocumentController::class, 'etatHeures']) ->name('documents.heures');
+Route::get('/documents/recapitulatif-activites', [DocumentController::class, 'recapitulatifActivites'])->name('documents.recapitulatif');
+Route::get('/documents/fiche-individuelle', [DocumentController::class, 'ficheIndividuelle'])->name('documents.fiche');
+Route::get('/documents/etat-heures', [DocumentController::class, 'etatHeures'])->name('documents.heures');
 /*
 |--------------------------------------------------------------------------
 | Compte

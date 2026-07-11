@@ -18,6 +18,7 @@ class Enseignant extends Model
     protected $fillable = [
         'matricule',
         'statut',
+        'taux_horaire_perso',
         'date_recrutement',
         'id_grade',
         'id_departement',
@@ -28,6 +29,7 @@ class Enseignant extends Model
     {
         return [
             'date_recrutement' => 'date',
+            'taux_horaire_perso' => 'decimal:2',
         ];
     }
 
@@ -47,9 +49,9 @@ class Enseignant extends Model
      * Lié à l'utilisateur via la table 'users'.
      */
     public function utilisateur(): BelongsTo
-{
-    return $this->belongsTo(User::class, 'id_utilisateur', 'id');
-}
+    {
+        return $this->belongsTo(User::class, 'id_utilisateur', 'id');
+    }
 
     public function affectationsCours(): HasMany
     {
