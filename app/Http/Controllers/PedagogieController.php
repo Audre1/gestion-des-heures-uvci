@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreActivitePedagogiqueRequest;
 use App\Http\Requests\StoreAffectationRequest;
 use App\Http\Requests\StoreCoursRequest;
 use App\Http\Requests\StoreDepartementRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\StoreGradeRequest;
 use App\Http\Requests\StoreRessourceRequest;
 use App\Http\Requests\StoreSequenceRequest;
 use App\Http\Requests\StoreTypeRessourceRequest;
+use App\Http\Requests\UpdateActivitePedagogiqueRequest;
 use App\Http\Requests\UpdateAffectationRequest;
 use App\Http\Requests\UpdateCoursRequest;
 use App\Http\Requests\UpdateDepartementRequest;
@@ -20,6 +22,7 @@ use App\Http\Requests\UpdateGradeRequest;
 use App\Http\Requests\UpdateRessourceRequest;
 use App\Http\Requests\UpdateSequenceRequest;
 use App\Http\Requests\UpdateTypeRessourceRequest;
+use App\Models\ActivitePedagogique;
 use App\Models\AffectationCours;
 use App\Models\AnneeAcademique;
 use App\Models\Cours;
@@ -27,8 +30,10 @@ use App\Models\Departement;
 use App\Models\Enseignant;
 use App\Models\Filiere;
 use App\Models\Grade;
-use App\Models\Role;
+use App\Models\NiveauComplexite;
+use App\Models\ParametreCalcul;
 use App\Models\RessourcePedagogique;
+use App\Models\Role;
 use App\Models\SequencePedagogique;
 use App\Models\TypeRessource;
 use App\Models\Utilisateur;
@@ -1024,7 +1029,155 @@ class PedagogieController extends Controller
     // === ACTIVITES ===
     public function activites()
     {
-        return view('pedagogie.activites');
+        $activites = ActivitePedagogique::with([
+            'affectationCours.enseignant.utilisateur',
+            'affectationCours.cours',
+            'affectationCours.anneeAcademique',
+            'niveauComplexite',
+            'ressourcePedagogique'
+        ])->get();
+
+        $niveaux      = NiveauComplexite::all();
+        $affectations = AffectationCours::with(['enseignant.utilisateur', 'cours', 'anneeAcademique'])->get();
+        $ressources   = RessourcePedagogique::with(['typeRessource'])->get();
+        $parametres   = ParametreCalcul::anneeActive()->first();
+
+        return view('pedagogie.activites', compact(
+            'activites',
+            'niveaux',
+            'affectations',
+            'ressources',
+            'parametres'
+        ));
+    }
+
+    // === STORE ACTIVITE ===
+    public function storeActivite(StoreActivitePedagogiqueRequest $request)
+    {
+        DB::transaction(function () use ($request) {
+            $affectation = AffectationCours::with(['cours', 'enseignant.utilisateur'])->findOrFail($request->id_affectation);
+            
+            // Vérifier que les paramètres de calcul existent pour l'année active
+            $params = ParametreCalcul::anneeActive()->first();
+            if (!$params) {
+                throw new \Exception('Aucun paramètre de calcul actif trouvé. Veuillez configurer les paramètres pour l\'année académique en cours.');
+            }
+
+            ActivitePedagogique::create([
+                'type_activite'  => $request->type_activite,
+                'date_activite'  => $request->date_activite,
+                'statut'         => $request->statut ?? 'en_cours',
+                'id_affectation' => $request->id_affectation,
+                'id_ressource'   => $request->id_ressource,
+                'id_niveau'      => $request->id_niveau,
+            ]);
+
+            if (function_exists('logActivite')) {
+                $enseignant = $affectation->enseignant->utilisateur;
+                $cours = $affectation->cours;
+                logActivite('création', "Activité {$request->type_activite} pour {$enseignant->nom} {$enseignant->prenom} - {$cours->code_cours}");
+            }
+        });
+
+        return redirect()->route('activites.index')
+            ->with('success', 'Activité pédagogique créée avec succès.');
+    }
+
+    // === UPDATE ACTIVITE ===
+    public function updateActivite(UpdateActivitePedagogiqueRequest $request, int $id)
+    {
+        $activite = ActivitePedagogique::findOrFail($id);
+
+        DB::transaction(function () use ($request, $activite) {
+            $affectation = AffectationCours::with(['cours', 'enseignant.utilisateur'])->findOrFail($request->id_affectation);
+
+            // Vérifier que les paramètres de calcul existent pour l'année active
+            $params = ParametreCalcul::anneeActive()->first();
+            if (!$params) {
+                throw new \Exception('Aucun paramètre de calcul actif trouvé. Veuillez configurer les paramètres pour l\'année académique en cours.');
+            }
+
+            $activite->update([
+                'type_activite'  => $request->type_activite,
+                'date_activite'  => $request->date_activite,
+                'statut'         => $request->statut ?? $activite->statut,
+                'id_affectation' => $request->id_affectation,
+                'id_ressource'   => $request->id_ressource,
+                'id_niveau'      => $request->id_niveau,
+            ]);
+
+            // Recalculer les champs automatiques après modification
+            $activite->calculerEtRemplir();
+            $activite->save();
+
+            if (function_exists('logActivite')) {
+                $enseignant = $affectation->enseignant->utilisateur;
+                $cours = $affectation->cours;
+                logActivite('modification', "Modification activité {$request->type_activite} pour {$enseignant->nom} - {$cours->code_cours}", $activite);
+            }
+        });
+
+        return redirect()->route('activites.index')
+            ->with('success', 'Activité pédagogique modifiée avec succès.');
+    }
+
+    // === DESTROY ACTIVITE ===
+    public function destroyActivite(int $id)
+    {
+        $activite = ActivitePedagogique::findOrFail($id);
+
+        DB::transaction(function () use ($activite) {
+            $affectation = $activite->affectationCours;
+            $enseignant = $affectation->enseignant->utilisateur;
+            $cours = $affectation->cours;
+
+            if (function_exists('logActivite')) {
+                logActivite('suppression', "Suppression de l'activité {$activite->type_activite} pour {$enseignant->nom} {$enseignant->prenom} - {$cours->code_cours}", $activite);
+            }
+
+            $activite->delete();
+        });
+
+        return redirect()->route('activites.index')->with('success', 'Activité pédagogique supprimée avec succès.');
+    }
+
+    // === RESTORE ACTIVITE ===
+    public function restoreActivite(Request $request, int $id)
+    {
+        $activite = ActivitePedagogique::withTrashed()->findOrFail($id);
+
+        DB::transaction(function () use ($request, $activite) {
+            $activite->restore();
+
+            if (function_exists('logActivite')) {
+                $affectation = $activite->affectationCours;
+                $enseignant = $affectation->enseignant->utilisateur;
+                $cours = $affectation->cours;
+                logActivite('création', "Restauration de l'activité {$activite->type_activite} pour {$enseignant->nom} {$enseignant->prenom} - {$cours->code_cours}", $activite);
+            }
+        });
+
+        return redirect()->route('activites.index')->with('success', 'Activité pédagogique restaurée avec succès.');
+    }
+
+    // === VALIDER ACTIVITE ===
+    public function validerActivite(int $id)
+    {
+        $activite = ActivitePedagogique::findOrFail($id);
+
+        DB::transaction(function () use ($activite) {
+            $activite->update(['statut' => 'validee']);
+
+            if (function_exists('logActivite')) {
+                $affectation = $activite->affectationCours;
+                $enseignant = $affectation->enseignant->utilisateur;
+                $cours = $affectation->cours;
+                logActivite('modification', "Validation de l'activité {$activite->type_activite} pour {$enseignant->nom} {$enseignant->prenom} - {$cours->code_cours}", $activite);
+            }
+        });
+
+        return redirect()->route('activites.index')
+            ->with('success', 'Activité pédagogique validée avec succès.');
     }
 
     // === VOLUMES ===

@@ -10,18 +10,39 @@ return new class extends Migration
     {
         Schema::create('activites_pedagogiques', function (Blueprint $table) {
             $table->id();
-            $table->string('type_activite', 100); // ex: CM, TD, TP, Projet...
+
+            // Type : uniquement création ou mise à jour
+            $table->enum('type_activite', ['creation', 'maj']);
+
             $table->date('date_activite');
-            $table->enum('statut', ['planifie', 'realise', 'annule'])->default('planifie');
-            $table->decimal('coefficient', 5, 2)->default(1);
-            $table->integer('nb_sequences')->default(1);
-            $table->decimal('volume_horaire', 5, 2); // en heures
+
+            // Statut aligné sur le métier
+            $table->enum('statut', ['en_cours', 'validee', 'rejetee'])->default('en_cours');
+
+            // Calculés automatiquement depuis les paramètres
+            $table->decimal('coefficient', 5, 3);
+            $table->integer('nb_sequences');
+            $table->decimal('volume_horaire', 8, 2);
+
+            // Relations
             $table->unsignedBigInteger('id_affectation');
-            $table->foreign('id_affectation')->references('id')->on('affectations_cours')->restrictOnDelete();
+            $table->foreign('id_affectation')
+                ->references('id')
+                ->on('affectations_cours')
+                ->restrictOnDelete();
+
             $table->unsignedBigInteger('id_ressource')->nullable();
-            $table->foreign('id_ressource')->references('id')->on('ressources_pedagogiques')->nullOnDelete();
+            $table->foreign('id_ressource')
+                ->references('id')
+                ->on('ressources_pedagogiques')
+                ->nullOnDelete();
+
             $table->unsignedBigInteger('id_niveau')->nullable();
-            $table->foreign('id_niveau')->references('id')->on('niveaux_complexite')->nullOnDelete();
+            $table->foreign('id_niveau')
+                ->references('id')
+                ->on('niveaux_complexite')
+                ->nullOnDelete();
+
             $table->timestamps();
             $table->softDeletes();
         });

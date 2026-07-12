@@ -100,33 +100,58 @@
             </div>
 
             {{-- Modal Delete --}}
-            <div class="modal fade" id="deleteModal{{ $niveau->id }}" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Supprimer le niveau de complexité</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal fade" id="deleteModal{{ $niveau->id }}" tabindex="-1"
+                aria-labelledby="deleteModalLabel{{ $niveau->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title fw-bold" id="deleteModalLabel{{ $niveau->id }}">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                Confirmer la suppression
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Fermer"></button>
                         </div>
-                        <div class="modal-body">
-                            <p>Êtes-vous sûr de vouloir supprimer le niveau <strong>{{ $niveau->libelle }}</strong>
-                                ?
+
+                        <div class="modal-body p-4">
+                            <p class="mb-3">
+                                Voulez-vous vraiment supprimer le niveau de complexité suivant ?
                             </p>
+
+                            <div class="alert alert-warning mb-0">
+                                <strong>
+                                    <i class="fa-solid fa-signal me-2"></i>
+                                    {{ $niveau->libelle }}
+                                </strong><br>
+                                <span class="small">Coefficient : {{ number_format($niveau->coefficient, 2) }} — {{ $niveau->activites_pedagogiques_count }} activité(s) associée(s)</span>
+                            </div>
+
                             @if ($niveau->activites_pedagogiques_count > 0)
-                                <p class="text-danger">Impossible de supprimer ce niveau car il a des activités
-                                    pédagogiques associées.</p>
+                                <p class="text-danger small mt-3 mb-0">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i>
+                                    Impossible de supprimer ce niveau car il a des activités pédagogiques associées.
+                                </p>
+                            @else
+                                <p class="text-danger small mt-3 mb-0">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i>
+                                    Cette action est irréversible.
+                                </p>
                             @endif
                         </div>
+
                         <div class="modal-footer bg-light">
-                            <form action="{{ route('niveaux.destroy', $niveau->id) }}" method="POST" class="d-inline">
+                            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                                Annuler
+                            </button>
+
+                            <form action="{{ route('niveaux.destroy', $niveau->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
 
-                                <button type="button" class="btn btn-light border me-2"
-                                    data-bs-dismiss="modal">Annuler</button>
-
                                 <button type="submit" class="btn btn-danger"
                                     {{ $niveau->activites_pedagogiques_count > 0 ? 'disabled' : '' }}>
-                                    <i class="fa-solid fa-trash me-1"></i> Oui, supprimer
+                                    <i class="fa-solid fa-trash me-1"></i>
+                                    Oui, supprimer
                                 </button>
                             </form>
                         </div>

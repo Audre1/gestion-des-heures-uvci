@@ -48,30 +48,26 @@ class ParametreCalcul extends Model
      * Les coefficients MAJ sont calculés dynamiquement depuis la réduction
      *
      * @param string $type   'creation' ou 'maj'
-     * @param int    $niveau  1, 2 ou 3
+     * @param int    $niveau  Numéro du niveau (1-based index)
      */
     public function getCoefficient(string $type, int $niveau): float
     {
-        if (!in_array($type, ['creation', 'maj']) || !in_array($niveau, [1, 2, 3])) {
+        if (!in_array($type, ['creation', 'maj'])) {
             return 0.0;
         }
 
-        // Récupérer le coefficient depuis la table niveaux_complexite
-        $niveauComplexite = NiveauComplexite::where('libelle', 'like', "%{$niveau}%")
-            ->where(function ($query) {
-                $query->where('libelle', 'like', '%Niveau%')
-                    ->orWhere('libelle', 'like', '%niveau%');
-            })
-            ->first();
+        // Récupérer TOUS les niveaux depuis la base, ordonnés par ID
+        $niveaux = NiveauComplexite::orderBy('id', 'asc')->get();
 
-        // Valeurs par défaut si aucun niveau n'est trouvé
-        $defaultCoefficients = [
-            1 => 0.400,
-            2 => 0.750,
-            3 => 1.500,
-        ];
+        // Chercher le niveau par son index (niveau - 1 car tableau 0-based)
+        $niveauComplexite = $niveaux->skip($niveau - 1)->first();
 
-        $coeffCreation = $niveauComplexite ? (float) $niveauComplexite->coefficient : $defaultCoefficients[$niveau];
+        // Si aucun niveau trouvé, retourner 0
+        if (!$niveauComplexite) {
+            return 0.0;
+        }
+
+        $coeffCreation = (float) $niveauComplexite->coefficient;
 
         if ($type === 'creation') {
             return $coeffCreation;
@@ -102,7 +98,7 @@ class ParametreCalcul extends Model
      *
      * @param int    $nbHeuresCours  Nombre d'heures du cours
      * @param string $type           'creation' ou 'maj'
-     * @param int    $niveau          1, 2 ou 3
+     * @param int    $niveau          Numéro du niveau (1-based index)
      */
     public function calculerVHT(int $nbHeuresCours, string $type, int $niveau): float
     {
@@ -135,12 +131,17 @@ class ParametreCalcul extends Model
         $colonnes = [10, 20, 30];
         $grille   = [];
 
+        // Récupérer TOUS les niveaux depuis la base, ordonnés par ID
+        $niveaux = NiveauComplexite::orderBy('id', 'asc')->get();
+
         foreach (['creation', 'maj'] as $type) {
-            for ($niveau = 1; $niveau <= 3; $niveau++) {
-                $coeff  = $this->getCoefficient($type, $niveau);
+            foreach ($niveaux as $index => $niveau) {
+                $niveauNum = $index + 1; // Convertir en 1-based index
+                $coeff  = $this->getCoefficient($type, $niveauNum);
                 $ligne  = [
                     'type'    => $type,
-                    'niveau'  => $niveau,
+                    'niveau'  => $niveauNum,
+                    'libelle' => $niveau->libelle, // Ajouter le libellé réel
                     'coeff'   => $coeff,
                     'valeurs' => [],
                 ];
@@ -149,7 +150,7 @@ class ParametreCalcul extends Model
                     $ligne['valeurs'][] = [
                         'heures'    => $heures,
                         'sequences' => $this->calculerSequencesDepuisHeures($heures),
-                        'vht'       => $this->calculerVHT($heures, $type, $niveau),
+                        'vht'       => $this->calculerVHT($heures, $type, $niveauNum),
                     ];
                 }
 

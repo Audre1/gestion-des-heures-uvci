@@ -49,14 +49,7 @@
                                         {{-- Libellé --}}
                                         <td class="fw-semibold">
                                             {{ $ligne['type'] === 'creation' ? 'Création' : 'Mise à jour' }}
-                                            — Niv. {{ $ligne['niveau'] }}
-                                            @if ($ligne['niveau'] === 1)
-                                                (simple)
-                                            @elseif($ligne['niveau'] === 2)
-                                                (interactif)
-                                            @else
-                                                (serious games)
-                                            @endif
+                                            — {{ $ligne['libelle'] }}
                                         </td>
 
                                         {{-- Valeurs VHT calculées (lecture seule) --}}

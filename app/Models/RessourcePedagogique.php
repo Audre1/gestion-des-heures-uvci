@@ -46,4 +46,22 @@ class RessourcePedagogique extends Model
     {
         return $this->hasMany(ActivitePedagogique::class, 'id_ressource', 'id');
     }
+
+    // ─── Méthodes métier ───────────────────────────────────────────────────────────
+
+    /**
+     * Vérifie si la ressource a des activités pédagogiques associées
+     */
+    public function hasActivites(): bool
+    {
+        return $this->activitesPedagogiques()->count() > 0;
+    }
+
+    /**
+     * Compte le nombre d'activités pédagogiques associées
+     */
+    public function getActivitesCountAttribute(): int
+    {
+        return $this->activitesPedagogiques()->count();
+    }
 }

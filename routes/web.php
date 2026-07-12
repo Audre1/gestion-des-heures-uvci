@@ -116,6 +116,11 @@ Route::post('/types-ressources', [PedagogieController::class, 'storeTypeRessourc
 Route::put('/types-ressources/{id}', [PedagogieController::class, 'updateTypeRessource'])->name('types.update');
 Route::delete('/types-ressources/{id}', [PedagogieController::class, 'destroyTypeRessource'])->name('types.destroy');
 Route::get('/activites', [PedagogieController::class, 'activites'])->name('activites.index');
+Route::post('/activites', [PedagogieController::class, 'storeActivite'])->name('activites.store');
+Route::put('/activites/{id}', [PedagogieController::class, 'updateActivite'])->name('activites.update');
+Route::delete('/activites/{id}', [PedagogieController::class, 'destroyActivite'])->name('activites.destroy');
+Route::post('/activites/{id}/restore', [PedagogieController::class, 'restoreActivite'])->name('activites.restore');
+Route::post('/activites/{id}/valider', [PedagogieController::class, 'validerActivite'])->name('activites.valider');
 Route::get('/volumes-horaires', [PedagogieController::class, 'volumes'])->name('volumes.index');
 Route::get('/heures-complementaires', [PedagogieController::class, 'complementaires'])->name('complementaires.index');
 
