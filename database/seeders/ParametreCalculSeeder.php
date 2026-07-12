@@ -25,11 +25,6 @@ class ParametreCalculSeeder extends Seeder
                 'sequences_par_credit'  => 40,
                 'service_statutaire'    => 192,
                 'reduction_mise_a_jour' => 50,
-
-                // Coefficients création
-                'coeff_creation_niv1'   => 0.400,
-                'coeff_creation_niv2'   => 0.750,
-                'coeff_creation_niv3'   => 1.500,
             ]
         );
 

@@ -88,7 +88,7 @@
                                 <label class="form-label fw-semibold">Code <span class="text-danger">*</span></label>
                                 <input type="text" name="code_cours"
                                     class="form-control @error('code_cours') is-invalid @enderror"
-                                    placeholder="Ex : INF-101" required>
+                                    value="{{ old('code_cours') }}" placeholder="Ex : INF-101" required>
                                 @error('code_cours')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -99,7 +99,8 @@
                                         class="text-danger">*</span></label>
                                 <input type="text" name="intitule"
                                     class="form-control @error('intitule') is-invalid @enderror"
-                                    placeholder="Ex : Algorithmique et programmation" required>
+                                    value="{{ old('intitule') }}" placeholder="Ex : Algorithmique et programmation"
+                                    required>
                                 @error('intitule')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -111,7 +112,8 @@
                                 <div class="input-group">
                                     <input type="number" name="nombre_heures" id="nombre_heures"
                                         class="form-control @error('nombre_heures') is-invalid @enderror"
-                                        placeholder="Ex : 20" min="1" step="1" required>
+                                        placeholder="Ex : 20" min="1"
+                                        step="1" required>
                                     <span class="input-group-text">heures</span>
                                 </div>
                                 @error('nombre_heures')
@@ -271,7 +273,7 @@
                                     <label class="form-label fw-semibold">Volume horaire <span
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="number" name="nombre_heures"
+                                        <input type="number" name="nombre_heures" id="nombre_heures_edit_{{ $cour->id }}"
                                             class="form-control @error('nombre_heures') is-invalid @enderror"
                                             value="{{ old('nombre_heures', $cour->nombre_heures) }}" min="1"
                                             step="1" required>
@@ -285,10 +287,10 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Crédits <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="nombre_credits"
+                                    <input type="number" name="nombre_credits" id="nombre_credits_edit_{{ $cour->id }}"
                                         class="form-control @error('nombre_credits') is-invalid @enderror"
                                         value="{{ old('nombre_credits', $cour->nombre_credits) }}" min="0"
-                                        step="1" required>
+                                        step="1" readonly>
                                     @error('nombre_credits')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -372,11 +374,22 @@
     <script>
         const heuresParCredit = 10;
 
+        // Formulaire de création
         if (document.getElementById('nombre_heures')) {
             document.getElementById('nombre_heures').addEventListener('input', function() {
                 const heures = parseInt(this.value) || 0;
                 document.getElementById('nombre_credits').value = Math.round(heures / heuresParCredit);
             });
         }
+
+        // Formulaires de modification (un pour chaque cours)
+        @foreach ($cours as $cour)
+            if (document.getElementById('nombre_heures_edit_{{ $cour->id }}')) {
+                document.getElementById('nombre_heures_edit_{{ $cour->id }}').addEventListener('input', function() {
+                    const heures = parseInt(this.value) || 0;
+                    document.getElementById('nombre_credits_edit_{{ $cour->id }}').value = Math.round(heures / heuresParCredit);
+                });
+            }
+        @endforeach
     </script>
 </x-app-page>

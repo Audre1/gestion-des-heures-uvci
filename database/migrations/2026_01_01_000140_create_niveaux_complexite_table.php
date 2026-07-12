@@ -11,6 +11,8 @@ return new class extends Migration
         Schema::create('niveaux_complexite', function (Blueprint $table) {
             $table->id();
             $table->string('libelle', 100)->unique();
+            $table->decimal('coefficient', 5, 3);
+            $table->string('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

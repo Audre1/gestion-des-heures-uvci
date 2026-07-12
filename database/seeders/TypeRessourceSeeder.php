@@ -9,27 +9,27 @@ class TypeRessourceSeeder extends Seeder
 {
     public function run(): void
     {
-        TypeRessource::create([
+        TypeRessource::updateOrCreate([
             'libelle' => 'Texte',
         ]);
 
-        TypeRessource::create([
+        TypeRessource::updateOrCreate([
             'libelle' => 'Video',
         ]);
 
-        TypeRessource::create([
+        TypeRessource::updateOrCreate([
             'libelle' => 'Document',
         ]);
 
-        TypeRessource::create([
+        TypeRessource::updateOrCreate([
             'libelle' => 'Quiz',
         ]);
 
-        TypeRessource::create([
+        TypeRessource::updateOrCreate([
             'libelle' => 'Activité Interactive',
         ]);
 
-        TypeRessource::create([
+        TypeRessource::updateOrCreate([
             'libelle' => 'Evaluation',
         ]);
     }
