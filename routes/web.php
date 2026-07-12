@@ -122,6 +122,7 @@ Route::delete('/activites/{id}', [PedagogieController::class, 'destroyActivite']
 Route::post('/activites/{id}/restore', [PedagogieController::class, 'restoreActivite'])->name('activites.restore');
 Route::post('/activites/{id}/valider', [PedagogieController::class, 'validerActivite'])->name('activites.valider');
 Route::get('/volumes-horaires', [PedagogieController::class, 'volumes'])->name('volumes.index');
+Route::get('/volumes-horaires/export', [PedagogieController::class, 'exportVolumes'])->name('volumes.export');
 Route::get('/heures-complementaires', [PedagogieController::class, 'complementaires'])->name('complementaires.index');
 
 /*

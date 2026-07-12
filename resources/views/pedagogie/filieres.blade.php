@@ -194,10 +194,6 @@
                                                         class="badge badge-soft-gray">{{ $cours->pivot->niveau }}</span>
                                                 </td>
                                                 <td class="text-end">
-                                                    <button type="button" class="btn btn-sm btn-light border"
-                                                        title="Modifier">
-                                                        <i class="fa-solid fa-pen text-uvci-green"></i>
-                                                    </button>
                                                     <form
                                                         action="{{ route('filieres.detach-cours', [$filiere->id, $cours->id, $cours->pivot->semestre, $cours->pivot->niveau]) }}"
                                                         method="POST">
