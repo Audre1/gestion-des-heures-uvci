@@ -1181,9 +1181,164 @@ class PedagogieController extends Controller
     }
 
     // === VOLUMES ===
-    public function volumes()
+    public function volumes(Request $request)
     {
-        return view('pedagogie.volumes');
+        $anneeId = $request->get('annee_id');
+        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+
+        // Si aucune année n'est spécifiée, utiliser l'année active
+        if (!$anneeId && $anneeActive) {
+            $anneeId = $anneeActive->id;
+        }
+
+        // Récupérer les enseignants avec leurs affectations et activités
+        $enseignants = Enseignant::with([
+            'utilisateur',
+            'grade',
+            'affectationsCours' => function ($query) use ($anneeId) {
+                if ($anneeId) {
+                    $query->where('id_annee', $anneeId);
+                }
+            },
+            'affectationsCours.activitesPedagogiques' => function ($query) {
+                $query->where('statut', 'validee');
+            },
+            'affectationsCours.cours'
+        ])->get();
+
+        // Calculer les volumes horaires pour chaque enseignant
+        $volumes = $enseignants->map(function ($enseignant) {
+            $vhtTotal = 0;
+            $nbCours = 0;
+
+            foreach ($enseignant->affectationsCours as $affectation) {
+                foreach ($affectation->activitesPedagogiques as $activite) {
+                    $vhtTotal += $activite->volume_horaire;
+                    $nbCours++;
+                }
+            }
+
+            // Service statutaire selon le grade
+            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null);
+
+            // Heures complémentaires
+            $heuresComplementaires = max(0, $vhtTotal - $serviceStatutaire);
+
+            // Pourcentage de charge
+            $pourcentage = $serviceStatutaire > 0 ? round(($vhtTotal / $serviceStatutaire) * 100) : 0;
+
+            return [
+                'enseignant' => $enseignant,
+                'grade' => $enseignant->grade->libelle ?? 'Non défini',
+                'service_statutaire' => $serviceStatutaire,
+                'vht_realise' => $vhtTotal,
+                'heures_complementaires' => $heuresComplementaires,
+                'nb_cours' => $nbCours,
+                'pourcentage' => $pourcentage,
+            ];
+        });
+
+        // Récupérer toutes les années académiques pour le filtre
+        $annees = AnneeAcademique::orderBy('date_debut', 'desc')->get();
+
+        return view('pedagogie.volumes', compact('volumes', 'annees', 'anneeId', 'anneeActive'));
+    }
+
+    /**
+     * Export des volumes horaires en CSV
+     */
+    public function exportVolumes(Request $request)
+    {
+        $anneeId = $request->get('annee_id');
+        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+
+        if (!$anneeId && $anneeActive) {
+            $anneeId = $anneeActive->id;
+        }
+
+        $enseignants = Enseignant::with([
+            'utilisateur',
+            'grade',
+            'affectationsCours' => function ($query) use ($anneeId) {
+                if ($anneeId) {
+                    $query->where('id_annee', $anneeId);
+                }
+            },
+            'affectationsCours.activitesPedagogiques' => function ($query) {
+                $query->where('statut', 'validee');
+            },
+            'affectationsCours.cours'
+        ])->get();
+
+        $volumes = $enseignants->map(function ($enseignant) {
+            $vhtTotal = 0;
+            $nbCours = 0;
+
+            foreach ($enseignant->affectationsCours as $affectation) {
+                foreach ($affectation->activitesPedagogiques as $activite) {
+                    $vhtTotal += $activite->volume_horaire;
+                    $nbCours++;
+                }
+            }
+
+            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null);
+            $heuresComplementaires = max(0, $vhtTotal - $serviceStatutaire);
+            $pourcentage = $serviceStatutaire > 0 ? round(($vhtTotal / $serviceStatutaire) * 100) : 0;
+
+            return [
+                'nom' => $enseignant->utilisateur->nom,
+                'prenom' => $enseignant->utilisateur->prenom,
+                'grade' => $enseignant->grade->libelle ?? 'Non défini',
+                'service_statutaire' => $serviceStatutaire,
+                'vht_realise' => $vhtTotal,
+                'heures_complementaires' => $heuresComplementaires,
+                'nb_cours' => $nbCours,
+                'pourcentage' => $pourcentage,
+            ];
+        });
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="volumes_horaires_' . date('Y-m-d') . '.csv"',
+        ];
+
+        $callback = function () use ($volumes) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Nom', 'Prénom', 'Grade', 'Service statutaire', 'VHT réalisé', 'Heures complémentaires', 'Nb cours', 'Charge %']);
+
+            foreach ($volumes as $volume) {
+                fputcsv($file, [
+                    $volume['nom'],
+                    $volume['prenom'],
+                    $volume['grade'],
+                    $volume['service_statutaire'],
+                    $volume['vht_realise'],
+                    $volume['heures_complementaires'],
+                    $volume['nb_cours'],
+                    $volume['pourcentage'],
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Retourne le service statutaire selon le grade
+     */
+    private function getServiceStatutaire(?string $grade): int
+    {
+        $services = [
+            'Professeur' => 192,
+            'Maître de Conférences' => 192,
+            'Maître-Assistant' => 192,
+            'Assistant' => 192,
+            'Chargé de cours' => 192,
+        ];
+
+        return $services[$grade] ?? 192;
     }
 
     // === COMPLEMENTAIRES ===
