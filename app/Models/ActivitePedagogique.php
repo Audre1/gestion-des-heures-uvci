@@ -85,7 +85,7 @@ class ActivitePedagogique extends Model
         });
     }
 
-    private function calculerEtRemplir(): void
+    public function calculerEtRemplir(): void
     {
         $params = ParametreCalcul::anneeActive()->first();
         

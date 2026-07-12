@@ -1090,7 +1090,7 @@ class PedagogieController extends Controller
 
         DB::transaction(function () use ($request, $activite) {
             $affectation = AffectationCours::with(['cours', 'enseignant.utilisateur'])->findOrFail($request->id_affectation);
-            
+
             // Vérifier que les paramètres de calcul existent pour l'année active
             $params = ParametreCalcul::anneeActive()->first();
             if (!$params) {
@@ -1105,6 +1105,10 @@ class PedagogieController extends Controller
                 'id_ressource'   => $request->id_ressource,
                 'id_niveau'      => $request->id_niveau,
             ]);
+
+            // Recalculer les champs automatiques après modification
+            $activite->calculerEtRemplir();
+            $activite->save();
 
             if (function_exists('logActivite')) {
                 $enseignant = $affectation->enseignant->utilisateur;
@@ -1172,7 +1176,8 @@ class PedagogieController extends Controller
             }
         });
 
-        return redirect()->route('activites.index')->with('success', 'Activité pédagogique validée avec succès.');
+        return redirect()->route('activites.index')
+            ->with('success', 'Activité pédagogique validée avec succès.');
     }
 
     // === VOLUMES ===

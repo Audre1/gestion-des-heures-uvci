@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\ActivitePedagogique;
 
 class StoreActivitePedagogiqueRequest extends FormRequest
 {
@@ -24,6 +25,20 @@ class StoreActivitePedagogiqueRequest extends FormRequest
             'id_ressource' => 'nullable|exists:ressources_pedagogiques,id',
             'id_niveau' => 'required|exists:niveaux_complexite,id',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $existing = ActivitePedagogique::where('id_affectation', $this->id_affectation)
+                ->where('type_activite', $this->type_activite)
+                ->where('id_niveau', $this->id_niveau)
+                ->first();
+
+            if ($existing) {
+                $validator->errors()->add('id_affectation', 'Une activité avec les mêmes critères (affectation, type, niveau) existe déjà.');
+            }
+        });
     }
 
     public function messages(): array

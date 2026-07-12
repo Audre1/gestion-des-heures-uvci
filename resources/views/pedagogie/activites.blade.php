@@ -157,7 +157,8 @@
                                                 data-coeff-creation="{{ $coeffCreation }}"
                                                 data-coeff-maj="{{ $coeffMaj }}"
                                                 {{ old('id_niveau') == $niveau->id ? 'selected' : '' }}>
-                                                {{ $niveau->libelle }}
+                                                {{ $niveau->libelle }} (coeff:
+                                                {{ number_format($niveau->coefficient, 2) }})
                                             </option>
                                         @endforeach
                                     @else
@@ -267,11 +268,12 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Affectation <span
                                             class="text-danger">*</span></label>
-                                    <select name="id_affectation"
+                                    <select name="id_affectation" id="id_affectation_edit_{{ $activite->id }}"
                                         class="form-select @error('id_affectation') is-invalid @enderror" required>
                                         <option value="">Sélectionner une affectation</option>
                                         @foreach ($affectations as $affectation)
                                             <option value="{{ $affectation->id }}"
+                                                data-heures="{{ $affectation->cours->nombre_heures }}"
                                                 {{ old('id_affectation', $activite->id_affectation) == $affectation->id ? 'selected' : '' }}>
                                                 {{ $affectation->enseignant->utilisateur->nom }}
                                                 {{ $affectation->enseignant->utilisateur->prenom }} -
@@ -288,7 +290,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Type d'activité <span
                                             class="text-danger">*</span></label>
-                                    <select name="type_activite"
+                                    <select name="type_activite" id="type_activite_edit_{{ $activite->id }}"
                                         class="form-select @error('type_activite') is-invalid @enderror" required>
                                         <option value="creation"
                                             {{ old('type_activite', $activite->type_activite) === 'creation' ? 'selected' : '' }}>
@@ -305,15 +307,32 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Niveau de complexité <span
                                             class="text-danger">*</span></label>
-                                    <select name="id_niveau"
+                                    <select name="id_niveau" id="id_niveau_edit_{{ $activite->id }}"
                                         class="form-select @error('id_niveau') is-invalid @enderror" required>
-                                        @foreach ($niveaux as $niveau)
-                                            <option value="{{ $niveau->id }}"
-                                                {{ old('id_niveau', $activite->id_niveau) == $niveau->id ? 'selected' : '' }}>
-                                                {{ $niveau->libelle }} (coeff:
-                                                {{ number_format($niveau->coefficient, 2) }})
-                                            </option>
-                                        @endforeach
+                                        @if ($parametres)
+                                            @foreach ($niveaux as $index => $niveau)
+                                                @php
+                                                    $niveauNum = $index + 1;
+                                                    $coeffCreation = (float) $parametres->getCoefficient('creation', $niveauNum);
+                                                    $coeffMaj = (float) $parametres->getCoefficient('maj', $niveauNum);
+                                                @endphp
+                                                <option value="{{ $niveau->id }}"
+                                                    data-coeff-creation="{{ $coeffCreation }}"
+                                                    data-coeff-maj="{{ $coeffMaj }}"
+                                                    {{ old('id_niveau', $activite->id_niveau) == $niveau->id ? 'selected' : '' }}>
+                                                    {{ $niveau->libelle }} (coeff:
+                                                    {{ number_format($niveau->coefficient, 2) }})
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            @foreach ($niveaux as $niveau)
+                                                <option value="{{ $niveau->id }}"
+                                                    {{ old('id_niveau', $activite->id_niveau) == $niveau->id ? 'selected' : '' }}>
+                                                    {{ $niveau->libelle }} (coeff:
+                                                    {{ number_format($niveau->coefficient, 2) }})
+                                                </option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                     @error('id_niveau')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -373,7 +392,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Nombre de séquences <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="nb_sequences"
+                                    <input type="number" name="nb_sequences" id="nb_sequences_edit_{{ $activite->id }}"
                                         class="form-control @error('nb_sequences') is-invalid @enderror"
                                         value="{{ old('nb_sequences', $activite->nb_sequences) }}" min="1"
                                         step="1" readonly>
@@ -385,7 +404,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Coefficient <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="coefficient"
+                                    <input type="number" name="coefficient" id="coefficient_edit_{{ $activite->id }}"
                                         class="form-control @error('coefficient') is-invalid @enderror"
                                         value="{{ old('coefficient', $activite->coefficient) }}" min="0"
                                         step="0.01" readonly>
@@ -397,7 +416,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Volume horaire <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="volume_horaire"
+                                    <input type="number" name="volume_horaire" id="volume_horaire_edit_{{ $activite->id }}"
                                         class="form-control @error('volume_horaire') is-invalid @enderror"
                                         value="{{ old('volume_horaire', $activite->volume_horaire) }}" min="0"
                                         step="1" readonly>
@@ -523,18 +542,25 @@
         <script>
             const ratio = {{ $parametres->sequences_par_credit / $parametres->heures_par_credit }};
 
-            function recalculer() {
-                const affectationSelect = document.getElementById('id_affectation');
-                const typeSelect = document.getElementById('type_activite');
-                const niveauSelect = document.getElementById('id_niveau');
-                const apercu = document.getElementById('apercu-calcul');
+            function recalculer(modalId = '') {
+                const affectationSelect = document.getElementById('id_affectation' + modalId);
+                const typeSelect = document.getElementById('type_activite' + modalId);
+                const niveauSelect = document.getElementById('id_niveau' + modalId);
+                const apercu = document.getElementById('apercu-calcul' + modalId);
+                const nbSeqInput = document.getElementById('nb_sequences' + modalId);
+                const coeffInput = document.getElementById('coefficient' + modalId);
+                const vhtInput = document.getElementById('volume_horaire' + modalId);
+
+                if (!affectationSelect || !typeSelect || !niveauSelect) {
+                    return;
+                }
 
                 const heures = parseFloat(affectationSelect.selectedOptions[0]?.dataset.heures) || 0;
                 const type = typeSelect.value;
                 const option = niveauSelect.selectedOptions[0];
 
                 if (!heures || !type || !option?.value) {
-                    apercu.style.display = 'none';
+                    if (apercu) apercu.style.display = 'none';
                     return;
                 }
 
@@ -542,41 +568,91 @@
                 const coeff = type === 'creation' ?
                     parseFloat(option.dataset.coeffCreation) :
                     parseFloat(option.dataset.coeffMaj);
-                const vht = (nbSequences * coeff).toFixed(2);
+                const vht = Math.round(nbSequences * coeff);
 
-                document.getElementById('apercu-sequences').textContent = nbSequences;
-                document.getElementById('apercu-coeff').textContent = coeff.toFixed(3);
-                document.getElementById('apercu-vht').textContent = vht;
-                apercu.style.display = 'block';
+                // Mettre à jour l'aperçu si présent
+                if (apercu) {
+                    document.getElementById('apercu-sequences' + modalId).textContent = nbSequences;
+                    document.getElementById('apercu-coeff' + modalId).textContent = coeff.toFixed(3);
+                    document.getElementById('apercu-vht' + modalId).textContent = vht;
+                    apercu.style.display = 'block';
+                }
+
+                // Mettre à jour les champs calculés si présents (modification)
+                if (nbSeqInput) nbSeqInput.value = nbSequences;
+                if (coeffInput) coeffInput.value = coeff.toFixed(3);
+                if (vhtInput) vhtInput.value = vht;
             }
 
-            // Ajouter les écouteurs d'événements
+            // Ajouter les écouteurs d'événements pour la modale de création
             document.addEventListener('DOMContentLoaded', function() {
                 const affectationSelect = document.getElementById('id_affectation');
                 const typeSelect = document.getElementById('type_activite');
                 const niveauSelect = document.getElementById('id_niveau');
 
                 if (affectationSelect) {
-                    affectationSelect.addEventListener('change', recalculer);
+                    affectationSelect.addEventListener('change', () => recalculer());
                 }
                 if (typeSelect) {
-                    typeSelect.addEventListener('change', recalculer);
+                    typeSelect.addEventListener('change', () => recalculer());
                 }
                 if (niveauSelect) {
-                    niveauSelect.addEventListener('change', recalculer);
+                    niveauSelect.addEventListener('change', () => recalculer());
                 }
 
                 // Calculer au chargement si les champs sont déjà remplis
                 recalculer();
             });
+
+            // Ajouter les écouteurs pour chaque modale de modification
+            @foreach ($activites as $activite)
+                document.addEventListener('DOMContentLoaded', function() {
+                    const affectationSelect = document.getElementById('id_affectation_edit_{{ $activite->id }}');
+                    const typeSelect = document.getElementById('type_activite_edit_{{ $activite->id }}');
+                    const niveauSelect = document.getElementById('id_niveau_edit_{{ $activite->id }}');
+
+                    if (affectationSelect) {
+                        affectationSelect.addEventListener('change', () => recalculer('_edit_{{ $activite->id }}'));
+                    }
+                    if (typeSelect) {
+                        typeSelect.addEventListener('change', () => recalculer('_edit_{{ $activite->id }}'));
+                    }
+                    if (niveauSelect) {
+                        niveauSelect.addEventListener('change', () => recalculer('_edit_{{ $activite->id }}'));
+                    }
+
+                    // Calculer au chargement
+                    recalculer('_edit_{{ $activite->id }}');
+                });
+            @endforeach
         </script>
     @endif
 
     @if ($errors->any())
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                var addActivite = new bootstrap.Modal(document.getElementById('addActiviteModal'));
-                addActivite.show();
+                // Ne pas ouvrir de modale si on vient d'une validation (message de succès présent)
+                var hasSuccessMessage = document.querySelector('.alert-success');
+                if (hasSuccessMessage) {
+                    return;
+                }
+
+                // Vérifier si l'URL correspond à une route de modification
+                var url = window.location.pathname;
+                var updateMatch = url.match(/\/activites\/(\d+)$/);
+
+                if (updateMatch) {
+                    var activiteId = updateMatch[1];
+                    var editModal = document.getElementById('editActiviteModal' + activiteId);
+                    if (editModal) {
+                        var editActivite = new bootstrap.Modal(editModal);
+                        editActivite.show();
+                    }
+                } else {
+                    // Sinon, c'est une création
+                    var addActivite = new bootstrap.Modal(document.getElementById('addActiviteModal'));
+                    addActivite.show();
+                }
             });
         </script>
     @endif

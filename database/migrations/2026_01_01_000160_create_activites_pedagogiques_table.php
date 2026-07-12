@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
 
             // Type : uniquement création ou mise à jour
-            $table->enum('type_activite', ['creation', 'mise_a_jour']);
+            $table->enum('type_activite', ['creation', 'maj']);
 
             $table->date('date_activite');
 
