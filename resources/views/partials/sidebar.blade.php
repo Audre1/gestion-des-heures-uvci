@@ -52,11 +52,6 @@
 
         {{-- Gestion pédagogique --}}
         <div class="nav-section-title">Gestion pédagogique</div>
-        <a href="{{ route('enseignants.index') }}"
-            class="nav-link {{ request()->routeIs('enseignants.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-chalkboard-user"></i> Enseignants
-        </a>
-
         <a href="{{ route('grades.index') }}" class="nav-link {{ request()->routeIs('grades.*') ? 'active' : '' }}">
             <i class="fa-solid fa-ranking-star"></i> Grades
         </a>
@@ -64,6 +59,11 @@
         <a href="{{ route('departements.index') }}"
             class="nav-link {{ request()->routeIs('departements.*') ? 'active' : '' }}">
             <i class="fa-solid fa-building-columns"></i> Départements
+        </a>
+
+        <a href="{{ route('enseignants.index') }}"
+            class="nav-link {{ request()->routeIs('enseignants.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-chalkboard-user"></i> Enseignants
         </a>
 
         <a href="{{ route('filieres.index') }}"

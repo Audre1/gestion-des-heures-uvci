@@ -70,7 +70,9 @@ class AdminController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        logActivite('création', 'Création de l\'utilisateur ' . $utilisateur->login, $utilisateur);
+        if (function_exists('logActivite')) {
+            logActivite('création', 'Création de l\'utilisateur ' . $utilisateur->login, $utilisateur);
+        }
 
         return redirect()
             ->route('utilisateurs.index')
@@ -98,7 +100,9 @@ class AdminController extends Controller
 
         $utilisateur->update($data);
 
-        logActivite('modification', 'Modification de l\'utilisateur ' . $utilisateur->login, $utilisateur);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Modification de l\'utilisateur ' . $utilisateur->login, $utilisateur);
+        }
 
         return redirect()
             ->route('utilisateurs.index')
@@ -111,7 +115,9 @@ class AdminController extends Controller
         $utilisateur = Utilisateur::findOrFail($id);
         $utilisateur->delete();
 
-        logActivite('suppression', 'Suppression de l\'utilisateur ' . $utilisateur->login, $utilisateur);
+        if (function_exists('logActivite')) {
+            logActivite('suppression', 'Suppression de l\'utilisateur ' . $utilisateur->login, $utilisateur);
+        }
 
         return redirect()
             ->route('utilisateurs.index')
@@ -137,7 +143,9 @@ class AdminController extends Controller
             'statut' => 'a_venir',
         ]);
 
-        logActivite('création', 'Création de l\'année académique ' . $annee->libelle, $annee);
+        if (function_exists('logActivite')) {
+            logActivite('création', 'Création de l\'année académique ' . $annee->libelle, $annee);
+        }
 
         return redirect()
             ->route('annees.index')
@@ -161,7 +169,9 @@ class AdminController extends Controller
             'statut' => $request->statut,
         ]);
 
-        logActivite('modification', 'Modification de l\'année académique ' . $annee->libelle, $annee);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Modification de l\'année académique ' . $annee->libelle, $annee);
+        }
 
         return redirect()
             ->route('annees.index')
@@ -182,7 +192,9 @@ class AdminController extends Controller
 
         $annee->delete();
 
-        logActivite('suppression', 'Suppression de l\'année académique ' . $annee->libelle, $annee);
+        if (function_exists('logActivite')) {
+            logActivite('suppression', 'Suppression de l\'année académique ' . $annee->libelle, $annee);
+        }
 
         return redirect()
             ->route('annees.index')
@@ -199,7 +211,9 @@ class AdminController extends Controller
         // Activer l'année sélectionnée
         $annee->update(['statut' => 'en_cours']);
 
-        logActivite('activation', 'Activation de l\'année académique ' . $annee->libelle, $annee);
+        if (function_exists('logActivite')) {
+            logActivite('activation', 'Activation de l\'année académique ' . $annee->libelle, $annee);
+        }
 
         return redirect()
             ->route('annees.index')
@@ -311,6 +325,10 @@ class AdminController extends Controller
                 'service_statutaire'    => 192,
                 'reduction_mise_a_jour' => 50,
             ]);
+
+            if (function_exists('logActivite')) {
+                logActivite('création', 'Création automatique des paramètres de calcul pour l\'année ' . $anneeActive->libelle, $parametres);
+            }
         }
 
         return view('admin.parametres', compact('parametres'));
@@ -328,7 +346,9 @@ class AdminController extends Controller
 
         $parametres->update($request->validated());
 
-        logActivite('modification', 'Mise à jour des paramètres de calcul', $parametres);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Mise à jour des paramètres de calcul', $parametres);
+        }
 
         return redirect()
             ->route('parametres.index')
@@ -359,7 +379,9 @@ class AdminController extends Controller
     {
         $taux = TauxHoraire::create($request->validated());
 
-        logActivite('création', 'Création du taux horaire pour ' . $taux->grade->libelle, $taux);
+        if (function_exists('logActivite')) {
+            logActivite('création', 'Création du taux horaire pour ' . $taux->grade->libelle, $taux);
+        }
 
         return redirect()
             ->route('taux.index')
@@ -372,7 +394,9 @@ class AdminController extends Controller
         $taux = TauxHoraire::findOrFail($id);
         $taux->update($request->validated());
 
-        logActivite('modification', 'Modification du taux horaire pour ' . $taux->grade->libelle, $taux);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Modification du taux horaire pour ' . $taux->grade->libelle, $taux);
+        }
 
         return redirect()
             ->route('taux.index')
@@ -385,7 +409,9 @@ class AdminController extends Controller
         $taux = TauxHoraire::findOrFail($id);
         $taux->delete();
 
-        logActivite('suppression', 'Suppression du taux horaire pour ' . $taux->grade->libelle, $taux);
+        if (function_exists('logActivite')) {
+            logActivite('suppression', 'Suppression du taux horaire pour ' . $taux->grade->libelle, $taux);
+        }
 
         return redirect()
             ->route('taux.index')

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AnneeAcademique;
 use App\Models\Enseignant;
 use App\Models\EtatPaiement;
+use App\Models\ParametreCalcul;
 use App\Http\Requests\GenerateEtatPaiementRequest;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class PaiementController extends Controller
     {
         $anneeId = $request->get('annee_id');
         $statut = $request->get('statut');
-        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+        $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
 
         if (!$anneeId && $anneeActive) {
             $anneeId = $anneeActive->id;
@@ -65,7 +66,9 @@ class PaiementController extends Controller
      */
     public function generate(GenerateEtatPaiementRequest $request)
     {
-        logActivite('création', 'Génération d\'état de paiement pour enseignant, période: ' . $request->periode);
+        if (function_exists('logActivite')) {
+            logActivite('création', 'Génération d\'état de paiement pour enseignant, période: ' . $request->periode);
+        }
 
         $enseignant = Enseignant::with(['utilisateur', 'grade', 'affectationsCours.activitesPedagogiques', 'affectationsCours.cours'])
             ->findOrFail($request->id_enseignant);
@@ -103,10 +106,16 @@ class PaiementController extends Controller
             $montant = $heuresComplementaires * $tauxHoraire;
         }
 
-        logActivite('calcul', 'Calcul montant paiement - Enseignant: ' . $enseignant->utilisateur->nom . ' ' . $enseignant->utilisateur->prenom . ', VHT: ' . $vhtTotal . 'h, Montant: ' . $montant . ' FCFA');
+        if (function_exists('logActivite')) {
+            logActivite('calcul', 'Calcul montant paiement - Enseignant: ' . $enseignant->utilisateur->nom . ' ' . $enseignant->utilisateur->prenom . ', VHT: ' . $vhtTotal . 'h, Montant: ' . $montant . ' FCFA');
+        }
 
         // Générer un numéro de paiement unique (PAY-YYMM-XXX)
-        $numeroPaiement = 'PAY-' . now()->format('ym') . '-' . str_pad(EtatPaiement::count() + 1, 3, '0', STR_PAD_LEFT);
+        // Compter les états de paiement du mois en cours pour éviter les doublons
+        $countThisMonth = EtatPaiement::whereYear('date_generation', now()->year)
+            ->whereMonth('date_generation', now()->month)
+            ->count();
+        $numeroPaiement = 'PAY-' . now()->format('ym') . '-' . str_pad($countThisMonth + 1, 3, '0', STR_PAD_LEFT);
 
         // Créer l'état de paiement
         $etatPaiement = EtatPaiement::create([
@@ -120,7 +129,9 @@ class PaiementController extends Controller
             'id_annee' => $request->id_annee,
         ]);
 
-        logActivite('création', 'État de paiement créé - Numéro: ' . $numeroPaiement . ', Montant: ' . $montant . ' FCFA', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('création', 'État de paiement créé - Numéro: ' . $numeroPaiement . ', Montant: ' . $montant . ' FCFA', $etatPaiement);
+        }
 
         return redirect()->route('paiements.index')
             ->with('success', 'État de paiement généré avec succès.');
@@ -133,11 +144,15 @@ class PaiementController extends Controller
     {
         $etatPaiement = EtatPaiement::findOrFail($id);
 
-        logActivite('modification', 'Validation état de paiement, statut: ' . $etatPaiement->statut . ' -> valide', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Validation état de paiement, statut: ' . $etatPaiement->statut . ' -> valide', $etatPaiement);
+        }
 
         $etatPaiement->update(['statut' => 'valide']);
 
-        logActivite('modification', 'État de paiement validé - Montant: ' . $etatPaiement->montant_total . ' FCFA', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'État de paiement validé - Montant: ' . $etatPaiement->montant_total . ' FCFA', $etatPaiement);
+        }
 
         return redirect()->route('paiements.index')
             ->with('success', 'État de paiement validé avec succès.');
@@ -150,11 +165,15 @@ class PaiementController extends Controller
     {
         $etatPaiement = EtatPaiement::findOrFail($id);
 
-        logActivite('modification', 'Marquage comme payé état paiement, Montant: ' . $etatPaiement->montant_total . ' FCFA', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Marquage comme payé état paiement, Montant: ' . $etatPaiement->montant_total . ' FCFA', $etatPaiement);
+        }
 
         $etatPaiement->update(['statut' => 'paye']);
 
-        logActivite('modification', 'État de paiement marqué payé', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'État de paiement marqué payé', $etatPaiement);
+        }
 
         return redirect()->route('paiements.index')
             ->with('success', 'État de paiement marqué comme payé.');
@@ -167,11 +186,15 @@ class PaiementController extends Controller
     {
         $etatPaiement = EtatPaiement::findOrFail($id);
 
-        logActivite('modification', 'Rejet état paiement, statut: ' . $etatPaiement->statut . ' -> rejete', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'Rejet état paiement, statut: ' . $etatPaiement->statut . ' -> rejete', $etatPaiement);
+        }
 
         $etatPaiement->update(['statut' => 'rejete']);
 
-        logActivite('modification', 'État de paiement rejeté', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('modification', 'État de paiement rejeté', $etatPaiement);
+        }
 
         return redirect()->route('paiements.index')
             ->with('success', 'État de paiement rejeté.');
@@ -184,11 +207,15 @@ class PaiementController extends Controller
     {
         $etatPaiement = EtatPaiement::findOrFail($id);
 
-        logActivite('suppression', 'Suppression état paiement, statut: ' . $etatPaiement->statut . ', Montant: ' . $etatPaiement->montant_total . ' FCFA', $etatPaiement);
+        if (function_exists('logActivite')) {
+            logActivite('suppression', 'Suppression état paiement, statut: ' . $etatPaiement->statut . ', Montant: ' . $etatPaiement->montant_total . ' FCFA', $etatPaiement);
+        }
 
         $etatPaiement->delete();
 
-        logActivite('suppression', 'État de paiement supprimé');
+        if (function_exists('logActivite')) {
+            logActivite('suppression', 'État de paiement supprimé');
+        }
 
         return redirect()->route('paiements.index')
             ->with('success', 'État de paiement supprimé avec succès.');
@@ -203,14 +230,14 @@ class PaiementController extends Controller
             return 0;
         }
 
-        $services = [
-            'Professeur' => 192,
-            'Maître de Conférences' => 192,
-            'Maître-Assistant' => 192,
-            'Assistant' => 192,
-            'Chargé de cours' => 192,
-        ];
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
+        $parametres = ParametreCalcul::anneeActive()->first();
 
-        return $services[$grade] ?? 192;
+        if ($parametres) {
+            return $parametres->service_statutaire;
+        }
+
+        // Valeur par défaut si aucun paramètre n'est trouvé
+        return 192;
     }
 }

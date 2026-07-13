@@ -201,6 +201,10 @@ class AuthController extends Controller
             $user->mot_de_passe = Hash::make($request->password);
             $user->save();
 
+            if (function_exists('logActivite')) {
+                logActivite('modification', 'Réinitialisation du mot de passe pour l\'utilisateur ' . $user->login, $user);
+            }
+
             // Supprimer le token utilisé
             DB::table('password_reset_tokens')
                 ->where('email', $request->email)
