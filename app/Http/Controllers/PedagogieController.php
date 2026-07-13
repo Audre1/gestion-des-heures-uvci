@@ -1184,7 +1184,7 @@ class PedagogieController extends Controller
     public function volumes(Request $request)
     {
         $anneeId = $request->get('annee_id');
-        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+        $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
 
         // Si aucune année n'est spécifiée, utiliser l'année active
         if (!$anneeId && $anneeActive) {
@@ -1251,7 +1251,7 @@ class PedagogieController extends Controller
     public function exportVolumes(Request $request)
     {
         $anneeId = $request->get('annee_id');
-        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+        $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
 
         if (!$anneeId && $anneeActive) {
             $anneeId = $anneeActive->id;
@@ -1338,22 +1338,22 @@ class PedagogieController extends Controller
             return 0;
         }
 
-        $services = [
-            'Professeur' => 192,
-            'Maître de Conférences' => 192,
-            'Maître-Assistant' => 192,
-            'Assistant' => 192,
-            'Chargé de cours' => 192,
-        ];
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
+        $parametres = ParametreCalcul::anneeActive()->first();
 
-        return $services[$grade] ?? 192;
+        if ($parametres) {
+            return $parametres->service_statutaire;
+        }
+
+        // Valeur par défaut si aucun paramètre n'est trouvé
+        return 192;
     }
 
     // === COMPLEMENTAIRES ===
     public function complementaires(Request $request)
     {
         $anneeId = $request->get('annee_id');
-        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+        $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
 
         if (!$anneeId && $anneeActive) {
             $anneeId = $anneeActive->id;
