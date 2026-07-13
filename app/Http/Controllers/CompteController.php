@@ -10,6 +10,10 @@ class CompteController extends Controller
     {
         $enseignant = Auth::user()->enseignant;
 
+        if (function_exists('logActivite')) {
+            logActivite('consultation', 'Consultation du profil utilisateur');
+        }
+
         return view('compte.profil', compact('enseignant'));
     }
 }

@@ -411,7 +411,8 @@
                                             class="text-danger">*</span></label>
                                     <input type="date" name="date_recrutement"
                                         class="form-control @error('date_recrutement') is-invalid @enderror"
-                                        value="{{ old('date_recrutement', $enseignant->date_recrutement) }}" required>
+                                        value="{{ old('date_recrutement', $enseignant->date_recrutement ? $enseignant->date_recrutement->format('Y-m-d') : '') }}"
+                                        required>
                                     @error('date_recrutement')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

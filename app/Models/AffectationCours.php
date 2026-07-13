@@ -18,6 +18,8 @@ class AffectationCours extends Model
         'date_affectation',
         'id_enseignant',
         'id_cours',
+        'niveau',
+        'semestre',
         'id_annee',
     ];
 
@@ -25,6 +27,8 @@ class AffectationCours extends Model
     {
         return [
             'date_affectation' => 'date',
+            'niveau' => 'string',
+            'semestre' => 'string',
         ];
     }
 

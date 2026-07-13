@@ -12,6 +12,10 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
+        if (function_exists('logActivite')) {
+            logActivite('consultation', 'Accès au tableau de bord');
+        }
+
         return view('dashboard');
     }
 }

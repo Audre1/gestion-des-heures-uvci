@@ -504,7 +504,11 @@ class PedagogieController extends Controller
     // === COURS ===
     public function cours()
     {
-        $cours = Cours::withCount('sequencesPedagogiques', 'affectationsCours')->get();
+        $cours = Cours::withCount('sequencesPedagogiques', 'affectationsCours')
+            ->with(['sequencesPedagogiques' => function ($query) {
+                $query->withCount('ressourcesPedagogiques');
+            }])
+            ->get();
 
         return view('pedagogie.cours', compact('cours'));
     }
@@ -606,19 +610,49 @@ class PedagogieController extends Controller
         $currentYear = AnneeAcademique::where('statut', 'en_cours')
             ->first();
 
+        // Récupérer les combinaisons (cours + niveau + semestre) issues de filiere_cours
+        // Chaque cours peut apparaître avec différents niveaux/semestres
+        $coursDisponibles = DB::table('filiere_cours')
+            ->join('cours', 'filiere_cours.id_cours', '=', 'cours.id')
+            ->select(
+                'cours.id',
+                'cours.code_cours',
+                'cours.intitule',
+                'filiere_cours.niveau',
+                'filiere_cours.semestre'
+            )
+            ->distinct()
+            ->orderBy('cours.code_cours')
+            ->orderBy('filiere_cours.niveau')
+            ->orderBy('filiere_cours.semestre')
+            ->get();
+
+        // Récupérer les IDs des combinaisons déjà affectées pour l'année courante
+        $idsAffectes = collect();
+        if ($currentYear) {
+            $idsAffectes = AffectationCours::where('id_annee', $currentYear->id)
+                ->select('id_cours', 'niveau', 'semestre')
+                ->get()
+                ->map(fn($a) => $a->id_cours . '-' . $a->niveau . '-' . $a->semestre)
+                ->unique();
+        }
+
         return view('pedagogie.affectations', [
             'affectations' => $affectations,
             'currentYear' => $currentYear,
+            'coursDisponibles' => $coursDisponibles,
+            'idsAffectes' => $idsAffectes,
         ]);
     }
 
     // === STORE AFFECTATION ===
     public function storeAffectation(StoreAffectationRequest $request)
     {
-        // Vérifier si une affectation existe déjà pour ce triplet
+        // Vérifier si une affectation existe déjà pour cette combinaison (cours + niveau + semestre + année)
         $existing = AffectationCours::withTrashed()
-            ->where('id_enseignant', $request->id_enseignant)
             ->where('id_cours', $request->id_cours)
+            ->where('niveau', $request->niveau)
+            ->where('semestre', $request->semestre)
             ->where('id_annee', $request->id_annee)
             ->first();
 
@@ -626,21 +660,21 @@ class PedagogieController extends Controller
             if ($existing->trashed()) {
                 // Restaurer l'affectation soft-deleted
                 $existing->update([
+                    'id_enseignant' => $request->id_enseignant,
                     'date_affectation' => $request->date_affectation,
                 ]);
                 $existing->restore();
 
                 $enseignant = Enseignant::with('utilisateur')->find($request->id_enseignant);
                 $cours = Cours::find($request->id_cours);
-                $annee = AnneeAcademique::find($request->id_annee);
 
                 if (function_exists('logActivite')) {
-                    logActivite('création', "Restauration de l'affectation : {$enseignant->utilisateur->nom} {$enseignant->utilisateur->prenom} - {$cours->code_cours} ({$annee->libelle})", $existing);
+                    logActivite('création', "Restauration de l'affectation : {$enseignant->utilisateur->nom} {$enseignant->utilisateur->prenom} - {$cours->code_cours} ({$request->niveau} - {$request->semestre})", $existing);
                 }
 
                 return redirect()->route('affectations.index')->with('success', 'Affectation restaurée avec succès.');
             } else {
-                return redirect()->back()->with('error', 'Cette affectation existe déjà pour cet enseignant, ce cours et cette année académique.');
+                return redirect()->back()->with('error', 'Ce cours a déjà été affecté pour ce niveau, ce semestre et cette année académique.');
             }
         }
 
@@ -648,6 +682,8 @@ class PedagogieController extends Controller
         $affectation = AffectationCours::create([
             'id_enseignant' => $request->id_enseignant,
             'id_cours' => $request->id_cours,
+            'niveau' => $request->niveau,
+            'semestre' => $request->semestre,
             'id_annee' => $request->id_annee,
             'date_affectation' => $request->date_affectation,
         ]);
@@ -657,7 +693,7 @@ class PedagogieController extends Controller
         $annee = AnneeAcademique::find($request->id_annee);
 
         if (function_exists('logActivite')) {
-            logActivite('création', "Création de l'affectation : {$enseignant->utilisateur->nom} {$enseignant->utilisateur->prenom} - {$cours->code_cours} ({$annee->libelle})", $affectation);
+            logActivite('création', "Création de l'affectation : {$enseignant->utilisateur->nom} {$enseignant->utilisateur->prenom} - {$cours->code_cours} ({$request->niveau} - {$request->semestre})", $affectation);
         }
 
         return redirect()->route('affectations.index')->with('success', 'Affectation créée avec succès.');
@@ -668,15 +704,16 @@ class PedagogieController extends Controller
     {
         $affectation = AffectationCours::with(['enseignant.utilisateur', 'cours', 'anneeAcademique'])->findOrFail($id);
 
-        // Vérifier si une autre affectation existe avec les mêmes données
-        $existing = AffectationCours::where('id_enseignant', $request->id_enseignant)
-            ->where('id_cours', $request->id_cours)
+        // Vérifier si une autre affectation existe avec la même combinaison (cours + niveau + semestre + année)
+        $existing = AffectationCours::where('id_cours', $request->id_cours)
+            ->where('niveau', $request->niveau)
+            ->where('semestre', $request->semestre)
             ->where('id_annee', $request->id_annee)
             ->where('id', '!=', $id)
             ->first();
 
         if ($existing) {
-            return redirect()->back()->with('error', 'Cette affectation existe déjà pour cet enseignant, ce cours et cette année académique.');
+            return redirect()->back()->with('error', 'Ce cours a déjà été affecté pour ce niveau, ce semestre et cette année académique.');
         }
 
         $enseignant = Enseignant::with('utilisateur')->find($request->id_enseignant);
@@ -686,12 +723,14 @@ class PedagogieController extends Controller
         $affectation->update([
             'id_enseignant' => $request->id_enseignant,
             'id_cours' => $request->id_cours,
+            'niveau' => $request->niveau,
+            'semestre' => $request->semestre,
             'id_annee' => $request->id_annee,
             'date_affectation' => $request->date_affectation,
         ]);
 
         if (function_exists('logActivite')) {
-            logActivite('modification', "Modification de l'affectation : {$enseignant->utilisateur->nom} {$enseignant->utilisateur->prenom} - {$cours->code_cours} ({$annee->libelle})", $affectation);
+            logActivite('modification', "Modification de l'affectation : {$enseignant->utilisateur->nom} {$enseignant->utilisateur->prenom} - {$cours->code_cours} ({$request->niveau} - {$request->semestre})", $affectation);
         }
 
         return redirect()->route('affectations.index')->with('success', 'Affectation modifiée avec succès.');

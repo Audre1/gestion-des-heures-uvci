@@ -10,88 +10,97 @@ use App\Models\ActivitePedagogique;
 
 class DocumentController extends Controller
 {
-   public function recapitulatifActivites()
-{
-    $idEnseignant = Auth::user()->enseignant->id;
+    public function recapitulatifActivites()
+    {
+        $idEnseignant = Auth::user()->enseignant->id;
 
-    $activites = ActivitePedagogique::query()
-        ->whereHas('affectationCours', function ($query) use ($idEnseignant) {
+        $activites = ActivitePedagogique::query()
+            ->whereHas('affectationCours', function ($query) use ($idEnseignant) {
+                $query->where('id_enseignant', $idEnseignant);
+            })
+            ->with([
+                'affectationCours.cours',
+                'niveauComplexite',
+            ])
+            ->orderByDesc('date_activite')
+            ->get();
+
+        if (function_exists('logActivite')) {
+            logActivite('téléchargement', 'Téléchargement du récapitulatif des activités pédagogiques');
+        }
+
+        $pdf = Pdf::loadView('pdf.recapitulatif-activites', compact('activites'));
+
+        return $pdf->download('recapitulatif-activites.pdf');
+    }
+
+
+    public function ficheIndividuelle()
+    {
+        $enseignant = Auth::user()->enseignant;
+
+        $idEnseignant = $enseignant->id;
+
+        $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
             $query->where('id_enseignant', $idEnseignant);
         })
-        ->with([
-            'affectationCours.cours',
-            'niveauComplexite',
-        ])
-        ->orderByDesc('date_activite')
-        ->get();
+            ->where('statut', 'realise')
+            ->get();
 
-    $pdf = Pdf::loadView('pdf.recapitulatif-activites', compact('activites'));
+        $volumeRealise = $activites->sum('volume_horaire');
 
-    return $pdf->download('recapitulatif-activites.pdf');
-    
-}
+        $serviceStatutaire = 10;
 
+        $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
-public function ficheIndividuelle()
-{
-    $enseignant = Auth::user()->enseignant;
+        if (function_exists('logActivite')) {
+            logActivite('téléchargement', 'Téléchargement de la fiche individuelle');
+        }
 
-    $idEnseignant = $enseignant->id;
+        $pdf = Pdf::loadView('pdf.fiche-individuelle', [
+            'enseignant' => $enseignant,
+            'volumeRealise' => $volumeRealise,
+            'serviceStatutaire' => $serviceStatutaire,
+            'heuresComplementaires' => $heuresComplementaires
+        ]);
 
-    $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
+        return $pdf->download('fiche-individuelle.pdf');
+    }
+
+    public function etatHeures()
+    {
+        $enseignant = Auth::user()->enseignant;
+
+        $idEnseignant = $enseignant->id;
+
+        $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
             $query->where('id_enseignant', $idEnseignant);
         })
-        ->where('statut', 'realise')
-        ->get();
-
-    $volumeRealise = $activites->sum('volume_horaire');
-
-    $serviceStatutaire = 10;
-
-    $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
-
-    $pdf = Pdf::loadView('pdf.fiche-individuelle', [
-        'enseignant' => $enseignant,
-        'volumeRealise' => $volumeRealise,
-        'serviceStatutaire' => $serviceStatutaire,
-        'heuresComplementaires' => $heuresComplementaires
-    ]);
-
-    return $pdf->download('fiche-individuelle.pdf');
-}
-
-public function etatHeures()
-{
-    $enseignant = Auth::user()->enseignant;
-
-    $idEnseignant = $enseignant->id;
-
-    $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
-            $query->where('id_enseignant', $idEnseignant);
-        })
-        ->where('statut', 'realise')
-        ->with([
-            'affectationCours.cours'
-        ])
-        ->get();
+            ->where('statut', 'realise')
+            ->with([
+                'affectationCours.cours'
+            ])
+            ->get();
 
 
-    $volumeRealise = $activites->sum('volume_horaire');
+        $volumeRealise = $activites->sum('volume_horaire');
 
-    $serviceStatutaire = 10;
+        $serviceStatutaire = 10;
 
-    $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
+        $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
+        if (function_exists('logActivite')) {
+            logActivite('téléchargement', 'Téléchargement de l\'état des heures');
+        }
 
-    $pdf = Pdf::loadView('pdf.etat-heures', [
-        'enseignant' => $enseignant,
-        'activites' => $activites,
-        'volumeRealise' => $volumeRealise,
-        'serviceStatutaire' => $serviceStatutaire,
-        'heuresComplementaires' => $heuresComplementaires
-    ]);
+        $pdf = Pdf::loadView('pdf.etat-heures', [
+            'enseignant' => $enseignant,
+            'activites' => $activites,
+            'volumeRealise' => $volumeRealise,
+            'serviceStatutaire' => $serviceStatutaire,
+            'heuresComplementaires' => $heuresComplementaires
+        ]);
 
-    return $pdf->download('etat-heures.pdf');
-}
-
+        return $pdf->download('etat-heures.pdf');
+    }
 }
