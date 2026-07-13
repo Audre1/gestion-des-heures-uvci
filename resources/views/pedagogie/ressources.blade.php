@@ -7,6 +7,15 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher une ressource..." :count="$ressources->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Type</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(1)">
+                <option value="">Tous</option>
+                @foreach (collect($ressources)->pluck('typeRessource.libelle')->unique()->filter()->sort()->values() as $t)
+                    <option value="{{ $t }}">{{ $t }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Titre</th>
             <th>Type</th>

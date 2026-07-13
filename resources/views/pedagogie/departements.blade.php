@@ -7,6 +7,22 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher un département..." :count="$departements->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Code</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(0)">
+                <option value="">Tous</option>
+                @foreach (collect($departements)->pluck('code_departement')->unique()->filter()->sort()->values() as $c)
+                    <option value="{{ $c }}">{{ $c }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Département</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(1)">
+                <option value="">Tous</option>
+                @foreach (collect($departements)->pluck('nom_departement')->unique()->filter()->sort()->values() as $n)
+                    <option value="{{ $n }}">{{ $n }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Code</th>
             <th>Département</th>

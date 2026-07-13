@@ -8,6 +8,21 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher un taux..." :count="$taux->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Grade</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(0)">
+                <option value="">Tous</option>
+                @foreach (collect($taux)->pluck('grade.libelle')->unique()->filter()->sort()->values() as $g)
+                    <option value="{{ $g }}">{{ $g }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Statut</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(5)">
+                <option value="">Tous</option>
+                <option value="Actif">Actif</option>
+                <option value="Expiré">Expiré</option>
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Grade</th>
             <th>Montant</th>

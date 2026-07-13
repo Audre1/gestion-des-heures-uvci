@@ -7,6 +7,22 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher un utilisateur..." :count="$utilisateurs->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Rôle</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">
+                <option value="">Tous</option>
+                @foreach (collect($utilisateurs)->pluck('role.libelle')->unique()->filter()->sort()->values() as $r)
+                    <option value="{{ $r }}">{{ $r }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Statut</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(5)">
+                <option value="">Tous</option>
+                @foreach (collect($utilisateurs)->pluck('statut_compte')->unique()->filter()->sort()->values() as $s)
+                    <option value="{{ ucfirst($s) }}">{{ ucfirst($s) }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Utilisateur</th>
             <th>Login</th>
