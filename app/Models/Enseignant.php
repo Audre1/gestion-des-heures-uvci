@@ -70,4 +70,35 @@ class Enseignant extends Model
     {
         return "{$this->utilisateur->prenom} {$this->utilisateur->nom}";
     }
+
+    /**
+     * Récupère le taux horaire de l'enseignant
+     * Si le taux personnel est défini, l'utilise
+     * Sinon, utilise le taux du grade pour l'année académique active
+     */
+    public function getTauxHoraire(?int $anneeId = null): float
+    {
+        // Si l'enseignant a un taux personnel, l'utiliser
+        if ($this->taux_horaire_perso !== null) {
+            return (float) $this->taux_horaire_perso;
+        }
+
+        // Sinon, récupérer le taux du grade pour l'année académique
+        if (!$anneeId) {
+            $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+            $anneeId = $anneeActive ? $anneeActive->id : null;
+        }
+
+        if ($anneeId && $this->grade) {
+            $tauxHoraire = TauxHoraire::where('id_grade', $this->id_grade)
+                ->where('id_annee', $anneeId)
+                ->first();
+
+            if ($tauxHoraire) {
+                return (float) $tauxHoraire->montant;
+            }
+        }
+
+        return 0.0;
+    }
 }

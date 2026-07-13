@@ -24,6 +24,7 @@
     <x-data-table search-placeholder="Rechercher un enseignant..." :count="$volumes->count()">
         <x-slot:head>
             <th>Enseignant</th>
+            <th>Statut</th>
             <th>Grade</th>
             <th>Service statutaire</th>
             <th>VHT réalisé</th>
@@ -38,11 +39,26 @@
                     {{ $volume['enseignant']->utilisateur->nom }}
                     {{ $volume['enseignant']->utilisateur->prenom }}
                 </td>
+                <td>
+                    @if($volume['statut'] === 'Vacataire')
+                        <span class="badge bg-info text-white">Vacataire</span>
+                    @else
+                        <span class="badge bg-success text-white">Permanent</span>
+                    @endif
+                </td>
                 <td>{{ $volume['grade'] }}</td>
-                <td>{{ $volume['service_statutaire'] }}h</td>
+                <td>
+                    @if($volume['statut'] === 'Vacataire')
+                        <span class="text-muted">—</span>
+                    @else
+                        {{ $volume['service_statutaire'] }}h
+                    @endif
+                </td>
                 <td class="fw-semibold text-uvci-green">{{ $volume['vht_realise'] }}h</td>
                 <td>
-                    @if($volume['heures_complementaires'] > 0)
+                    @if($volume['statut'] === 'Vacataire')
+                        <span class="text-muted">—</span>
+                    @elseif($volume['heures_complementaires'] > 0)
                         <span class="badge badge-soft-amber">{{ $volume['heures_complementaires'] }}h</span>
                     @else
                         <span class="text-muted">—</span>
@@ -50,12 +66,16 @@
                 </td>
                 <td>{{ $volume['nb_cours'] }}</td>
                 <td style="min-width:140px">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="progress flex-fill" style="height:7px">
-                            <div class="progress-bar" style="width:{{ min($volume['pourcentage'], 100) }}%;background:{{ $volume['pourcentage'] > 100 ? 'var(--uvci-purple)' : 'var(--uvci-green)' }}"></div>
+                    @if($volume['statut'] === 'Vacataire')
+                        <span class="text-muted">N/A</span>
+                    @else
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-fill" style="height:7px">
+                                <div class="progress-bar" style="width:{{ min($volume['pourcentage'], 100) }}%;background:{{ $volume['pourcentage'] > 100 ? 'var(--uvci-purple)' : 'var(--uvci-green)' }}"></div>
+                            </div>
+                            <small class="fw-semibold {{ $volume['pourcentage'] > 100 ? 'text-uvci-purple' : 'text-muted' }}">{{ $volume['pourcentage'] }}%</small>
                         </div>
-                        <small class="fw-semibold {{ $volume['pourcentage'] > 100 ? 'text-uvci-purple' : 'text-muted' }}">{{ $volume['pourcentage'] }}%</small>
-                    </div>
+                    @endif
                 </td>
                 <td class="text-end">
                     <button type="button" class="btn btn-sm btn-light border" title="Voir détails"
@@ -66,7 +86,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="8" class="text-center py-5">
+                <td colspan="9" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fa-solid fa-hourglass-half fa-3x mb-3 text-muted"></i>
                         <p class="mb-0">Aucune donnée de volume horaire trouvée.</p>
@@ -89,21 +109,30 @@
                                 <i class="fa-solid fa-user me-2 text-primary"></i>
                                 {{ $volume['enseignant']->utilisateur->nom }} {{ $volume['enseignant']->utilisateur->prenom }}
                             </h5>
-                            <small class="text-muted">{{ $volume['grade'] }}</small>
+                            <div class="d-flex gap-2 align-items-center">
+                                <small class="text-muted">{{ $volume['grade'] }}</small>
+                                @if($volume['statut'] === 'Vacataire')
+                                    <span class="badge bg-info text-white">Vacataire</span>
+                                @else
+                                    <span class="badge bg-success text-white">Permanent</span>
+                                @endif
+                            </div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                     </div>
 
                     <div class="modal-body p-4">
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-subtitle mb-2 text-muted">Service statutaire</h6>
-                                        <h3 class="card-title fw-bold">{{ $volume['service_statutaire'] }}h</h3>
+                            @if($volume['statut'] !== 'Vacataire')
+                                <div class="col-md-3">
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-subtitle mb-2 text-muted">Service statutaire</h6>
+                                            <h3 class="card-title fw-bold">{{ $volume['service_statutaire'] }}h</h3>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                             <div class="col-md-3">
                                 <div class="card bg-success bg-opacity-10 border-0">
                                     <div class="card-body text-center">
@@ -112,22 +141,24 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card bg-warning bg-opacity-10 border-0">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-subtitle mb-2 text-muted">Heures compl.</h6>
-                                        <h3 class="card-title fw-bold text-warning">{{ $volume['heures_complementaires'] }}h</h3>
+                            @if($volume['statut'] !== 'Vacataire')
+                                <div class="col-md-3">
+                                    <div class="card bg-warning bg-opacity-10 border-0">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-subtitle mb-2 text-muted">Heures compl.</h6>
+                                            <h3 class="card-title fw-bold text-warning">{{ $volume['heures_complementaires'] }}h</h3>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card bg-info bg-opacity-10 border-0">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-subtitle mb-2 text-muted">Charge</h6>
-                                        <h3 class="card-title fw-bold text-info">{{ $volume['pourcentage'] }}%</h3>
+                                <div class="col-md-3">
+                                    <div class="card bg-info bg-opacity-10 border-0">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-subtitle mb-2 text-muted">Charge</h6>
+                                            <h3 class="card-title fw-bold text-info">{{ $volume['pourcentage'] }}%</h3>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
 
                         <hr class="my-4">

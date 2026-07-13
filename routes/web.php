@@ -131,6 +131,11 @@ Route::get('/heures-complementaires', [PedagogieController::class, 'complementai
 |--------------------------------------------------------------------------
 */
 Route::get('/etats-paiement', [PaiementController::class, 'index'])->name('paiements.index');
+Route::post('/etats-paiement/generate', [PaiementController::class, 'generate'])->name('paiements.generate');
+Route::post('/etats-paiement/{id}/valider', [PaiementController::class, 'valider'])->name('paiements.valider');
+Route::post('/etats-paiement/{id}/marquer-paye', [PaiementController::class, 'marquerPaye'])->name('paiements.marquerPaye');
+Route::post('/etats-paiement/{id}/rejeter', [PaiementController::class, 'rejeter'])->name('paiements.rejeter');
+Route::delete('/etats-paiement/{id}', [PaiementController::class, 'destroy'])->name('paiements.destroy');
 Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
 
 /*

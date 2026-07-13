@@ -1056,7 +1056,7 @@ class PedagogieController extends Controller
     {
         DB::transaction(function () use ($request) {
             $affectation = AffectationCours::with(['cours', 'enseignant.utilisateur'])->findOrFail($request->id_affectation);
-            
+
             // Vérifier que les paramètres de calcul existent pour l'année active
             $params = ParametreCalcul::anneeActive()->first();
             if (!$params) {
@@ -1218,18 +1218,19 @@ class PedagogieController extends Controller
                 }
             }
 
-            // Service statutaire selon le grade
-            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null);
+            // Service statutaire selon le grade et le statut (Vacataire ou Permanent)
+            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null, $enseignant->statut ?? null);
 
-            // Heures complémentaires
-            $heuresComplementaires = max(0, $vhtTotal - $serviceStatutaire);
+            // Heures complémentaires (uniquement pour les Permanents)
+            $heuresComplementaires = ($enseignant->statut !== 'Vacataire') ? max(0, $vhtTotal - $serviceStatutaire) : 0;
 
-            // Pourcentage de charge
-            $pourcentage = $serviceStatutaire > 0 ? round(($vhtTotal / $serviceStatutaire) * 100) : 0;
+            // Pourcentage de charge (uniquement pour les Permanents)
+            $pourcentage = ($enseignant->statut !== 'Vacataire' && $serviceStatutaire > 0) ? round(($vhtTotal / $serviceStatutaire) * 100) : 0;
 
             return [
                 'enseignant' => $enseignant,
                 'grade' => $enseignant->grade->libelle ?? 'Non défini',
+                'statut' => $enseignant->statut ?? 'Non défini',
                 'service_statutaire' => $serviceStatutaire,
                 'vht_realise' => $vhtTotal,
                 'heures_complementaires' => $heuresComplementaires,
@@ -1281,14 +1282,15 @@ class PedagogieController extends Controller
                 }
             }
 
-            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null);
-            $heuresComplementaires = max(0, $vhtTotal - $serviceStatutaire);
-            $pourcentage = $serviceStatutaire > 0 ? round(($vhtTotal / $serviceStatutaire) * 100) : 0;
+            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null, $enseignant->statut ?? null);
+            $heuresComplementaires = ($enseignant->statut !== 'Vacataire') ? max(0, $vhtTotal - $serviceStatutaire) : 0;
+            $pourcentage = ($enseignant->statut !== 'Vacataire' && $serviceStatutaire > 0) ? round(($vhtTotal / $serviceStatutaire) * 100) : 0;
 
             return [
                 'nom' => $enseignant->utilisateur->nom,
                 'prenom' => $enseignant->utilisateur->prenom,
                 'grade' => $enseignant->grade->libelle ?? 'Non défini',
+                'statut' => $enseignant->statut ?? 'Non défini',
                 'service_statutaire' => $serviceStatutaire,
                 'vht_realise' => $vhtTotal,
                 'heures_complementaires' => $heuresComplementaires,
@@ -1326,10 +1328,16 @@ class PedagogieController extends Controller
     }
 
     /**
-     * Retourne le service statutaire selon le grade
+     * Retourne le service statutaire selon le grade et le statut
+     * Les Vacataires n'ont pas de service statutaire
      */
-    private function getServiceStatutaire(?string $grade): int
+    private function getServiceStatutaire(?string $grade, ?string $statut): int
     {
+        // Les Vacataires n'ont pas de service statutaire
+        if ($statut === 'Vacataire') {
+            return 0;
+        }
+
         $services = [
             'Professeur' => 192,
             'Maître de Conférences' => 192,
@@ -1342,8 +1350,77 @@ class PedagogieController extends Controller
     }
 
     // === COMPLEMENTAIRES ===
-    public function complementaires()
+    public function complementaires(Request $request)
     {
-        return view('pedagogie.complementaires');
+        $anneeId = $request->get('annee_id');
+        $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+
+        if (!$anneeId && $anneeActive) {
+            $anneeId = $anneeActive->id;
+        }
+
+        // Récupérer les enseignants permanents avec leurs affectations et activités
+        $enseignants = Enseignant::with([
+            'utilisateur',
+            'grade',
+            'affectationsCours' => function ($query) use ($anneeId) {
+                if ($anneeId) {
+                    $query->where('id_annee', $anneeId);
+                }
+            },
+            'affectationsCours.activitesPedagogiques' => function ($query) {
+                $query->where('statut', 'validee');
+            },
+            'affectationsCours.cours'
+        ])->where('statut', 'Permanent')->get();
+
+        // Calculer les heures complémentaires et montants pour chaque enseignant
+        $complementaires = $enseignants->map(function ($enseignant) use ($anneeId) {
+            $vhtTotal = 0;
+            $nbCours = 0;
+
+            foreach ($enseignant->affectationsCours as $affectation) {
+                foreach ($affectation->activitesPedagogiques as $activite) {
+                    $vhtTotal += $activite->volume_horaire;
+                    $nbCours++;
+                }
+            }
+
+            $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null, $enseignant->statut ?? null);
+            $heuresComplementaires = max(0, $vhtTotal - $serviceStatutaire);
+
+            // Récupérer le taux horaire (personnel ou du grade)
+            $tauxHoraire = $enseignant->getTauxHoraire($anneeId);
+
+            // Calculer le montant à payer
+            $montant = $heuresComplementaires * $tauxHoraire;
+
+            return [
+                'enseignant' => $enseignant,
+                'grade' => $enseignant->grade->libelle ?? 'Non défini',
+                'service_statutaire' => $serviceStatutaire,
+                'vht_realise' => $vhtTotal,
+                'heures_complementaires' => $heuresComplementaires,
+                'nb_cours' => $nbCours,
+                'taux_horaire' => $tauxHoraire,
+                'montant' => $montant,
+                'taux_source' => $enseignant->taux_horaire_perso !== null ? 'Personnel' : 'Grade',
+            ];
+        })->filter(function ($item) {
+            return $item['heures_complementaires'] > 0;
+        })->sortByDesc('montant');
+
+        $annees = AnneeAcademique::orderBy('date_debut', 'desc')->get();
+        $totalMontant = $complementaires->sum('montant');
+        $totalHeures = $complementaires->sum('heures_complementaires');
+
+        return view('pedagogie.complementaires', compact(
+            'complementaires',
+            'annees',
+            'anneeId',
+            'anneeActive',
+            'totalMontant',
+            'totalHeures'
+        ));
     }
 }

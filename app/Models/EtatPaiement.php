@@ -14,6 +14,7 @@ class EtatPaiement extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'numero_paiement',
         'date_generation',
         'periode',
         'montant_total',
