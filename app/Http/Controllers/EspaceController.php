@@ -147,6 +147,10 @@ class EspaceController extends Controller
             ->first();
         $montantEstime = $heuresComplementaires * $tauxHoraire->montant;
 
+        if (function_exists('logActivite')) {
+            logActivite('consultation', 'Consultation des heures complémentaires par l\'enseignant');
+        }
+
         return view('espace.complementaires', compact(
             'heuresComplementaires',
             'tauxHoraire',
@@ -164,11 +168,19 @@ class EspaceController extends Controller
             ->orderByDesc('date_creation')
             ->get();
 
+        if (function_exists('logActivite')) {
+            logActivite('consultation', 'Consultation des ressources pédagogiques par l\'enseignant');
+        }
+
         return view('espace.ressources', compact('ressources'));
     }
 
     public function documents()
     {
+        if (function_exists('logActivite')) {
+            logActivite('consultation', 'Consultation des documents par l\'enseignant');
+        }
+
         return view('espace.documents');
     }
 }

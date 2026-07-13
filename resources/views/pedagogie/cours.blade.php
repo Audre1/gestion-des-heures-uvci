@@ -112,8 +112,7 @@
                                 <div class="input-group">
                                     <input type="number" name="nombre_heures" id="nombre_heures"
                                         class="form-control @error('nombre_heures') is-invalid @enderror"
-                                        placeholder="Ex : 20" min="1"
-                                        step="1" required>
+                                        placeholder="Ex : 20" min="1" step="1" required>
                                     <span class="input-group-text">heures</span>
                                 </div>
                                 @error('nombre_heures')
@@ -178,32 +177,29 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Libellé</th>
-                                        <th>Type</th>
-                                        <th>Volume horaire</th>
-                                        <th>Complexité</th>
+                                        <th>N°</th>
+                                        <th>Titre</th>
+                                        <th>Ressources</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @if ($cour->sequencesPedagogiques->count() > 0)
                                         @foreach ($cour->sequencesPedagogiques as $sequence)
                                             <tr>
-                                                <td class="fw-semibold">{{ $sequence->libelle }}</td>
-                                                <td><span class="badge badge-soft-purple">{{ $sequence->type }}</span>
-                                                </td>
-                                                <td>{{ $sequence->volume_horaire }} h</td>
                                                 <td><span
-                                                        class="badge badge-soft-{{ $sequence->complexite == 'Normale' ? 'green' : 'amber' }}\">{{ $sequence->complexite }}</span></td>
-                                            </tr>
-@endforeach
-@else
-<tr>
-                                            <td colspan="4"
-                                                        class="text-center py-3 text-muted">
-                                                        Aucune séquence pédagogique pour ce cours.
+                                                        class="badge badge-soft-purple">{{ $sequence->numero_ordre }}</span>
                                                 </td>
+                                                <td class="fw-semibold">{{ $sequence->titre }}</td>
+                                                <td>{{ $sequence->ressources_pedagogiques_count }}</td>
                                             </tr>
-                                        @endif
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="3" class="text-center py-3 text-muted">
+                                                Aucune séquence pédagogique pour ce cours.
+                                            </td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -273,7 +269,8 @@
                                     <label class="form-label fw-semibold">Volume horaire <span
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="number" name="nombre_heures" id="nombre_heures_edit_{{ $cour->id }}"
+                                        <input type="number" name="nombre_heures"
+                                            id="nombre_heures_edit_{{ $cour->id }}"
                                             class="form-control @error('nombre_heures') is-invalid @enderror"
                                             value="{{ old('nombre_heures', $cour->nombre_heures) }}" min="1"
                                             step="1" required>
@@ -287,7 +284,8 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Crédits <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="nombre_credits" id="nombre_credits_edit_{{ $cour->id }}"
+                                    <input type="number" name="nombre_credits"
+                                        id="nombre_credits_edit_{{ $cour->id }}"
                                         class="form-control @error('nombre_credits') is-invalid @enderror"
                                         value="{{ old('nombre_credits', $cour->nombre_credits) }}" min="0"
                                         step="1" readonly>
@@ -387,7 +385,8 @@
             if (document.getElementById('nombre_heures_edit_{{ $cour->id }}')) {
                 document.getElementById('nombre_heures_edit_{{ $cour->id }}').addEventListener('input', function() {
                     const heures = parseInt(this.value) || 0;
-                    document.getElementById('nombre_credits_edit_{{ $cour->id }}').value = Math.round(heures / heuresParCredit);
+                    document.getElementById('nombre_credits_edit_{{ $cour->id }}').value = Math.round(heures /
+                        heuresParCredit);
                 });
             }
         @endforeach
