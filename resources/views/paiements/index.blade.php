@@ -85,39 +85,239 @@
                 <td class="text-end">
                     <div class="action-btns justify-content-end">
                         @if($etat->statut === 'en_attente')
-                            <form action="{{ route('paiements.valider', $etat->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-light border" title="Valider" onclick="return confirm('Valider cet état de paiement ?')">
-                                    <i class="fa-solid fa-check text-success"></i>
-                                </button>
-                            </form>
+                            <button type="button"
+                                class="btn btn-sm btn-light border"
+                                title="Valider"
+                                data-bs-toggle="modal"
+                                data-bs-target="#validerModal{{ $etat->id }}">
+                                <i class="fa-solid fa-check text-success"></i>
+                            </button>
                         @endif
                         @if($etat->statut === 'valide')
-                            <form action="{{ route('paiements.marquerPaye', $etat->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-light border" title="Marquer payé" onclick="return confirm('Marquer cet état comme payé ?')">
-                                    <i class="fa-solid fa-money-bill-wave text-info"></i>
-                                </button>
-                            </form>
+                            <button type="button"
+                                class="btn btn-sm btn-light border"
+                                title="Marquer payé"
+                                data-bs-toggle="modal"
+                                data-bs-target="#marquerPayeModal{{ $etat->id }}">
+                                <i class="fa-solid fa-money-bill-wave text-info"></i>
+                            </button>
                         @endif
                         @if(in_array($etat->statut, ['en_attente', 'valide']))
-                            <form action="{{ route('paiements.rejeter', $etat->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-light border" title="Rejeter" onclick="return confirm('Rejeter cet état de paiement ?')">
-                                    <i class="fa-solid fa-times text-danger"></i>
-                                </button>
-                            </form>
-                        @endif
-                        <form action="{{ route('paiements.destroy', $etat->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-light border" title="Supprimer" onclick="return confirm('Supprimer cet état de paiement ?')">
-                                <i class="fa-solid fa-trash text-muted"></i>
+                            <button type="button"
+                                class="btn btn-sm btn-light border"
+                                title="Rejeter"
+                                data-bs-toggle="modal"
+                                data-bs-target="#rejeterModal{{ $etat->id }}">
+                                <i class="fa-solid fa-times text-danger"></i>
                             </button>
-                        </form>
+                        @endif
+                        <button type="button"
+                            class="btn btn-sm btn-light border"
+                            title="Supprimer"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ $etat->id }}">
+                            <i class="fa-solid fa-trash text-muted"></i>
+                        </button>
                     </div>
                 </td>
             </tr>
+
+            {{-- Modale de validation --}}
+            @if($etat->statut === 'en_attente')
+                <div class="modal fade" id="validerModal{{ $etat->id }}" tabindex="-1"
+                    aria-labelledby="validerModalLabel{{ $etat->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title fw-bold" id="validerModalLabel{{ $etat->id }}">
+                                    <i class="fa-solid fa-check me-2"></i>
+                                    Valider l'état de paiement
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Fermer"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <p class="mb-3">
+                                    Voulez-vous valider l'état de paiement suivant ?
+                                </p>
+
+                                <div class="alert alert-info mb-0">
+                                    <strong>
+                                        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+                                        {{ $etat->numero_paiement }}
+                                    </strong><br>
+                                    <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }} {{ $etat->enseignant->utilisateur->prenom }}</span><br>
+                                    <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                                    Annuler
+                                </button>
+
+                                <form action="{{ route('paiements.valider', $etat->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa-solid fa-check me-1"></i>
+                                        Oui, valider
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Modale de marquer payé --}}
+            @if($etat->statut === 'valide')
+                <div class="modal fade" id="marquerPayeModal{{ $etat->id }}" tabindex="-1"
+                    aria-labelledby="marquerPayeModalLabel{{ $etat->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-info text-white">
+                                <h5 class="modal-title fw-bold" id="marquerPayeModalLabel{{ $etat->id }}">
+                                    <i class="fa-solid fa-money-bill-wave me-2"></i>
+                                    Marquer comme payé
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Fermer"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <p class="mb-3">
+                                    Voulez-vous marquer cet état de paiement comme payé ?
+                                </p>
+
+                                <div class="alert alert-info mb-0">
+                                    <strong>
+                                        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+                                        {{ $etat->numero_paiement }}
+                                    </strong><br>
+                                    <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                                    Annuler
+                                </button>
+
+                                <form action="{{ route('paiements.marquerPaye', $etat->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-info">
+                                        <i class="fa-solid fa-money-bill-wave me-1"></i>
+                                        Oui, marquer payé
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Modale de rejet --}}
+            @if(in_array($etat->statut, ['en_attente', 'valide']))
+                <div class="modal fade" id="rejeterModal{{ $etat->id }}" tabindex="-1"
+                    aria-labelledby="rejeterModalLabel{{ $etat->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-warning text-white">
+                                <h5 class="modal-title fw-bold" id="rejeterModalLabel{{ $etat->id }}">
+                                    <i class="fa-solid fa-times me-2"></i>
+                                    Rejeter l'état de paiement
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Fermer"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <p class="mb-3">
+                                    Voulez-vous rejeter l'état de paiement suivant ?
+                                </p>
+
+                                <div class="alert alert-warning mb-0">
+                                    <strong>
+                                        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+                                        {{ $etat->numero_paiement }}
+                                    </strong><br>
+                                    <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }} {{ $etat->enseignant->utilisateur->prenom }}</span><br>
+                                    <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                                    Annuler
+                                </button>
+
+                                <form action="{{ route('paiements.rejeter', $etat->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fa-solid fa-times me-1"></i>
+                                        Oui, rejeter
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Modale de suppression --}}
+            <div class="modal fade" id="deleteModal{{ $etat->id }}" tabindex="-1"
+                aria-labelledby="deleteModalLabel{{ $etat->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title fw-bold" id="deleteModalLabel{{ $etat->id }}">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                Confirmer la suppression
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Fermer"></button>
+                        </div>
+
+                        <div class="modal-body p-4">
+                            <p class="mb-3">
+                                Voulez-vous vraiment supprimer l'état de paiement suivant ?
+                            </p>
+
+                            <div class="alert alert-warning mb-0">
+                                <strong>
+                                    <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+                                    {{ $etat->numero_paiement }}
+                                </strong><br>
+                                <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }} {{ $etat->enseignant->utilisateur->prenom }}</span><br>
+                                <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span><br>
+                                <span class="small">Statut: {{ $etat->statut }}</span>
+                            </div>
+
+                            <p class="text-danger small mt-3 mb-0">
+                                <i class="fa-solid fa-circle-exclamation me-1"></i>
+                                Cette action est irréversible.
+                            </p>
+                        </div>
+
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                                Annuler
+                            </button>
+
+                            <form action="{{ route('paiements.destroy', $etat->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash me-1"></i>
+                                    Oui, supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @empty
             <tr>
                 <td colspan="9" class="text-center py-5">
