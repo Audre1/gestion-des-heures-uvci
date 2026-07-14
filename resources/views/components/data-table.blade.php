@@ -230,8 +230,13 @@
                     });
 
                     // Exclure la colonne Actions si elle existe
-                    const lastHeader = headers[headers.length - 1].toLowerCase();
-                    const hasActions = lastHeader === 'actions' || lastHeader === 'action';
+                    const lastHeader = headers[headers.length - 1]
+                        .trim()
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "");
+
+                    const hasActions = ['action', 'actions', 'detail'].includes(lastHeader);
                     const exportHeaders = hasActions ? headers.slice(0, -1) : headers;
                     const exportRows = hasActions ? rows.map(row => row.slice(0, -1)) : rows;
 
