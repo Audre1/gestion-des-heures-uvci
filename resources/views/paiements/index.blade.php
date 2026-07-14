@@ -8,7 +8,9 @@
                 @foreach ($annees as $annee)
                     <option value="{{ $annee->id }}" {{ $anneeId == $annee->id ? 'selected' : '' }}>
                         {{ $annee->libelle }}
-                        @if ($anneeActive && $annee->id == $anneeActive->id) (Active) @endif
+                        @if ($anneeActive && $annee->id == $anneeActive->id)
+                            (Active)
+                        @endif
                     </option>
                 @endforeach
             </select>
@@ -29,25 +31,77 @@
     </x-slot:actions>
 
     <div class="row g-3 mb-3">
-        <div class="col-md-3"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon amber"><i class="fa-solid fa-clock"></i></div>
-            <div><div class="stat-value">{{ $statsParStatut['en_attente'] }}</div><div class="stat-label">En attente</div></div>
-        </div></div></div>
-        <div class="col-md-3"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon green"><i class="fa-solid fa-check-circle"></i></div>
-            <div><div class="stat-value">{{ $statsParStatut['valide'] }}</div><div class="stat-label">Validés</div></div>
-        </div></div></div>
-        <div class="col-md-3"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon purple"><i class="fa-solid fa-money-bill-wave"></i></div>
-            <div><div class="stat-value">{{ $statsParStatut['paye'] }}</div><div class="stat-label">Payés</div></div>
-        </div></div></div>
-        <div class="col-md-3"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon red"><i class="fa-solid fa-times-circle"></i></div>
-            <div><div class="stat-value">{{ $statsParStatut['rejete'] }}</div><div class="stat-label">Rejetés</div></div>
-        </div></div></div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon amber"><i class="fa-solid fa-clock"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $statsParStatut['en_attente'] }}</div>
+                        <div class="stat-label">En attente</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon green"><i class="fa-solid fa-check-circle"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $statsParStatut['valide'] }}</div>
+                        <div class="stat-label">Validés</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon purple"><i class="fa-solid fa-money-bill-wave"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $statsParStatut['paye'] }}</div>
+                        <div class="stat-label">Payés</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon red"><i class="fa-solid fa-times-circle"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $statsParStatut['rejete'] }}</div>
+                        <div class="stat-label">Rejetés</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <x-data-table search-placeholder="Rechercher un état..." :count="$etatsPaiement->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Grade</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">
+                <option value="">Tous</option>
+                @foreach (collect($etatsPaiement)->pluck('enseignant.grade.libelle')->unique()->filter()->sort()->values() as $g)
+                    <option value="{{ $g }}">{{ $g }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Année</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(4)">
+                <option value="">Toutes</option>
+                @foreach (collect($etatsPaiement)->pluck('anneeAcademique.libelle')->unique()->filter()->sort()->values() as $a)
+                    <option value="{{ $a }}">{{ $a }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Statut</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(6)">
+                <option value="">Tous</option>
+                <option value="en_attente">En attente</option>
+                <option value="valide">Validé</option>
+                <option value="paye">Payé</option>
+                <option value="rejete">Rejeté</option>
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Numéro</th>
             <th>Enseignant</th>
@@ -69,9 +123,10 @@
                 <td>{{ $etat->enseignant->grade->libelle ?? 'N/A' }}</td>
                 <td>{{ $etat->periode }}</td>
                 <td>{{ $etat->anneeAcademique->libelle ?? 'N/A' }}</td>
-                <td class="fw-semibold text-uvci-green">{{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</td>
+                <td class="fw-semibold text-uvci-green">{{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA
+                </td>
                 <td>
-                    @if($etat->statut === 'en_attente')
+                    @if ($etat->statut === 'en_attente')
                         <span class="badge bg-warning text-white">En attente</span>
                     @elseif($etat->statut === 'valide')
                         <span class="badge bg-success text-white">Validé</span>
@@ -84,38 +139,26 @@
                 <td>{{ $etat->date_generation ? $etat->date_generation->format('d/m/Y H:i') : 'N/A' }}</td>
                 <td class="text-end">
                     <div class="action-btns justify-content-end">
-                        @if($etat->statut === 'en_attente')
-                            <button type="button"
-                                class="btn btn-sm btn-light border"
-                                title="Valider"
-                                data-bs-toggle="modal"
-                                data-bs-target="#validerModal{{ $etat->id }}">
+                        @if ($etat->statut === 'en_attente')
+                            <button type="button" class="btn btn-sm btn-light border" title="Valider"
+                                data-bs-toggle="modal" data-bs-target="#validerModal{{ $etat->id }}">
                                 <i class="fa-solid fa-check text-success"></i>
                             </button>
                         @endif
-                        @if($etat->statut === 'valide')
-                            <button type="button"
-                                class="btn btn-sm btn-light border"
-                                title="Marquer payé"
-                                data-bs-toggle="modal"
-                                data-bs-target="#marquerPayeModal{{ $etat->id }}">
+                        @if ($etat->statut === 'valide')
+                            <button type="button" class="btn btn-sm btn-light border" title="Marquer payé"
+                                data-bs-toggle="modal" data-bs-target="#marquerPayeModal{{ $etat->id }}">
                                 <i class="fa-solid fa-money-bill-wave text-info"></i>
                             </button>
                         @endif
-                        @if(in_array($etat->statut, ['en_attente', 'valide']))
-                            <button type="button"
-                                class="btn btn-sm btn-light border"
-                                title="Rejeter"
-                                data-bs-toggle="modal"
-                                data-bs-target="#rejeterModal{{ $etat->id }}">
+                        @if (in_array($etat->statut, ['en_attente', 'valide']))
+                            <button type="button" class="btn btn-sm btn-light border" title="Rejeter"
+                                data-bs-toggle="modal" data-bs-target="#rejeterModal{{ $etat->id }}">
                                 <i class="fa-solid fa-times text-danger"></i>
                             </button>
                         @endif
-                        <button type="button"
-                            class="btn btn-sm btn-light border"
-                            title="Supprimer"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteModal{{ $etat->id }}">
+                        <button type="button" class="btn btn-sm btn-light border" title="Supprimer"
+                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ $etat->id }}">
                             <i class="fa-solid fa-trash text-muted"></i>
                         </button>
                     </div>
@@ -123,7 +166,7 @@
             </tr>
 
             {{-- Modale de validation --}}
-            @if($etat->statut === 'en_attente')
+            @if ($etat->statut === 'en_attente')
                 <div class="modal fade" id="validerModal{{ $etat->id }}" tabindex="-1"
                     aria-labelledby="validerModalLabel{{ $etat->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -147,8 +190,10 @@
                                         <i class="fa-solid fa-file-invoice-dollar me-2"></i>
                                         {{ $etat->numero_paiement }}
                                     </strong><br>
-                                    <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }} {{ $etat->enseignant->utilisateur->prenom }}</span><br>
-                                    <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
+                                    <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }}
+                                        {{ $etat->enseignant->utilisateur->prenom }}</span><br>
+                                    <span class="small">Montant:
+                                        {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
                                 </div>
                             </div>
 
@@ -157,7 +202,8 @@
                                     Annuler
                                 </button>
 
-                                <form action="{{ route('paiements.valider', $etat->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('paiements.valider', $etat->id) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn btn-success">
                                         <i class="fa-solid fa-check me-1"></i>
@@ -171,7 +217,7 @@
             @endif
 
             {{-- Modale de marquer payé --}}
-            @if($etat->statut === 'valide')
+            @if ($etat->statut === 'valide')
                 <div class="modal fade" id="marquerPayeModal{{ $etat->id }}" tabindex="-1"
                     aria-labelledby="marquerPayeModalLabel{{ $etat->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -195,7 +241,8 @@
                                         <i class="fa-solid fa-file-invoice-dollar me-2"></i>
                                         {{ $etat->numero_paiement }}
                                     </strong><br>
-                                    <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
+                                    <span class="small">Montant:
+                                        {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
                                 </div>
                             </div>
 
@@ -204,7 +251,8 @@
                                     Annuler
                                 </button>
 
-                                <form action="{{ route('paiements.marquerPaye', $etat->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('paiements.marquerPaye', $etat->id) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn btn-info">
                                         <i class="fa-solid fa-money-bill-wave me-1"></i>
@@ -218,7 +266,7 @@
             @endif
 
             {{-- Modale de rejet --}}
-            @if(in_array($etat->statut, ['en_attente', 'valide']))
+            @if (in_array($etat->statut, ['en_attente', 'valide']))
                 <div class="modal fade" id="rejeterModal{{ $etat->id }}" tabindex="-1"
                     aria-labelledby="rejeterModalLabel{{ $etat->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -242,8 +290,10 @@
                                         <i class="fa-solid fa-file-invoice-dollar me-2"></i>
                                         {{ $etat->numero_paiement }}
                                     </strong><br>
-                                    <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }} {{ $etat->enseignant->utilisateur->prenom }}</span><br>
-                                    <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
+                                    <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }}
+                                        {{ $etat->enseignant->utilisateur->prenom }}</span><br>
+                                    <span class="small">Montant:
+                                        {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span>
                                 </div>
                             </div>
 
@@ -252,7 +302,8 @@
                                     Annuler
                                 </button>
 
-                                <form action="{{ route('paiements.rejeter', $etat->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('paiements.rejeter', $etat->id) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn btn-warning">
                                         <i class="fa-solid fa-times me-1"></i>
@@ -289,8 +340,10 @@
                                     <i class="fa-solid fa-file-invoice-dollar me-2"></i>
                                     {{ $etat->numero_paiement }}
                                 </strong><br>
-                                <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }} {{ $etat->enseignant->utilisateur->prenom }}</span><br>
-                                <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }} FCFA</span><br>
+                                <span class="small">Enseignant: {{ $etat->enseignant->utilisateur->nom }}
+                                    {{ $etat->enseignant->utilisateur->prenom }}</span><br>
+                                <span class="small">Montant: {{ number_format($etat->montant_total, 0, ',', ' ') }}
+                                    FCFA</span><br>
                                 <span class="small">Statut: {{ $etat->statut }}</span>
                             </div>
 
@@ -305,7 +358,8 @@
                                 Annuler
                             </button>
 
-                            <form action="{{ route('paiements.destroy', $etat->id) }}" method="POST" class="d-inline">
+                            <form action="{{ route('paiements.destroy', $etat->id) }}" method="POST"
+                                class="d-inline">
                                 @csrf
                                 @method('DELETE')
 
@@ -352,8 +406,9 @@
                                 @php
                                     $enseignants = \App\Models\Enseignant::with('utilisateur')->get();
                                 @endphp
-                                @foreach($enseignants as $ens)
-                                    <option value="{{ $ens->id }}">{{ $ens->utilisateur->nom }} {{ $ens->utilisateur->prenom }}</option>
+                                @foreach ($enseignants as $ens)
+                                    <option value="{{ $ens->id }}">{{ $ens->utilisateur->nom }}
+                                        {{ $ens->utilisateur->prenom }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -361,8 +416,9 @@
                             <label class="form-label">Année académique <span class="text-danger">*</span></label>
                             <select name="id_annee" class="form-select" required>
                                 <option value="">Sélectionner une année</option>
-                                @foreach($annees as $annee)
-                                    <option value="{{ $annee->id }}" {{ $anneeActive && $annee->id == $anneeActive->id ? 'selected' : '' }}>
+                                @foreach ($annees as $annee)
+                                    <option value="{{ $annee->id }}"
+                                        {{ $anneeActive && $annee->id == $anneeActive->id ? 'selected' : '' }}>
                                         {{ $annee->libelle }}
                                     </option>
                                 @endforeach
@@ -370,7 +426,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Période <span class="text-danger">*</span></label>
-                            <input type="text" name="periode" class="form-control" placeholder="Ex: Octobre 2026" required>
+                            <input type="text" name="periode" class="form-control" placeholder="Ex: Octobre 2026"
+                                required>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">

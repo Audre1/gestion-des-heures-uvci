@@ -8,6 +8,28 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher une activité..." :count="$activites->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Type</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">
+                <option value="">Tous</option>
+                <option value="creation">Création</option>
+                <option value="maj">Mise à jour</option>
+            </select>
+            <label class="dt-filter-label">Niveau</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(3)">
+                <option value="">Tous</option>
+                @foreach (collect($activites)->pluck('niveauComplexite.libelle')->unique()->filter()->sort()->values() as $n)
+                    <option value="{{ $n }}">{{ $n }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Statut</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(8)">
+                <option value="">Tous</option>
+                <option value="en_cours">En cours</option>
+                <option value="validee">Validée</option>
+                <option value="rejetee">Rejetée</option>
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Enseignant</th>
             <th>Cours</th>
@@ -131,8 +153,8 @@
                                     <option value="">Sélectionner le type</option>
                                     <option value="creation"
                                         {{ old('type_activite') === 'creation' ? 'selected' : '' }}>Création</option>
-                                    <option value="maj"
-                                        {{ old('type_activite') === 'maj' ? 'selected' : '' }}>Mise à jour
+                                    <option value="maj" {{ old('type_activite') === 'maj' ? 'selected' : '' }}>Mise
+                                        à jour
                                     </option>
                                 </select>
                                 @error('type_activite')
@@ -150,10 +172,13 @@
                                         @foreach ($niveaux as $index => $niveau)
                                             @php
                                                 $niveauNum = $index + 1;
-                                                $coeffCreation = (float) $parametres->getCoefficient('creation', $niveauNum);
+                                                $coeffCreation = (float) $parametres->getCoefficient(
+                                                    'creation',
+                                                    $niveauNum,
+                                                );
                                                 $coeffMaj = (float) $parametres->getCoefficient('maj', $niveauNum);
                                             @endphp
-                                            <option value="{{ $niveau->id }}" 
+                                            <option value="{{ $niveau->id }}"
                                                 data-coeff-creation="{{ $coeffCreation }}"
                                                 data-coeff-maj="{{ $coeffMaj }}"
                                                 {{ old('id_niveau') == $niveau->id ? 'selected' : '' }}>
@@ -203,9 +228,12 @@
                                 <label class="form-label fw-semibold">Statut</label>
                                 <select name="statut" class="form-select @error('statut') is-invalid @enderror">
                                     <option value="">Par défaut : En cours</option>
-                                    <option value="en_cours" {{ old('statut') === 'en_cours' ? 'selected' : '' }}>En cours</option>
-                                    <option value="validee" {{ old('statut') === 'validee' ? 'selected' : '' }}>Validée</option>
-                                    <option value="rejetee" {{ old('statut') === 'rejetee' ? 'selected' : '' }}>Rejetée</option>
+                                    <option value="en_cours" {{ old('statut') === 'en_cours' ? 'selected' : '' }}>En
+                                        cours</option>
+                                    <option value="validee" {{ old('statut') === 'validee' ? 'selected' : '' }}>
+                                        Validée</option>
+                                    <option value="rejetee" {{ old('statut') === 'rejetee' ? 'selected' : '' }}>
+                                        Rejetée</option>
                                 </select>
                                 @error('statut')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -313,7 +341,10 @@
                                             @foreach ($niveaux as $index => $niveau)
                                                 @php
                                                     $niveauNum = $index + 1;
-                                                    $coeffCreation = (float) $parametres->getCoefficient('creation', $niveauNum);
+                                                    $coeffCreation = (float) $parametres->getCoefficient(
+                                                        'creation',
+                                                        $niveauNum,
+                                                    );
                                                     $coeffMaj = (float) $parametres->getCoefficient('maj', $niveauNum);
                                                 @endphp
                                                 <option value="{{ $niveau->id }}"
@@ -392,7 +423,8 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Nombre de séquences <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="nb_sequences" id="nb_sequences_edit_{{ $activite->id }}"
+                                    <input type="number" name="nb_sequences"
+                                        id="nb_sequences_edit_{{ $activite->id }}"
                                         class="form-control @error('nb_sequences') is-invalid @enderror"
                                         value="{{ old('nb_sequences', $activite->nb_sequences) }}" min="1"
                                         step="1" readonly>
@@ -404,7 +436,8 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Coefficient <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="coefficient" id="coefficient_edit_{{ $activite->id }}"
+                                    <input type="number" name="coefficient"
+                                        id="coefficient_edit_{{ $activite->id }}"
                                         class="form-control @error('coefficient') is-invalid @enderror"
                                         value="{{ old('coefficient', $activite->coefficient) }}" min="0"
                                         step="0.01" readonly>
@@ -416,7 +449,8 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Volume horaire <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" name="volume_horaire" id="volume_horaire_edit_{{ $activite->id }}"
+                                    <input type="number" name="volume_horaire"
+                                        id="volume_horaire_edit_{{ $activite->id }}"
                                         class="form-control @error('volume_horaire') is-invalid @enderror"
                                         value="{{ old('volume_horaire', $activite->volume_horaire) }}" min="0"
                                         step="1" readonly>
@@ -425,7 +459,7 @@
                                     @enderror
                                 </div>
 
-                                
+
                             </div>
                         </div>
 
@@ -473,7 +507,8 @@
                         </div>
 
                         <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Annuler</button>
+                            <button type="button" class="btn btn-light border"
+                                data-bs-dismiss="modal">Annuler</button>
 
                             <form action="{{ route('activites.valider', $activite->id) }}" method="POST">
                                 @csrf
