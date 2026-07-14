@@ -85,7 +85,7 @@ class Enseignant extends Model
 
         // Sinon, récupérer le taux du grade pour l'année académique
         if (!$anneeId) {
-            $anneeActive = AnneeAcademique::where('statut', 'active')->first();
+            $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
             $anneeId = $anneeActive ? $anneeActive->id : null;
         }
 
