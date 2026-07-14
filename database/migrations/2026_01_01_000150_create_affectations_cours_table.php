@@ -15,9 +15,11 @@ return new class extends Migration
             $table->foreign('id_enseignant')->references('id')->on('enseignants')->restrictOnDelete();
             $table->unsignedBigInteger('id_cours');
             $table->foreign('id_cours')->references('id')->on('cours')->restrictOnDelete();
+            $table->string('niveau', 2);
+            $table->string('semestre', 2);
             $table->unsignedBigInteger('id_annee');
             $table->foreign('id_annee')->references('id')->on('annees_academiques')->restrictOnDelete();
-            $table->unique(['id_enseignant', 'id_cours', 'id_annee']);
+            $table->unique(['id_cours', 'niveau', 'semestre', 'id_annee']);
             $table->timestamps();
             $table->softDeletes();
         });

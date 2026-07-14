@@ -470,6 +470,16 @@ class PedagogieController extends Controller
             return redirect()->back()->with('error', 'Cette association existe déjà pour cette filière.');
         }
 
+        // Vérifier si le cours est déjà associé à cette filière, quel que soit le semestre ou le niveau.
+        $alreadyAttached = $filiere->cours()
+            ->wherePivot('id_cours', $request->id_cours)
+            ->wherePivot('niveau', $request->niveau)
+            ->exists();
+
+        if ($alreadyAttached) {
+            return redirect()->back()->with('error', 'Ce cours est déjà associé à cette filière.');
+        }
+
         $filiere->cours()->attach($request->id_cours, [
             'semestre' => $request->semestre,
             'niveau' => $request->niveau,

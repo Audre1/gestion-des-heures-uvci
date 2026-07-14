@@ -8,7 +8,9 @@
                 @foreach ($annees as $annee)
                     <option value="{{ $annee->id }}" {{ $anneeId == $annee->id ? 'selected' : '' }}>
                         {{ $annee->libelle }}
-                        @if ($anneeActive && $annee->id == $anneeActive->id) (Active) @endif
+                        @if ($anneeActive && $annee->id == $anneeActive->id)
+                            (Active)
+                        @endif
                     </option>
                 @endforeach
             </select>
@@ -19,21 +21,51 @@
     </x-slot:actions>
 
     <div class="row g-3 mb-3">
-        <div class="col-md-4"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon amber"><i class="fa-solid fa-clock"></i></div>
-            <div><div class="stat-value">{{ number_format($totalHeures, 0, ',', ' ') }} h</div><div class="stat-label">Total heures complémentaires</div></div>
-        </div></div></div>
-        <div class="col-md-4"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon purple"><i class="fa-solid fa-users"></i></div>
-            <div><div class="stat-value">{{ $complementaires->count() }}</div><div class="stat-label">Enseignants concernés</div></div>
-        </div></div></div>
-        <div class="col-md-4"><div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
-            <div class="stat-icon green"><i class="fa-solid fa-money-bill-trend-up"></i></div>
-            <div><div class="stat-value">{{ number_format($totalMontant, 0, ',', ' ') }} FCFA</div><div class="stat-label">Montant estimé</div></div>
-        </div></div></div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon amber"><i class="fa-solid fa-clock"></i></div>
+                    <div>
+                        <div class="stat-value">{{ number_format($totalHeures, 0, ',', ' ') }} h</div>
+                        <div class="stat-label">Total heures complémentaires</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon purple"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $complementaires->count() }}</div>
+                        <div class="stat-label">Enseignants concernés</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon green"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+                    <div>
+                        <div class="stat-value">{{ number_format($totalMontant, 0, ',', ' ') }} FCFA</div>
+                        <div class="stat-label">Montant estimé</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <x-data-table search-placeholder="Rechercher un enseignant..." :count="$complementaires->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Grade</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(1)">
+                <option value="">Tous</option>
+                @foreach (collect($complementaires)->pluck('grade')->unique()->filter()->sort()->values() as $g)
+                    <option value="{{ $g }}">{{ $g }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Enseignant</th>
             <th>Grade</th>
@@ -58,7 +90,7 @@
                 </td>
                 <td>{{ number_format($comp['taux_horaire'], 0, ',', ' ') }} FCFA</td>
                 <td>
-                    @if($comp['taux_source'] === 'Personnel')
+                    @if ($comp['taux_source'] === 'Personnel')
                         <span class="badge bg-info text-white">Personnel</span>
                     @else
                         <span class="badge bg-secondary text-white">Grade</span>

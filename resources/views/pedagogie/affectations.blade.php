@@ -7,6 +7,22 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher une affectation..." :count="$affectations->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Cours</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(1)">
+                <option value="">Tous</option>
+                @foreach (collect($affectations)->pluck('cours.code_cours')->unique()->filter()->sort()->values() as $c)
+                    <option value="{{ $c }}">{{ $c }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Année académique</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(4)">
+                <option value="">Toutes</option>
+                @foreach (collect($affectations)->pluck('anneeAcademique.libelle')->unique()->filter()->sort()->values() as $a)
+                    <option value="{{ $a }}">{{ $a }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Enseignant</th>
             <th>Cours</th>

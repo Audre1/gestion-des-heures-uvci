@@ -133,9 +133,6 @@ class EspaceController extends Controller
             return $activite;
         });
 
-
-
-
         $volumeRealise = $activites->sum('volume_horaire');
 
 

@@ -8,7 +8,9 @@
                 @foreach ($annees as $annee)
                     <option value="{{ $annee->id }}" {{ $anneeId == $annee->id ? 'selected' : '' }}>
                         {{ $annee->libelle }}
-                        @if ($anneeActive && $annee->id == $anneeActive->id) (Active) @endif
+                        @if ($anneeActive && $annee->id == $anneeActive->id)
+                            (Active)
+                        @endif
                     </option>
                 @endforeach
             </select>
@@ -22,6 +24,21 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher un enseignant..." :count="$volumes->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Statut</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(1)">
+                <option value="">Tous</option>
+                <option value="Vacataire">Vacataire</option>
+                <option value="Permanent">Permanent</option>
+            </select>
+            <label class="dt-filter-label">Grade</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(2)">
+                <option value="">Tous</option>
+                @foreach (collect($volumes)->pluck('grade')->unique()->filter()->sort()->values() as $g)
+                    <option value="{{ $g }}">{{ $g }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Enseignant</th>
             <th>Statut</th>
@@ -40,7 +57,7 @@
                     {{ $volume['enseignant']->utilisateur->prenom }}
                 </td>
                 <td>
-                    @if($volume['statut'] === 'Vacataire')
+                    @if ($volume['statut'] === 'Vacataire')
                         <span class="badge bg-info text-white">Vacataire</span>
                     @else
                         <span class="badge bg-success text-white">Permanent</span>
@@ -48,7 +65,7 @@
                 </td>
                 <td>{{ $volume['grade'] }}</td>
                 <td>
-                    @if($volume['statut'] === 'Vacataire')
+                    @if ($volume['statut'] === 'Vacataire')
                         <span class="text-muted">—</span>
                     @else
                         {{ $volume['service_statutaire'] }}h
@@ -56,7 +73,7 @@
                 </td>
                 <td class="fw-semibold text-uvci-green">{{ $volume['vht_realise'] }}h</td>
                 <td>
-                    @if($volume['statut'] === 'Vacataire')
+                    @if ($volume['statut'] === 'Vacataire')
                         <span class="text-muted">—</span>
                     @elseif($volume['heures_complementaires'] > 0)
                         <span class="badge badge-soft-amber">{{ $volume['heures_complementaires'] }}h</span>
@@ -66,14 +83,17 @@
                 </td>
                 <td>{{ $volume['nb_cours'] }}</td>
                 <td style="min-width:140px">
-                    @if($volume['statut'] === 'Vacataire')
+                    @if ($volume['statut'] === 'Vacataire')
                         <span class="text-muted">N/A</span>
                     @else
                         <div class="d-flex align-items-center gap-2">
                             <div class="progress flex-fill" style="height:7px">
-                                <div class="progress-bar" style="width:{{ min($volume['pourcentage'], 100) }}%;background:{{ $volume['pourcentage'] > 100 ? 'var(--uvci-purple)' : 'var(--uvci-green)' }}"></div>
+                                <div class="progress-bar"
+                                    style="width:{{ min($volume['pourcentage'], 100) }}%;background:{{ $volume['pourcentage'] > 100 ? 'var(--uvci-purple)' : 'var(--uvci-green)' }}">
+                                </div>
                             </div>
-                            <small class="fw-semibold {{ $volume['pourcentage'] > 100 ? 'text-uvci-purple' : 'text-muted' }}">{{ $volume['pourcentage'] }}%</small>
+                            <small
+                                class="fw-semibold {{ $volume['pourcentage'] > 100 ? 'text-uvci-purple' : 'text-muted' }}">{{ $volume['pourcentage'] }}%</small>
                         </div>
                     @endif
                 </td>
@@ -107,11 +127,12 @@
                         <div>
                             <h5 class="modal-title fw-bold" id="detailsModalLabel{{ $volume['enseignant']->id }}">
                                 <i class="fa-solid fa-user me-2 text-primary"></i>
-                                {{ $volume['enseignant']->utilisateur->nom }} {{ $volume['enseignant']->utilisateur->prenom }}
+                                {{ $volume['enseignant']->utilisateur->nom }}
+                                {{ $volume['enseignant']->utilisateur->prenom }}
                             </h5>
                             <div class="d-flex gap-2 align-items-center">
                                 <small class="text-muted">{{ $volume['grade'] }}</small>
-                                @if($volume['statut'] === 'Vacataire')
+                                @if ($volume['statut'] === 'Vacataire')
                                     <span class="badge bg-info text-white">Vacataire</span>
                                 @else
                                     <span class="badge bg-success text-white">Permanent</span>
@@ -123,7 +144,7 @@
 
                     <div class="modal-body p-4">
                         <div class="row g-3">
-                            @if($volume['statut'] !== 'Vacataire')
+                            @if ($volume['statut'] !== 'Vacataire')
                                 <div class="col-md-3">
                                     <div class="card bg-light border-0">
                                         <div class="card-body text-center">
@@ -141,12 +162,13 @@
                                     </div>
                                 </div>
                             </div>
-                            @if($volume['statut'] !== 'Vacataire')
+                            @if ($volume['statut'] !== 'Vacataire')
                                 <div class="col-md-3">
                                     <div class="card bg-warning bg-opacity-10 border-0">
                                         <div class="card-body text-center">
                                             <h6 class="card-subtitle mb-2 text-muted">Heures compl.</h6>
-                                            <h3 class="card-title fw-bold text-warning">{{ $volume['heures_complementaires'] }}h</h3>
+                                            <h3 class="card-title fw-bold text-warning">
+                                                {{ $volume['heures_complementaires'] }}h</h3>
                                         </div>
                                     </div>
                                 </div>
@@ -178,19 +200,22 @@
                                 </thead>
                                 <tbody>
                                     @forelse($volume['enseignant']->affectationsCours as $affectation)
-                                        @foreach($affectation->activitesPedagogiques as $activite)
+                                        @foreach ($affectation->activitesPedagogiques as $activite)
                                             <tr>
                                                 <td>{{ $affectation->cours->code_cours }}</td>
                                                 <td>
-                                                    <span class="badge badge-soft-{{ $activite->type_activite === 'creation' ? 'green' : 'purple' }}">
+                                                    <span
+                                                        class="badge badge-soft-{{ $activite->type_activite === 'creation' ? 'green' : 'purple' }}">
                                                         {{ $activite->type_activite === 'creation' ? 'Création' : 'Mise à jour' }}
                                                     </span>
                                                 </td>
                                                 <td>{{ $activite->niveauComplexite->libelle ?? 'N/A' }}</td>
                                                 <td class="fw-semibold">{{ $activite->volume_horaire }}h</td>
-                                                <td>{{ $activite->date_activite ? $activite->date_activite->format('d/m/Y') : 'N/A' }}</td>
+                                                <td>{{ $activite->date_activite ? $activite->date_activite->format('d/m/Y') : 'N/A' }}
+                                                </td>
                                                 <td>
-                                                    <span class="badge badge-soft-{{ $activite->statut === 'validee' ? 'green' : 'amber' }}">
+                                                    <span
+                                                        class="badge badge-soft-{{ $activite->statut === 'validee' ? 'green' : 'amber' }}">
                                                         {{ $activite->statut === 'validee' ? 'Validée' : 'En cours' }}
                                                     </span>
                                                 </td>
@@ -198,7 +223,8 @@
                                         @endforeach
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted">Aucune activité pédagogique</td>
+                                            <td colspan="6" class="text-center text-muted">Aucune activité
+                                                pédagogique</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

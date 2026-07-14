@@ -9,6 +9,15 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher un cours..." :count="$cours->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Crédits</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(3)">
+                <option value="">Tous</option>
+                @foreach (collect($cours)->pluck('nombre_credits')->unique()->filter()->sort()->values() as $c)
+                    <option value="{{ $c }}">{{ $c }} crédits</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Code</th>
             <th>Intitulé</th>

@@ -2,6 +2,15 @@
     subtitle="Traçabilité des actions réalisées dans le système.">
 
     <x-data-table search-placeholder="Rechercher dans les journaux..." :count="$journaux->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Action</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(2)">
+                <option value="">Toutes</option>
+                @foreach (collect($journaux)->pluck('action')->unique()->filter()->sort()->values() as $a)
+                    <option value="{{ ucfirst($a) }}">{{ ucfirst($a) }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Date / Heure</th>
             <th>Utilisateur</th>
@@ -42,5 +51,4 @@
         @endforelse
     </x-data-table>
 
-    {{ $journaux->links() }}
 </x-app-page>

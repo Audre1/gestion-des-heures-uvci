@@ -7,6 +7,22 @@
     </x-slot:actions>
 
     <x-data-table search-placeholder="Rechercher par nom, matricule..." :count="$enseignants->count()">
+        <x-slot:filters>
+            <label class="dt-filter-label">Département</label>
+            <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">
+                <option value="">Tous</option>
+                @foreach (collect($enseignants)->pluck('departement.nom_departement')->unique()->filter()->sort()->values() as $d)
+                    <option value="{{ $d }}">{{ $d }}</option>
+                @endforeach
+            </select>
+            <label class="dt-filter-label">Grade</label>
+            <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(3)">
+                <option value="">Tous</option>
+                @foreach (collect($enseignants)->pluck('grade.libelle')->unique()->filter()->sort()->values() as $g)
+                    <option value="{{ $g }}">{{ $g }}</option>
+                @endforeach
+            </select>
+        </x-slot:filters>
         <x-slot:head>
             <th>Enseignant</th>
             <th>Matricule</th>
