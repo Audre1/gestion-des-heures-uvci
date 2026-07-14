@@ -149,6 +149,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/etats-paiement/{id}/rejeter', [PaiementController::class, 'rejeter'])->name('paiements.rejeter');
     Route::delete('/etats-paiement/{id}', [PaiementController::class, 'destroy'])->name('paiements.destroy');
     Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
+    Route::get('/rapports/fiche-individuelle', [RapportController::class, 'ficheIndividuelleForm'])->name('rapports.fiche-individuelle');
+    Route::post('/rapports/fiche-individuelle/generate', [RapportController::class, 'ficheIndividuelleGenerate'])->name('rapports.fiche-individuelle.generate');
+    Route::get('/rapports/etat-global', [RapportController::class, 'etatGlobalForm'])->name('rapports.etat-global');
+    Route::post('/rapports/etat-global/generate', [RapportController::class, 'etatGlobalGenerate'])->name('rapports.etat-global.generate');
+    Route::get('/rapports/statistiques', [RapportController::class, 'statistiquesForm'])->name('rapports.statistiques');
+    Route::post('/rapports/statistiques/generate', [RapportController::class, 'statistiquesGenerate'])->name('rapports.statistiques.generate');
+    Route::get('/rapports/heures-complementaires', [RapportController::class, 'heuresComplementairesForm'])->name('rapports.heures-complementaires');
+    Route::post('/rapports/heures-complementaires/generate', [RapportController::class, 'heuresComplementairesGenerate'])->name('rapports.heures-complementaires.generate');
+    Route::get('/rapports/paiement-collectif', [RapportController::class, 'paiementCollectifForm'])->name('rapports.paiement-collectif');
+    Route::post('/rapports/paiement-collectif/generate', [RapportController::class, 'paiementCollectifGenerate'])->name('rapports.paiement-collectif.generate');
+    Route::get('/rapports/charge-departement', [RapportController::class, 'chargeDepartementForm'])->name('rapports.charge-departement');
+    Route::post('/rapports/charge-departement/generate', [RapportController::class, 'chargeDepartementGenerate'])->name('rapports.charge-departement.generate');
 
     /*
 |--------------------------------------------------------------------------
