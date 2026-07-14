@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivitePedagogique;
 use App\Models\Enseignant;
-use App\Models\TauxHoraire;
 use App\Models\RessourcePedagogique;
+use App\Models\ParametreCalcul;
+use App\Models\AnneeAcademique;
 use Illuminate\Support\Facades\Auth;
 
 class EspaceController extends Controller
 {
     public function activites()
     {
-        // Temporaire : enseignant n°1
-        // Cette ligne sera remplacée lorsque
-        // l'authentification sera terminée.
+
+        // L'enseignant connecté
         $idEnseignant = Auth::user()->enseignant->id;
 
         $activites = ActivitePedagogique::query()
@@ -23,7 +23,9 @@ class EspaceController extends Controller
             })
             ->with([
                 'affectationCours.cours',
+                'affectationCours.anneeAcademique',
                 'niveauComplexite',
+                'ressourcePedagogique',
             ])
             ->orderByDesc('date_activite')
             ->get();
@@ -42,14 +44,16 @@ class EspaceController extends Controller
         $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
             $query->where('id_enseignant', $idEnseignant);
         })
-            ->where('statut', 'realise')
+            ->where('statut', 'validee')
             ->get();
 
         $volumeRealise = $activites->sum('volume_horaire');
 
         $nombreActivites = $activites->count();
 
-        $serviceStatutaire = 10;
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
+        $params = ParametreCalcul::anneeActive()->first();
+        $serviceStatutaire = $params ? $params->service_statutaire : 10;
 
         $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
@@ -74,13 +78,16 @@ class EspaceController extends Controller
             $evolutionMensuelle[$mois] = $activitesDuMois->sum('volume_horaire');
         });
 
+        // Formater les données pour Chart.js
+        $chartLabels = array_keys($evolutionMensuelle->toArray());
+        $chartData = array_values($evolutionMensuelle->toArray());
 
+        $enseignant = Enseignant::with('grade')->find($idEnseignant);
 
-        $enseignant = Enseignant::find($idEnseignant);
-
-        $tauxHoraire = TauxHoraire::where('id_grade', $enseignant->id_grade)
-            ->where('id_annee', 1)
-            ->first();
+        // Récupérer le taux horaire en utilisant la méthode du modèle
+        $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
+        $anneeId = $anneeActive ? $anneeActive->id : null;
+        $tauxHoraireMontant = $enseignant->getTauxHoraire($anneeId);
 
         $chargeGlobale = $serviceStatutaire > 0
             ? round(($volumeRealise / $serviceStatutaire) * 100)
@@ -97,8 +104,11 @@ class EspaceController extends Controller
             'heuresComplementaires',
             'evolutionMensuelle',
             'enseignant',
-            'tauxHoraire',
-            'chargeGlobale'
+            'tauxHoraireMontant',
+            'chargeGlobale',
+            'anneeActive',
+            'chartLabels',
+            'chartData'
         ));
     }
 
@@ -106,15 +116,19 @@ class EspaceController extends Controller
     {
         $idEnseignant = Auth::user()->enseignant->id;
 
-        $serviceStatutaire = 10; // valeur temporaire pour test
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
+        $params = ParametreCalcul::anneeActive()->first();
+        $serviceStatutaire = $params ? $params->service_statutaire : 10;
 
         $activites = ActivitePedagogique::query()
             ->whereHas('affectationCours', function ($query) use ($idEnseignant) {
                 $query->where('id_enseignant', $idEnseignant);
             })
-            ->where('statut', 'realise')
+            ->where('statut', 'validee')
             ->with([
-                'affectationCours.cours'
+                'affectationCours.cours',
+                'affectationCours.anneeAcademique',
+                'niveauComplexite'
             ])
             ->get();
 
@@ -139,10 +153,13 @@ class EspaceController extends Controller
         $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
 
-        $tauxHoraire = TauxHoraire::where('id_grade', 1)
-            ->where('id_annee', 1)
-            ->first();
-        $montantEstime = $heuresComplementaires * $tauxHoraire->montant;
+        $enseignant = Enseignant::with('grade')->find($idEnseignant);
+
+        // Récupérer le taux horaire en utilisant la méthode du modèle
+        $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
+        $anneeId = $anneeActive ? $anneeActive->id : null;
+        $tauxHoraireMontant = $enseignant->getTauxHoraire($anneeId);
+        $montantEstime = $heuresComplementaires * $tauxHoraireMontant;
 
         if (function_exists('logActivite')) {
             logActivite('consultation', 'Consultation des heures complémentaires par l\'enseignant');
@@ -150,7 +167,7 @@ class EspaceController extends Controller
 
         return view('espace.complementaires', compact(
             'heuresComplementaires',
-            'tauxHoraire',
+            'tauxHoraireMontant',
             'montantEstime',
             'activites'
         ));
@@ -158,10 +175,15 @@ class EspaceController extends Controller
 
     public function ressources()
     {
-        $ressources = RessourcePedagogique::with([
-            'sequence.cours',
-            'typeRessource'
-        ])
+        $idEnseignant = Auth::user()->enseignant->id;
+
+        $ressources = RessourcePedagogique::whereHas('activitesPedagogiques.affectationCours', function ($query) use ($idEnseignant) {
+            $query->where('id_enseignant', $idEnseignant);
+        })
+            ->with([
+                'sequence.cours',
+                'typeRessource'
+            ])
             ->orderByDesc('date_creation')
             ->get();
 

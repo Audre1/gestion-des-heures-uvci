@@ -28,10 +28,6 @@ class PaiementController extends Controller
             $query->where('id_annee', $anneeId);
         }
 
-        if ($statut) {
-            $query->where('statut', $statut);
-        }
-
         $etatsPaiement = $query->orderBy('date_generation', 'desc')->get();
 
         // Calculer les totaux

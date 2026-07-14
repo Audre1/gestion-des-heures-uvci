@@ -21,7 +21,7 @@
                     <div class="stat-icon green"><i class="fa-solid fa-money-bill-wave"></i></div>
 
                     <div>
-                        <div class="stat-value">{{ number_format($tauxHoraire->montant, 0, ',', ' ') }}</div>
+                        <div class="stat-value">{{ number_format($tauxHoraireMontant, 0, ',', ' ') }}</div>
                         <div class="stat-label">Taux horaire (FCFA)</div>
                     </div>
 
@@ -45,8 +45,12 @@
         export-title="Liste des heures complémentaires">
         <x-slot:head>
             <th>Période</th>
-            <th>Cours concerné</th>
-            <th>Heures</th>
+            <th>Cours</th>
+            <th>Type</th>
+            <th>Niveau</th>
+            <th>Semestre</th>
+            <th>Complexité</th>
+            <th>Heures compl.</th>
             <th>Taux</th>
             <th>Montant</th>
         </x-slot:head>
@@ -54,16 +58,29 @@
 
         @foreach ($activites as $activite)
             <tr>
-                <td class="fw-semibold"> {{ $activite->date_activite->format('F Y') }}</td>
-                <td>{{ $activite->affectationCours->cours->intitule }}</td>
+                <td class="fw-semibold">
+                    {{ ucfirst($activite->date_activite->locale('fr')->translatedFormat('F Y')) }}
+                </td>
+                <td>
+                    <span class="font-monospace">{{ $activite->affectationCours->cours->code_cours }}</span>
+                    <br><small class="text-muted">{{ $activite->affectationCours->cours->intitule }}</small>
+                </td>
+                <td>
+                    <span class="badge badge-soft-green">
+                        {{ $activite->type_activite === 'creation' ? 'Création' : 'Mise à jour' }}
+                    </span>
+                </td>
+                <td>{{ $activite->affectationCours->niveau ?? '-' }}</td>
+                <td>{{ $activite->affectationCours->semestre ?? '-' }}</td>
+                <td>{{ $activite->niveauComplexite->libelle ?? '-' }}</td>
                 <td>
                     <span class="badge badge-soft-amber">
                         {{ $activite->heures_complementaires }} h
                     </span>
                 </td>
-                <td> {{ number_format($tauxHoraire->montant, 0, ',', ' ') }} FCFA</td>
+                <td>{{ number_format($tauxHoraireMontant, 0, ',', ' ') }} FCFA</td>
                 <td class="fw-semibold text-uvci-green">
-                    {{ number_format($activite->heures_complementaires * $tauxHoraire->montant, 0, ',', ' ') }} FCFA
+                    {{ number_format($activite->heures_complementaires * $tauxHoraireMontant, 0, ',', ' ') }} FCFA
                 </td>
             </tr>
         @endforeach
