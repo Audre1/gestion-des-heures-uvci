@@ -23,7 +23,8 @@
         </a>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un enseignant..." :count="$volumes->count()">
+    <x-data-table search-placeholder="Rechercher un enseignant..." :count="$volumes->count()"
+        export-title="Liste des volumes horaires">
         <x-slot:filters>
             <label class="dt-filter-label">Statut</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(1)">
@@ -176,7 +177,8 @@
                                     <div class="card bg-info bg-opacity-10 border-0">
                                         <div class="card-body text-center">
                                             <h6 class="card-subtitle mb-2 text-muted">Charge</h6>
-                                            <h3 class="card-title fw-bold text-info">{{ $volume['pourcentage'] }}%</h3>
+                                            <h3 class="card-title fw-bold text-info">{{ $volume['pourcentage'] }}%
+                                            </h3>
                                         </div>
                                     </div>
                                 </div>

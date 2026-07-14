@@ -4,6 +4,7 @@
     'showFilters' => true,
     'pageSize' => 10,
     'id' => 'table-' . uniqid(),
+    'exportTitle' => null,
 ])
 
 <div class="card" x-data="DataTable({
@@ -47,10 +48,10 @@
 
             {{-- Actions d'export --}}
             <div class="data-table-actions">
-                <button class="btn btn-sm btn-light border" title="Exporter en CSV" @click="exporterCSV">
+                <button class="btn btn-sm btn-light border" title="Exporter en Excel" @click="exporterExcel">
                     <i class="fa-solid fa-file-excel text-uvci-green"></i>
                 </button>
-                <button class="btn btn-sm btn-light border" title="Imprimer" @click="window.print()">
+                <button class="btn btn-sm btn-light border" title="Exporter en PDF" @click="exporterPDF">
                     <i class="fa-solid fa-file-pdf text-danger"></i>
                 </button>
             </div>
@@ -218,28 +219,94 @@
                     this.majIconesTri();
                 },
 
-                exporterCSV() {
-                    const lignes = [];
+                exporterExcel() {
                     const thead = this.el?.querySelector('thead');
                     if (!thead) return;
                     const ths = thead.querySelectorAll('th');
-                    lignes.push(Array.from(ths).map(th => JSON.stringify(th.textContent.trim())).join(','));
-                    this.filtrees.forEach(d => {
+                    const headers = Array.from(ths).map(th => th.textContent.trim().replace(/\s+/g, ' '));
+                    const rows = this.filtrees.map(d => {
                         const tds = d.el.querySelectorAll('td');
-                        lignes.push(Array.from(tds).map(td => JSON.stringify(td.textContent.trim())).join(','));
+                        return Array.from(tds).map(td => td.textContent.trim().replace(/\s+/g, ' '));
                     });
-                    const csv = '\uFEFF' + lignes.join('\n');
-                    const blob = new Blob([csv], {
-                        type: 'text/csv;charset=utf-8'
+
+                    // Exclure la colonne Actions si elle existe
+                    const lastHeader = headers[headers.length - 1].toLowerCase();
+                    const hasActions = lastHeader === 'actions' || lastHeader === 'action';
+                    const exportHeaders = hasActions ? headers.slice(0, -1) : headers;
+                    const exportRows = hasActions ? rows.map(row => row.slice(0, -1)) : rows;
+
+                    const formData = new FormData();
+                    const title = '{{ $exportTitle ?? 'Export' }}';
+                    formData.append('title', title);
+                    formData.append('headers', JSON.stringify(exportHeaders));
+                    formData.append('rows', JSON.stringify(exportRows));
+
+                    fetch('/export/excel', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            },
+                            body: formData
+                        })
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            const decodedTitle = new DOMParser().parseFromString(title, 'text/html').documentElement
+                                .textContent;
+                            const safeTitle = decodedTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                            a.download = `${safeTitle}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        });
+                },
+
+                exporterPDF() {
+                    const thead = this.el?.querySelector('thead');
+                    if (!thead) return;
+                    const ths = thead.querySelectorAll('th');
+                    const headers = Array.from(ths).map(th => th.textContent.trim().replace(/\s+/g, ' '));
+                    const rows = this.filtrees.map(d => {
+                        const tds = d.el.querySelectorAll('td');
+                        return Array.from(tds).map(td => td.textContent.trim().replace(/\s+/g, ' '));
                     });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `export-${new Date().toISOString().slice(0, 10)}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+
+                    // Exclure la colonne Actions si elle existe
+                    const lastHeader = headers[headers.length - 1].toLowerCase();
+                    const hasActions = lastHeader === 'actions' || lastHeader === 'action';
+                    const exportHeaders = hasActions ? headers.slice(0, -1) : headers;
+                    const exportRows = hasActions ? rows.map(row => row.slice(0, -1)) : rows;
+
+                    const formData = new FormData();
+                    const title = '{{ $exportTitle ?? 'Export' }}';
+                    formData.append('title', title);
+                    formData.append('headers', JSON.stringify(exportHeaders));
+                    formData.append('rows', JSON.stringify(exportRows));
+
+                    fetch('/export/pdf', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            },
+                            body: formData
+                        })
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            const decodedTitle = new DOMParser().parseFromString(title, 'text/html').documentElement
+                                .textContent;
+                            const safeTitle = decodedTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                            a.download = `${safeTitle}-${new Date().toISOString().slice(0, 10)}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        });
                 },
 
                 filtrerColonne(index, valeur) {

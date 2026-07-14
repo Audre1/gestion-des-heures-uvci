@@ -77,7 +77,7 @@
         </div>
     </div>
 
-    <x-data-table search-placeholder="Rechercher un état..." :count="$etatsPaiement->count()">
+    <x-data-table search-placeholder="Rechercher un état..." :count="$etatsPaiement->count()" export-title="Liste des états de paiement">
         <x-slot:filters>
             <label class="dt-filter-label">Grade</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">

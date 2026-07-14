@@ -6,7 +6,8 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher une ressource..." :count="$ressources->count()">
+    <x-data-table search-placeholder="Rechercher une ressource..." :count="$ressources->count()"
+        export-title="Liste des ressources pédagogiques">
         <x-slot:filters>
             <label class="dt-filter-label">Type</label>
             <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(1)">
@@ -30,21 +31,22 @@
                 <td><span class="badge badge-soft-purple">{{ $ressource->typeRessource->libelle }}</span></td>
                 <td>
                     <span class="badge badge-soft-blue">Séq. {{ $ressource->sequence->numero_ordre }}</span>
-                    <div class="text-muted small">{{ $ressource->sequence->cours->code_cours }} — {{ $ressource->sequence->titre }}</div>
+                    <div class="text-muted small">{{ $ressource->sequence->cours->code_cours }} —
+                        {{ $ressource->sequence->titre }}</div>
                 </td>
-                <td class="text-muted">{{ $ressource->date_creation ? $ressource->date_creation->format('d/m/Y') : '-' }}</td>
-                <td class="text-muted">{{ $ressource->date_modification ? $ressource->date_modification->format('d/m/Y') : '-' }}</td>
+                <td class="text-muted">
+                    {{ $ressource->date_creation ? $ressource->date_creation->format('d/m/Y') : '-' }}</td>
+                <td class="text-muted">
+                    {{ $ressource->date_modification ? $ressource->date_modification->format('d/m/Y') : '-' }}</td>
                 <td>
                     <div class="action-btns justify-content-end">
-                        <button type="button" class="btn btn-light border" title="Modifier"
-                            data-bs-toggle="modal"
+                        <button type="button" class="btn btn-light border" title="Modifier" data-bs-toggle="modal"
                             data-bs-target="#editRessourceModal{{ $ressource->id }}">
                             <i class="fa-solid fa-pen text-uvci-green"></i>
                         </button>
 
                         @if ($ressource->activites_pedagogiques_count == 0)
-                            <button type="button" class="btn btn-light border" title="Supprimer"
-                                data-bs-toggle="modal"
+                            <button type="button" class="btn btn-light border" title="Supprimer" data-bs-toggle="modal"
                                 data-bs-target="#deleteRessourceModal{{ $ressource->id }}">
                                 <i class="fa-solid fa-trash text-danger"></i>
                             </button>
@@ -113,8 +115,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Type de ressource <span
                                         class="text-danger">*</span></label>
-                                <select name="id_type"
-                                    class="form-select @error('id_type') is-invalid @enderror" required>
+                                <select name="id_type" class="form-select @error('id_type') is-invalid @enderror"
+                                    required>
                                     <option value="">-- Sélectionner un type --</option>
                                     @foreach (\App\Models\TypeRessource::all() as $type)
                                         <option value="{{ $type->id }}">{{ $type->libelle }}</option>
@@ -126,8 +128,7 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Titre <span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold">Titre <span class="text-danger">*</span></label>
                                 <input type="text" name="titre"
                                     class="form-control @error('titre') is-invalid @enderror"
                                     value="{{ old('titre') }}" maxlength="255" required>
@@ -201,8 +202,8 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Type de ressource <span
                                             class="text-danger">*</span></label>
-                                    <select name="id_type"
-                                        class="form-select @error('id_type') is-invalid @enderror" required>
+                                    <select name="id_type" class="form-select @error('id_type') is-invalid @enderror"
+                                        required>
                                         <option value="">-- Sélectionner un type --</option>
                                         @foreach (\App\Models\TypeRessource::all() as $type)
                                             <option value="{{ $type->id }}"
@@ -263,7 +264,8 @@
                             <div class="alert alert-warning mb-0">
                                 <strong>{{ $ressource->titre }}</strong><br>
                                 <span class="small">{{ $ressource->typeRessource->libelle }}</span><br>
-                                <span class="small">Séq. {{ $ressource->sequence->numero_ordre }} — {{ $ressource->sequence->titre }}
+                                <span class="small">Séq. {{ $ressource->sequence->numero_ordre }} —
+                                    {{ $ressource->sequence->titre }}
                                     ({{ $ressource->sequence->cours->code_cours }})</span>
                             </div>
 

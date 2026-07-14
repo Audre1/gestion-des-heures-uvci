@@ -6,7 +6,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un grade..." :count="$grades->count()" :show-filters="false">
+    <x-data-table search-placeholder="Rechercher un grade..." :count="$grades->count()" :show-filters="false" export-title="Liste des grades">
         <x-slot:head>
             <th>Libellé</th>
             <th>Enseignants</th>

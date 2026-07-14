@@ -8,7 +8,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un cours..." :count="$cours->count()">
+    <x-data-table search-placeholder="Rechercher un cours..." :count="$cours->count()" export-title="Liste des cours">
         <x-slot:filters>
             <label class="dt-filter-label">Crédits</label>
             <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(3)">
@@ -130,7 +130,8 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Crédits <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold">Crédits <span
+                                        class="text-danger">*</span></label>
                                 <input type="number" name="nombre_credits" id="nombre_credits"
                                     class="form-control @error('nombre_credits') is-invalid @enderror"
                                     placeholder="Calculé automatiquement" min="0" step="1" readonly>

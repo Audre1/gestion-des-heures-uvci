@@ -5,7 +5,8 @@
 
 
 
-    <x-data-table search-placeholder="Rechercher une activité..." :count="5" :show-filters="true">
+    <x-data-table search-placeholder="Rechercher une activité..." :count="5" :show-filters="true"
+        export-title="Mes activités pédagogiques">
         <x-slot:filters>
             <label class="dt-filter-label">Type</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(1)">

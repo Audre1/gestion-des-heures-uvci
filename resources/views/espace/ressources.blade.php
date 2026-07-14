@@ -1,7 +1,7 @@
 <x-app-page title="Mes ressources" section="Espace Enseignant" icon="fa-solid fa-book-open"
     subtitle="Ressources pédagogiques associées à vos cours.">
 
-    <x-data-table search-placeholder="Rechercher une ressource..." :count="5">
+    <x-data-table search-placeholder="Rechercher une ressource..." :count="5" export-title="Liste des ressources pédagogiques">
         <x-slot:filters>
             <label class="dt-filter-label">Type</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(1)">

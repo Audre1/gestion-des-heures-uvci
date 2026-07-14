@@ -6,7 +6,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un département..." :count="$departements->count()">
+    <x-data-table search-placeholder="Rechercher un département..." :count="$departements->count()" export-title="Liste des départements">
         <x-slot:filters>
             <label class="dt-filter-label">Code</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(0)">
@@ -148,7 +148,8 @@
                                 {{ $departement->nom_departement }}</small>
                         </div>
 
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Fermer"></button>
                     </div>
 
                     <form action="{{ route('departements.update', $departement->id) }}" method="POST">

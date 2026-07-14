@@ -6,7 +6,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un utilisateur..." :count="$utilisateurs->count()">
+    <x-data-table search-placeholder="Rechercher un utilisateur..." :count="$utilisateurs->count()" export-title="Liste des utilisateurs">
         <x-slot:filters>
             <label class="dt-filter-label">Rôle</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">
