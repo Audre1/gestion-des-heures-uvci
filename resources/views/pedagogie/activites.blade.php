@@ -7,7 +7,8 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher une activité..." :count="$activites->count()">
+    <x-data-table search-placeholder="Rechercher une activité..." :count="$activites->count()"
+        export-title="Liste des activités pédagogiques">
         <x-slot:filters>
             <label class="dt-filter-label">Type</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">

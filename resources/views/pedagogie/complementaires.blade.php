@@ -56,7 +56,8 @@
         </div>
     </div>
 
-    <x-data-table search-placeholder="Rechercher un enseignant..." :count="$complementaires->count()">
+    <x-data-table search-placeholder="Rechercher un enseignant..." :count="$complementaires->count()"
+        export-title="Liste des heures complémentaires">
         <x-slot:filters>
             <label class="dt-filter-label">Grade</label>
             <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(1)">

@@ -1,7 +1,8 @@
 <x-app-page title="Journaux d'activités" section="Administration" icon="fa-solid fa-clipboard-list"
     subtitle="Traçabilité des actions réalisées dans le système.">
 
-    <x-data-table search-placeholder="Rechercher dans les journaux..." :count="$journaux->count()">
+    <x-data-table search-placeholder="Rechercher dans les journaux..." :count="$journaux->count()"
+        export-title="Liste des journaux d'activités">
         <x-slot:filters>
             <label class="dt-filter-label">Action</label>
             <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(2)">

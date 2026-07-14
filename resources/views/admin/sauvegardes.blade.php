@@ -44,7 +44,8 @@
         </div>
     </div>
 
-    <x-data-table search-placeholder="Rechercher une sauvegarde..." :count="count($backups)" :show-filters="false">
+    <x-data-table search-placeholder="Rechercher une sauvegarde..." :count="count($backups)" :show-filters="false"
+        export-title="Liste des sauvegardes">
         <x-slot:head>
             <th>Fichier</th>
             <th>Date</th>

@@ -6,7 +6,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher une filière..." :count="$filieres->count()">
+    <x-data-table search-placeholder="Rechercher une filière..." :count="$filieres->count()" export-title="Liste des filières">
         <x-slot:filters>
             <label class="dt-filter-label">Département</label>
             <select class="form-select form-select-sm dt-filter-select" onchange="filtrerDataTable(2)">
@@ -298,7 +298,8 @@
 
                             <div class="alert alert-info mt-4 mb-0">
                                 <i class="fa-solid fa-circle-info me-2"></i>
-                                Un cours ne peut être associé qu'une seule fois à une filière (peu importe le semestre/niveau).
+                                Un cours ne peut être associé qu'une seule fois à une filière (peu importe le
+                                semestre/niveau).
                             </div>
                         </div>
 

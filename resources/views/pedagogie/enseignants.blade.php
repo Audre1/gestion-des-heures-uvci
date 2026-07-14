@@ -6,7 +6,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher par nom, matricule..." :count="$enseignants->count()">
+    <x-data-table search-placeholder="Rechercher par nom, matricule..." :count="$enseignants->count()" export-title="Liste des enseignants">
         <x-slot:filters>
             <label class="dt-filter-label">Département</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(2)">
@@ -156,7 +156,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Confirmer le mot de passe <span
                                         class="text-danger">*</span></label>
-                                <input type="password" name="mot_de_passe_confirmation" class="form-control" required>
+                                <input type="password" name="mot_de_passe_confirmation" class="form-control"
+                                    required>
                             </div>
                         </div>
                         <div class="alert alert-info mb-4">

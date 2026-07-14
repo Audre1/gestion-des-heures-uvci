@@ -10,6 +10,7 @@ use App\Http\Controllers\PedagogieController;
 use App\Http\Controllers\RapportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,14 @@ Route::post('/renvoyer-code', [AuthController::class, 'resendCode'])->name('pass
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/tableau-de-bord', [DashboardController::class, 'index']);
+
+    /*
+|--------------------------------------------------------------------------
+| Exports
+|--------------------------------------------------------------------------
+*/
+    Route::post('/export/pdf', [ExportController::class, 'exportPDF'])->name('export.pdf');
+    Route::post('/export/excel', [ExportController::class, 'exportExcel'])->name('export.excel');
 
 
     /*

@@ -7,7 +7,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un taux..." :count="$taux->count()">
+    <x-data-table search-placeholder="Rechercher un taux..." :count="$taux->count()" export-title="Liste taux horaires">
         <x-slot:filters>
             <label class="dt-filter-label">Grade</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(0)">

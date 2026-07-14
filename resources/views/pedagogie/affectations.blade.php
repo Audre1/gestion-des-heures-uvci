@@ -6,7 +6,7 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher une affectation..." :count="$affectations->count()">
+    <x-data-table search-placeholder="Rechercher une affectation..." :count="$affectations->count()" export-title="Liste des affectations">
         <x-slot:filters>
             <label class="dt-filter-label">Cours</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(1)">
@@ -142,8 +142,7 @@
                                             $dejaAffecte = $idsAffectes->contains($key);
                                         @endphp
                                         @if (!$dejaAffecte)
-                                            <option value="{{ $item->id }}"
-                                                data-niveau="{{ $item->niveau }}"
+                                            <option value="{{ $item->id }}" data-niveau="{{ $item->niveau }}"
                                                 data-semestre="{{ $item->semestre }}">
                                                 {{ $item->code_cours }} — {{ $item->intitule }}
                                                 ({{ $item->niveau }} - {{ $item->semestre }})
@@ -229,7 +228,8 @@
             }
 
             // Pour les modales d'édition : mettre à jour les champs cachés
-            document.querySelectorAll('[id^="editAffectationModal"] select[name="id_cours"]').forEach(function(select) {
+            document.querySelectorAll('[id^="editAffectationModal"] select[name="id_cours"]').forEach(function(
+                select) {
                 const modal = select.closest('.modal');
                 const id = modal.id.replace('editAffectationModal', '');
                 const editNiveau = document.getElementById('editNiveau' + id);
@@ -309,7 +309,8 @@
                                             @php
                                                 $key = $item->id . '-' . $item->niveau . '-' . $item->semestre;
                                                 $dejaAffecte = $idsAffectes->contains($key);
-                                                $estCourant = $affectation->id_cours == $item->id &&
+                                                $estCourant =
+                                                    $affectation->id_cours == $item->id &&
                                                     $affectation->niveau == $item->niveau &&
                                                     $affectation->semestre == $item->semestre;
                                             @endphp
@@ -329,8 +330,10 @@
                                     @enderror
                                 </div>
 
-                                <input type="hidden" name="niveau" id="editNiveau{{ $affectation->id }}" value="{{ $affectation->niveau }}">
-                                <input type="hidden" name="semestre" id="editSemestre{{ $affectation->id }}" value="{{ $affectation->semestre }}">
+                                <input type="hidden" name="niveau" id="editNiveau{{ $affectation->id }}"
+                                    value="{{ $affectation->niveau }}">
+                                <input type="hidden" name="semestre" id="editSemestre{{ $affectation->id }}"
+                                    value="{{ $affectation->semestre }}">
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Année académique <span
@@ -400,7 +403,8 @@
                                     {{ $affectation->enseignant->utilisateur->nom }}</strong><br>
                                 <span class="small">{{ $affectation->cours->code_cours }} —
                                     {{ $affectation->cours->intitule }}</span><br>
-                                <span class="small">{{ $affectation->niveau }} - {{ $affectation->semestre }}</span><br>
+                                <span class="small">{{ $affectation->niveau }} -
+                                    {{ $affectation->semestre }}</span><br>
                                 <span class="small">{{ $affectation->anneeAcademique->libelle }}</span>
                             </div>
 
