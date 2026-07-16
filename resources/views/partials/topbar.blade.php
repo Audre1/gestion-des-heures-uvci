@@ -6,33 +6,28 @@
     {{-- Barre de recherche adaptée au rôle --}}
     <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="search" class="form-control" placeholder="{{ $searchPlaceholder }}"
-               id="globalSearch" autocomplete="off">
+        <input type="search" class="form-control" placeholder="{{ $searchPlaceholder }}" id="globalSearch"
+            autocomplete="off">
     </div>
 
     <div class="topbar-actions">
         {{-- Sélecteur d'année académique --}}
         <div class="dropdown d-none d-md-block me-2">
-            <button class="btn btn-sm btn-light border dropdown-toggle d-flex align-items-center gap-1" data-bs-toggle="dropdown">
+            <button class="btn btn-sm btn-light border d-flex align-items-center gap-1" data-bs-toggle="dropdown">
                 <i class="fa-solid fa-calendar-days text-uvci-green"></i>
                 <span>{{ $currentYear?->libelle ?? 'Année non définie' }}</span>
             </button>
             <ul class="dropdown-menu">
-                @forelse ($allYears as $year)
-                    @php $badge = $yearStatusBadge($year->statut); @endphp
+                @if ($currentYear)
                     <li>
-                        <a class="dropdown-item d-flex align-items-center justify-content-between {{ $year->statut === 'en_cours' ? 'active' : '' }}"
-                           href="#"
-                           data-year-id="{{ $year->id }}">
-                            {{ $year->libelle }}
-                            @if ($badge)
-                                <span class="badge {{ $badge['class'] }} ms-2" style="font-size:.65rem">{{ $badge['label'] }}</span>
-                            @endif
+                        <a class="dropdown-item d-flex align-items-center justify-content-between active"
+                            href="#">{{ $currentYear->libelle }} <span class="badge bg-gray ms-2"
+                            style="font-size:.65rem">En cours</span>
                         </a>
                     </li>
-                @empty
+                @else
                     <li><span class="dropdown-item text-muted">Aucune année</span></li>
-                @endforelse
+                @endif
             </ul>
         </div>
 
@@ -81,7 +76,9 @@
                     </li>
                 @endif
 
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
                 <li>
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf

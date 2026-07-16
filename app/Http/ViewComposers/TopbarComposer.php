@@ -16,7 +16,6 @@ class TopbarComposer
         $utilisateur = Auth::user();
 
         $currentYear = AnneeAcademique::where('statut', 'en_cours')->first();
-        $allYears    = AnneeAcademique::orderBy('date_debut', 'desc')->get();
         $userRole    = $utilisateur?->role?->code;
 
         // Placeholder de recherche adapté au rôle
@@ -47,7 +46,6 @@ class TopbarComposer
 
         $view->with(compact(
             'currentYear',
-            'allYears',
             'userRole',
             'searchPlaceholder',
             'userName',
