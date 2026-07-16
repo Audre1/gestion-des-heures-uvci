@@ -81,23 +81,71 @@ Un guide complet est disponible dans le fichier [`docs/MANUEL_UTILISATION.md`](d
 - **Secrétaire** : gestion pédagogique, activités, paiements, rapports
 - **Enseignant** : espace personnel, consultation, documents
 
+## Base de données
+
+L'application utilise **MySQL** comme système de gestion de base de données. Les fichiers de migration et de seed sont déjà en place.
+
+### Configuration
+
+1. Créez une base de données MySQL nommée `uvci_ptc` (ou un autre nom de votre choix).
+2. Configurez vos identifiants de connexion dans le fichier `.env` :
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=uvci_ptc
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+## Email
+
+L'application utilise l'envoi d'emails pour la réinitialisation du mot de passe (envoi du code OTP à 6 chiffres).
+
+### Configuration
+
+Dans le fichier `.env`, configurez le service d'envoi d'emails selon votre environnement :
+
+**En développement (logs)** :
+```
+MAIL_MAILER=log
+```
+Les emails seront écrits dans le fichier de log au lieu d'être réellement envoyés.
+
+**Avec un service SMTP** (ex : Gmail, Mailtrap, etc.) :
+```
+  MAIL_MAILER=smtp
+  MAIL_HOST=smtp.gmail.com
+  MAIL_PORT=587
+  MAIL_USERNAME=votre.email@gmail.com
+  MAIL_PASSWORD=votre-mot-de-passe-d-application
+  MAIL_ENCRYPTION=tls
+  MAIL_FROM_ADDRESS="noreply@uvci.ci"
+  MAIL_FROM_NAME="${APP_NAME}"
+```
+
+> 💡 Pour Gmail, utilisez un **mot de passe d'application** (Application Password) plutôt que votre mot de passe personnel.
+> Pour tester en développement, [Mailtrap](https://mailtrap.io) est une excellente alternative.
+
 ## Démarrage
 
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
+php artisan migrate
+php artisan db:seed
 php artisan serve
 ```
 
 Puis ouvrir http://127.0.0.1:8000.
 
-> **Comptes de démonstration** :
-> - Admin : `admin ou admin@uvci.ci` / `admin123`
-> - Secrétaire : `secretaire ou secretaire@uvci.ci` / `secretaire123`
-> - Enseignant : `enseignant ou enseignant@uvci.ci` / `enseignant123`
+> **Comptes de démonstration** (créés par les seeders) :
+> - **Admin** : `admin@uvci.ci` / `admin123`
+> - **Secrétaire** : `secretaire@uvci.ci` / `secretaire123`
+> - **Enseignant** : `enseignant@uvci.ci` / `enseignant123`
 >
-> *(à adapter selon votre configuration)*
+> Les seeders créent également des données de démonstration : enseignants, grades, départements, cours, affectations, activités, etc.
 
 ## Structure du projet
 
