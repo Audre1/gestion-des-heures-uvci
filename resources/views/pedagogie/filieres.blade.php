@@ -6,6 +6,15 @@
         </button>
     </x-slot:actions>
 
+    @php
+        // Extraire le paramètre highlight de l'URL
+$highlightParam = request()->get('highlight');
+$highlightId = null;
+if ($highlightParam && str_contains($highlightParam, 'filiere:')) {
+    $highlightId = str_replace('filiere:', '', $highlightParam);
+        }
+    @endphp
+
     <x-data-table search-placeholder="Rechercher une filière..." :count="$filieres->count()" export-title="Liste des filières">
         <x-slot:filters>
             <label class="dt-filter-label">Département</label>
@@ -24,7 +33,7 @@
             <th class="text-end">Actions</th>
         </x-slot:head>
         @forelse($filieres as $filiere)
-            <tr>
+            <tr class="{{ $highlightId == $filiere->id ? 'highlight-row' : '' }}">
                 <td class="font-monospace fw-semibold text-uvci-purple">{{ $filiere->code_filiere }}</td>
                 <td class="fw-semibold"><i
                         class="fa-solid fa-diagram-project text-uvci-purple me-2"></i>{{ $filiere->nom_filiere }}</td>
@@ -457,3 +466,25 @@
         </script>
     @endif
 </x-app-page>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Si un élément est highlighté, faire défiler jusqu'à lui
+            const highlightedRow = document.querySelector('.highlight-row');
+            if (highlightedRow) {
+                highlightedRow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Nettoyer l'URL après 3 secondes
+                setTimeout(() => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('highlight');
+                    window.history.replaceState({}, '', url);
+                }, 3000);
+            }
+        });
+    </script>
+@endpush

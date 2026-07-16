@@ -97,7 +97,7 @@
 
                 <td>
                     <span class="badge badge-soft-green">
-                        {{ $activite->statut }}
+                        {{ ucfirst(str_replace('_', ' ', $activite->statut)) }}
                     </span>
                 </td>
 
@@ -149,7 +149,7 @@
                                 <label class="form-label text-muted small mb-1">Statut</label>
                                 <div>
                                     <span class="badge badge-soft-green">
-                                        {{ $activite->statut }}
+                                        {{ ucfirst(str_replace('_', ' ', $activite->statut)) }}
                                     </span>
                                 </div>
                             </div>

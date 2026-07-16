@@ -171,9 +171,16 @@ class DashboardController extends Controller
         $stats['heures_complementaires'] = round($enseignants->sum('complementaires'), 1);
 
         return view('dashboard-admin', compact(
-            'stats', 'currentYear', 'volumesParDepartement', 'maxVolume',
-            'repartitionActivites', 'activitesRecentes', 'enseignants',
-            'serviceStatutaire', 'chartLabels', 'chartData'
+            'stats',
+            'currentYear',
+            'volumesParDepartement',
+            'maxVolume',
+            'repartitionActivites',
+            'activitesRecentes',
+            'enseignants',
+            'serviceStatutaire',
+            'chartLabels',
+            'chartData'
         ));
     }
 
@@ -191,7 +198,7 @@ class DashboardController extends Controller
                 $q->where('id_annee', $currentYearId);
             })->count(),
             'affectations'         => AffectationCours::where('id_annee', $currentYearId)->count(),
-            'activites_en_attente' => ActivitePedagogique::where('statut', 'en_attente')
+            'activites_en_attente' => ActivitePedagogique::where('statut', 'en_cours')
                 ->whereHas('affectationCours', function ($q) use ($currentYearId) {
                     $q->where('id_annee', $currentYearId);
                 })
@@ -204,7 +211,7 @@ class DashboardController extends Controller
             'affectationCours.cours',
             'niveauComplexite',
         ])
-            ->where('statut', 'en_attente')
+            ->where('statut', 'en_cours')
             ->whereHas('affectationCours', function ($q) use ($currentYearId) {
                 $q->where('id_annee', $currentYearId);
             })
@@ -242,7 +249,10 @@ class DashboardController extends Controller
             });
 
         return view('dashboard-secretaire', compact(
-            'stats', 'currentYear', 'activitesEnAttente', 'dernieresAffectations'
+            'stats',
+            'currentYear',
+            'activitesEnAttente',
+            'dernieresAffectations'
         ));
     }
 
@@ -283,16 +293,25 @@ class DashboardController extends Controller
         $volumeRealise = $activites->where('statut', 'validee')->sum('volume_horaire');
         $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
+        // Volume total prévu (basé sur les affectations et les heures des cours)
+        $volumeTotal = 0;
+        foreach ($affectations as $affectation) {
+            if ($affectation->cours) {
+                $volumeTotal += $affectation->cours->nombre_heures;
+            }
+        }
+
         // Stats personnelles
         $stats = [
             'cours_assignes'        => $affectations->count(),
-            'volume_total'          => $affectations->sum('volume_horaire'),
+            'volume_total'          => $volumeTotal,
             'volume_realise'        => $volumeRealise,
             'heures_complementaires' => $heuresComplementaires,
-            'activites_en_attente'  => $activites->where('statut', 'en_attente')->count(),
+            'activites_en_cours'    => $activites->where('statut', 'en_cours')->count(),
             'activites_validees'    => $activites->where('statut', 'validee')->count(),
-            'taux_realisation'      => $affectations->sum('volume_horaire') > 0
-                ? round(($volumeRealise / $affectations->sum('volume_horaire')) * 100)
+            'activites_rejetees'    => $activites->where('statut', 'rejetee')->count(),
+            'taux_realisation'      => $serviceStatutaire > 0
+                ? round(($volumeRealise / $serviceStatutaire) * 100)
                 : 0,
         ];
 
@@ -314,8 +333,13 @@ class DashboardController extends Controller
         });
 
         return view('dashboard-enseignant', compact(
-            'stats', 'currentYear', 'affectations', 'activitesRecentes',
-            'serviceStatutaire', 'volumeRealise', 'heuresComplementaires'
+            'stats',
+            'currentYear',
+            'affectations',
+            'activitesRecentes',
+            'serviceStatutaire',
+            'volumeRealise',
+            'heuresComplementaires'
         ));
     }
 }

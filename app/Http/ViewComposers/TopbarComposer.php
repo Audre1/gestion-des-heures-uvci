@@ -20,7 +20,7 @@ class TopbarComposer
 
         // Placeholder de recherche adapté au rôle
         $searchPlaceholder = match ($userRole) {
-            'admin'      => 'Rechercher un enseignant, un cours, une filière...',
+            'admin'      => 'Rechercher par utilisateur, une année, un niveau de complexité...',
             'secretaire' => 'Rechercher un enseignant, un cours, une filière...',
             'enseignant' => 'Rechercher dans mes activités, mes cours...',
             default      => 'Rechercher...',

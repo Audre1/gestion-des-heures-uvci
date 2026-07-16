@@ -6,7 +6,17 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un département..." :count="$departements->count()" export-title="Liste des départements">
+    @php
+        // Extraire le paramètre highlight de l'URL
+$highlightParam = request()->get('highlight');
+$highlightId = null;
+if ($highlightParam && str_contains($highlightParam, 'departement:')) {
+    $highlightId = str_replace('departement:', '', $highlightParam);
+        }
+    @endphp
+
+    <x-data-table search-placeholder="Rechercher un département..." :count="$departements->count()"
+        export-title="Liste des départements">
         <x-slot:filters>
             <label class="dt-filter-label">Code</label>
             <select class="form-select form-select-sm dt-filter-select mb-3" onchange="filtrerDataTable(0)">
@@ -32,7 +42,7 @@
         </x-slot:head>
 
         @forelse($departements as $departement)
-            <tr>
+            <tr class="{{ $highlightId == $departement->id ? 'highlight-row' : '' }}">
                 <td class="font-monospace fw-semibold text-uvci-purple">{{ $departement->code_departement }}</td>
                 <td class="fw-semibold"><i
                         class="fa-solid fa-building-columns text-uvci-green me-2"></i>{{ $departement->nom_departement }}
@@ -257,3 +267,25 @@
         </script>
     @endif
 </x-app-page>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Si un élément est highlighté, faire défiler jusqu'à lui
+            const highlightedRow = document.querySelector('.highlight-row');
+            if (highlightedRow) {
+                highlightedRow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Nettoyer l'URL après 3 secondes
+                setTimeout(() => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('highlight');
+                    window.history.replaceState({}, '', url);
+                }, 3000);
+            }
+        });
+    </script>
+@endpush

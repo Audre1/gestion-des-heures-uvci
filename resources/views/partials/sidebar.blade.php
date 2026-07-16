@@ -52,7 +52,7 @@
             </a>
         @endif
 
-        {{-- Gestion pédagogique (admin + secretaire) --}}
+        {{-- Gestion pédagogique (secretaire uniquement) --}}
         @if ($userRole === 'secretaire')
             <div class="nav-section-title">Gestion pédagogique</div>
             <a href="{{ route('grades.index') }}"
@@ -98,9 +98,11 @@
                 <i class="fa-solid fa-shapes"></i> Types de ressources
             </a>
 
+            {{-- Activités pédagogiques --}}
+            <div class="nav-section-title">Activités pédagogiques</div>
             <a href="{{ route('activites.index') }}"
                 class="nav-link {{ request()->routeIs('activites.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-list-check"></i> Activités pédagogiques
+                <i class="fa-solid fa-list-check"></i> Activités
             </a>
 
             {{-- Volumes & Paiements --}}
@@ -126,7 +128,7 @@
             </a>
         @endif
 
-        {{-- Espace Enseignant (admin + secretaire + enseignant) --}}
+        {{-- Espace Enseignant (enseignant) --}}
         @if ($userRole === 'enseignant')
             <div class="nav-section-title">Espace Enseignant</div>
             <a href="{{ route('espace.activites') }}"
@@ -161,8 +163,7 @@
             <i class="fa-solid fa-user"></i> Mon profil
         </a>
 
-        <a href="{{ route('login') }}" class="nav-link"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#logoutModal">
             <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
         </a>
         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>

@@ -1,12 +1,31 @@
 <x-app-page title="Mes documents" section="Espace Enseignant" icon="fa-solid fa-download"
     subtitle="Téléchargez vos récapitulatifs et fiches individuelles.">
 
+    {{-- Sélecteur d'année académique --}}
+    <div class="row g-3 mb-4">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-body">
+                    <label class="form-label fw-semibold"><i
+                            class="fa-solid fa-calendar-days text-uvci-purple me-2"></i>Année académique</label>
+                    <select id="selectAnnee" class="form-select" onchange="updateDocumentLinks()">
+                        @foreach ($annees as $annee)
+                            <option value="{{ $annee->id }}" {{ $annee->statut === 'en_cours' ? 'selected' : '' }}>
+                                {{ $annee->libelle }} {{ $annee->statut === 'en_cours' ? '(En cours)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3">
         @php
             $docs = [
                 [
                     'Récapitulatif d\'activités',
-                    'Bilan complet de vos activités pédagogiques 2024-2025.',
+                    'Bilan complet de vos activités pédagogiques.',
                     'fa-folder-tree',
                     'green',
                     'documents.recapitulatif',
@@ -37,18 +56,35 @@
                         <p class="text-muted small">{{ $desc }}</p>
                     </div>
                     <div class="card-footer bg-white">
-                        @if ($route != '#')
-                            <a href="{{ route($route) }}" class="btn btn-uvci w-100">
-                            @else
-                                <a href="#" class="btn btn-secondary w-100">
-                        @endif
-
-                        <i class="fa-solid fa-file-pdf me-1"></i> Télécharger (PDF)
-
+                        <a href="{{ route($route) }}" class="btn btn-uvci w-100 document-link"
+                            data-route="{{ $route }}">
+                            <i class="fa-solid fa-file-pdf me-1"></i> Télécharger (PDF)
                         </a>
                     </div>
                 </div>
             </div>
         @endforeach
     </div>
+
+    @push('scripts')
+        <script>
+            const routes = {
+                'documents.recapitulatif': "{{ route('documents.recapitulatif') }}",
+                'documents.fiche': "{{ route('documents.fiche') }}",
+                'documents.heures': "{{ route('documents.heures') }}",
+            };
+
+            function updateDocumentLinks() {
+                const anneeId = document.getElementById('selectAnnee').value;
+                document.querySelectorAll('.document-link').forEach(link => {
+                    const route = link.dataset.route;
+                    link.href = routes[route] + '?annee=' + anneeId;
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                updateDocumentLinks();
+            });
+        </script>
+    @endpush
 </x-app-page>

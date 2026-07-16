@@ -6,6 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ActivitePedagogique;
 use App\Models\ParametreCalcul;
+use App\Models\AnneeAcademique;
 
 
 class DocumentController extends Controller
@@ -19,12 +20,17 @@ class DocumentController extends Controller
     public function recapitulatifActivites()
     {
         $idEnseignant = Auth::user()->enseignant->id;
+        $anneeId = request()->get('annee');
 
-
+        // Récupérer l'année académique ou utiliser l'année active par défaut
+        $annee = $anneeId ? AnneeAcademique::find($anneeId) : AnneeAcademique::where('statut', 'en_cours')->first();
 
         $activites = ActivitePedagogique::query()
-            ->whereHas('affectationCours', function ($query) use ($idEnseignant) {
+            ->whereHas('affectationCours', function ($query) use ($idEnseignant, $annee) {
                 $query->where('id_enseignant', $idEnseignant);
+                if ($annee) {
+                    $query->where('id_annee', $annee->id);
+                }
             })
             ->with([
                 'affectationCours.cours',
@@ -38,49 +44,55 @@ class DocumentController extends Controller
         }
 
         // Formater les données pour le template générique
-        $headers = ['Date', 'Cours', 'Type', 'Niveau', 'Complexité', 'Volume (h)', 'Statut'];
+        $headers = ['Date', 'Cours', 'Type', 'Volume (h)', 'Statut'];
         $rows = $activites->map(function ($activite) {
             return [
                 $activite->date_activite->format('d/m/Y'),
                 $activite->affectationCours->cours->code_cours . ' - ' . $activite->affectationCours->cours->intitule,
                 $activite->type_activite === 'creation' ? 'Création' : 'Mise à jour',
-                $activite->affectationCours->niveau ?? '-',
-                $activite->niveauComplexite->libelle ?? '-',
                 $activite->volume_horaire,
-                ucfirst($activite->statut),
+                ucfirst(str_replace('_', ' ', $activite->statut)),
             ];
         })->toArray();
 
+        $anneeLibelle = $annee ? $annee->libelle : 'Toutes années';
+        $anneeSlug = $annee ? str_replace('/', '-', $annee->libelle) : 'toutes-annees';
+
         $pdf = Pdf::loadView('exports.pdf-template', [
-            'title' => 'Récapitulatif des Activités Pédagogiques',
+            'title' => 'Récapitulatif des Activités Pédagogiques - ' . $anneeLibelle,
             'date' => now()->format('d/m/Y H:i'),
             'logo' => $this->logo(),
             'headers' => $headers,
             'rows' => $rows,
         ]);
 
-        return $pdf->download('recapitulatif-activites.pdf');
+        return $pdf->download('recapitulatif-activites-' . $anneeSlug . '.pdf');
     }
 
 
     public function ficheIndividuelle()
     {
         $enseignant = Auth::user()->enseignant;
-
         $idEnseignant = $enseignant->id;
+        $anneeId = request()->get('annee');
 
-        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
-        $params = ParametreCalcul::anneeActive()->first();
+        // Récupérer l'année académique ou utiliser l'année active par défaut
+        $annee = $anneeId ? AnneeAcademique::find($anneeId) : AnneeAcademique::where('statut', 'en_cours')->first();
+
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année
+        $params = $annee ? ParametreCalcul::where('annee_id', $annee->id)->first() : null;
         $serviceStatutaire = $params ? $params->service_statutaire : 10;
 
-        $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
+        $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant, $annee) {
             $query->where('id_enseignant', $idEnseignant);
+            if ($annee) {
+                $query->where('id_annee', $annee->id);
+            }
         })
             ->where('statut', 'validee')
             ->get();
 
         $volumeRealise = $activites->sum('volume_horaire');
-
         $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
         if (function_exists('logActivite')) {
@@ -93,35 +105,45 @@ class DocumentController extends Controller
             ['Nom complet', $enseignant->utilisateur->prenom . ' ' . $enseignant->utilisateur->nom],
             ['Grade', $enseignant->grade->libelle ?? '-'],
             ['Département', $enseignant->departement->nom_departement ?? '-'],
+            ['Année académique', $annee ? $annee->libelle : '-'],
             ['Service statutaire', $serviceStatutaire . ' h'],
             ['Volume réalisé', $volumeRealise . ' h'],
             ['Heures complémentaires', $heuresComplementaires . ' h'],
             ['Charge globale', $serviceStatutaire > 0 ? round(($volumeRealise / $serviceStatutaire) * 100) . '%' : '0%'],
         ];
 
+        $anneeLibelle = $annee ? $annee->libelle : 'Toutes années';
+        $anneeSlug = $annee ? str_replace('/', '-', $annee->libelle) : 'toutes-annees';
+
         $pdf = Pdf::loadView('exports.pdf-template', [
-            'title' => 'Fiche Individuelle Enseignant',
+            'title' => 'Fiche Individuelle Enseignant - ' . $anneeLibelle,
             'date' => now()->format('d/m/Y H:i'),
             'logo' => $this->logo(),
             'headers' => $headers,
             'rows' => $rows,
         ]);
 
-        return $pdf->download('fiche-individuelle.pdf');
+        return $pdf->download('fiche-individuelle-' . $anneeSlug . '.pdf');
     }
 
     public function etatHeures()
     {
         $enseignant = Auth::user()->enseignant;
-
         $idEnseignant = $enseignant->id;
+        $anneeId = request()->get('annee');
 
-        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
-        $params = ParametreCalcul::anneeActive()->first();
+        // Récupérer l'année académique ou utiliser l'année active par défaut
+        $annee = $anneeId ? AnneeAcademique::find($anneeId) : AnneeAcademique::where('statut', 'en_cours')->first();
+
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année
+        $params = $annee ? ParametreCalcul::where('annee_id', $annee->id)->first() : null;
         $serviceStatutaire = $params ? $params->service_statutaire : 10;
 
-        $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant) {
+        $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant, $annee) {
             $query->where('id_enseignant', $idEnseignant);
+            if ($annee) {
+                $query->where('id_annee', $annee->id);
+            }
         })
             ->where('statut', 'validee')
             ->with([
@@ -130,7 +152,6 @@ class DocumentController extends Controller
             ->get();
 
         $volumeRealise = $activites->sum('volume_horaire');
-
         $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
 
         if (function_exists('logActivite')) {
@@ -144,7 +165,7 @@ class DocumentController extends Controller
                 $activite->date_activite->format('d/m/Y'),
                 $activite->affectationCours->cours->code_cours . ' - ' . $activite->affectationCours->cours->intitule,
                 $activite->volume_horaire,
-                ucfirst($activite->statut),
+                ucfirst(str_replace('_', ' ', $activite->statut)),
             ];
         })->toArray();
 
@@ -154,14 +175,17 @@ class DocumentController extends Controller
         $rows[] = ['Service statutaire', $serviceStatutaire . ' h', '', ''];
         $rows[] = ['Heures complémentaires', $heuresComplementaires . ' h', '', ''];
 
+        $anneeLibelle = $annee ? $annee->libelle : 'Toutes années';
+        $anneeSlug = $annee ? str_replace('/', '-', $annee->libelle) : 'toutes-annees';
+
         $pdf = Pdf::loadView('exports.pdf-template', [
-            'title' => 'État des Heures',
+            'title' => 'État des Heures - ' . $anneeLibelle,
             'date' => now()->format('d/m/Y H:i'),
             'logo' => $this->logo(),
             'headers' => $headers,
             'rows' => $rows,
         ]);
 
-        return $pdf->download('etat-heures.pdf');
+        return $pdf->download('etat-heures-' . $anneeSlug . '.pdf');
     }
 }

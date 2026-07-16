@@ -8,6 +8,7 @@ use App\Http\Controllers\EspaceController;
 use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\PedagogieController;
 use App\Http\Controllers\RapportController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExportController;
@@ -17,9 +18,9 @@ use App\Http\Controllers\ExportController;
 | Web Routes
 |--------------------------------------------------------------------------
 | Les middlewares de rôles sont appliqués selon les règles définies dans la sidebar :
-|   - admin      → Administration + Gestion pédagogique + Espace Enseignant
-|   - secretaire → Gestion pédagogique + Espace Enseignant
-|   - enseignant → Espace Enseignant + Profil
+|   - admin      → Administration   
+|   - secretaire → Gestion pédagogique
+|   - enseignant → Espace Enseignant
 */
 
 // ─── Authentification (public) ──────────────────────────────────────────────
@@ -44,9 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/tableau-de-bord', [DashboardController::class, 'index']);
 
+
     // Exports (tous les rôles)
     Route::post('/export/pdf', [ExportController::class, 'exportPDF'])->name('export.pdf');
     Route::post('/export/excel', [ExportController::class, 'exportExcel'])->name('export.excel');
+
+    // Recherche globale
+    Route::get('/recherche', [SearchController::class, 'search'])->name('search');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -92,7 +98,6 @@ Route::middleware('auth')->group(function () {
     | Gestion pédagogique (admin + secretaire)
     |--------------------------------------------------------------------------
     */
-    // Route::middleware('role:admin,secretaire')->group(function () {
     Route::middleware('secretaire')->group(function () {
         // Enseignants
         Route::get('/enseignants', [PedagogieController::class, 'enseignants'])->name('enseignants.index');
@@ -206,7 +211,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/documents/etat-heures', [DocumentController::class, 'etatHeures'])->name('documents.heures');
     });
 
-    
+
     /*
     |--------------------------------------------------------------------------
     | Compte (tous les rôles connectés)

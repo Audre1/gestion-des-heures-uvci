@@ -6,7 +6,17 @@
         </button>
     </x-slot:actions>
 
-    <x-data-table search-placeholder="Rechercher un grade..." :count="$grades->count()" :show-filters="false" export-title="Liste des grades">
+    @php
+        // Extraire le paramètre highlight de l'URL
+$highlightParam = request()->get('highlight');
+$highlightId = null;
+if ($highlightParam && str_contains($highlightParam, 'grade:')) {
+    $highlightId = str_replace('grade:', '', $highlightParam);
+        }
+    @endphp
+
+    <x-data-table search-placeholder="Rechercher un grade..." :count="$grades->count()" :show-filters="false"
+        export-title="Liste des grades">
         <x-slot:head>
             <th>Libellé</th>
             <th>Enseignants</th>
@@ -14,7 +24,7 @@
             <th class="text-end">Actions</th>
         </x-slot:head>
         @forelse($grades as $grade)
-            <tr>
+            <tr class="{{ $highlightId == $grade->id ? 'highlight-row' : '' }}">
                 <td class="fw-semibold"><i class="fa-solid fa-medal text-uvci-purple me-2"></i>{{ $grade->libelle }}
                 </td>
                 <td><span
@@ -124,7 +134,8 @@
                             </div>
                         </div>
                         <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Annuler</button>
+                            <button type="button" class="btn btn-light border"
+                                data-bs-dismiss="modal">Annuler</button>
                             <button type="submit" class="btn btn-uvci">
                                 <i class="fa-solid fa-check me-1"></i> Modifier
                             </button>
@@ -197,3 +208,25 @@
         </script>
     @endif
 </x-app-page>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Si un élément est highlighté, faire défiler jusqu'à lui
+            const highlightedRow = document.querySelector('.highlight-row');
+            if (highlightedRow) {
+                highlightedRow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Nettoyer l'URL après 3 secondes
+                setTimeout(() => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('highlight');
+                    window.history.replaceState({}, '', url);
+                }, 3000);
+            }
+        });
+    </script>
+@endpush

@@ -126,7 +126,7 @@
     </div>
 
     {{-- Dernières activités & enseignants en dépassement --}}
-    <div class="row g-3 mt-1">
+    {{-- <div class="row g-3 mt-1">
         <div class="col-lg-7">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -157,7 +157,7 @@
                                     <td class="fw-semibold">{{ $a['volume'] }}</td>
                                     <td>
                                         <span
-                                            class="badge badge-soft-{{ $a['statut_badge'] }}">{{ $a['statut'] }}</span>
+                                            class="badge badge-soft-{{ $a['statut_badge'] }}">{{ ucfirst(str_replace('_', ' ', $a['statut'])) }}</span>
                                     </td>
                                 </tr>
                             @empty
@@ -205,7 +205,7 @@
                 @endif
             </div>
         </div>
-    </div>
+    </div> --}}
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
