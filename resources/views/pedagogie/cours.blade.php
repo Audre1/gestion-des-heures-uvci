@@ -8,6 +8,15 @@
         </button>
     </x-slot:actions>
 
+    @php
+        // Extraire le paramètre highlight de l'URL
+$highlightParam = request()->get('highlight');
+$highlightId = null;
+if ($highlightParam && str_contains($highlightParam, 'cours:')) {
+    $highlightId = str_replace('cours:', '', $highlightParam);
+        }
+    @endphp
+
     <x-data-table search-placeholder="Rechercher un cours..." :count="$cours->count()" export-title="Liste des cours">
         <x-slot:filters>
             <label class="dt-filter-label">Crédits</label>
@@ -28,7 +37,7 @@
 
 
         @forelse($cours as $cour)
-            <tr>
+            <tr class="{{ $highlightId == $cour->id ? 'highlight-row' : '' }}">
                 <td class="font-monospace fw-semibold text-uvci-purple">{{ $cour->code_cours }}</td>
                 <td>{{ $cour->intitule }}</td>
                 <td>{{ $cour->nombre_heures }}h</td>
@@ -402,3 +411,25 @@
         @endforeach
     </script>
 </x-app-page>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Si un élément est highlighté, faire défiler jusqu'à lui
+            const highlightedRow = document.querySelector('.highlight-row');
+            if (highlightedRow) {
+                highlightedRow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Nettoyer l'URL après 3 secondes
+                setTimeout(() => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('highlight');
+                    window.history.replaceState({}, '', url);
+                }, 3000);
+            }
+        });
+    </script>
+@endpush

@@ -26,7 +26,7 @@
 
             {{-- Filtres --}}
             @if ($showFilters && $filters ?? false)
-                <div class="dropdown">
+                <div class="dropdown data-table-filters">
                     <button class="btn btn-sm btn-light border dropdown-toggle" type="button"
                         data-bs-toggle="dropdown">
                         <i class="fa-solid fa-filter me-1 text-muted"></i>
@@ -43,9 +43,6 @@
                 </div>
             @endif
 
-            {{-- Compteur --}}
-            <span class="badge badge-soft-gray data-table-count" x-text="info.compteur"></span>
-
             {{-- Actions d'export --}}
             <div class="data-table-actions">
                 <button class="btn btn-sm btn-light border" title="Exporter en Excel" @click="exporterExcel">
@@ -55,6 +52,9 @@
                     <i class="fa-solid fa-file-pdf text-danger"></i>
                 </button>
             </div>
+
+            {{-- Compteur --}}
+            <span class="badge badge-soft-gray data-table-count" x-text="info.compteur"></span>
 
         </div>
 
@@ -399,12 +399,16 @@
             background: #fff;
         }
 
-        .data-table-count {
+        .data-table-filters {
             flex-shrink: 0;
         }
 
+        .data-table-count {
+            flex-shrink: 0;
+            order: 3;
+        }
+
         .data-table-actions {
-            margin-left: auto;
             display: flex;
             gap: 0.4rem;
             flex-shrink: 0;
@@ -500,27 +504,96 @@
             font-size: 0.82rem;
         }
 
-        @media (max-width: 576px) {
+        @media (max-width: 768px) {
             .data-table-toolbar {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 0.75rem;
             }
 
             .data-table-search {
                 max-width: 100%;
+                flex: 1 1 auto;
+            }
+
+            .data-table-filters {
+                width: 100%;
+            }
+
+            .data-table-filters .btn {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .data-table-actions {
-                margin-left: 0;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .data-table-actions .btn {
+                flex: 1;
+            }
+
+            .data-table-count {
+                width: 100%;
+                text-align: center;
+                order: 4;
             }
 
             .dt-pagination {
                 flex-direction: column;
                 text-align: center;
+                gap: 1rem;
             }
 
             .dt-pages {
                 justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .dt-page {
+                min-width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table {
+                font-size: 0.85rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .data-table-toolbar {
+                padding: 0.5rem;
+            }
+
+            .data-table-search input {
+                font-size: 0.9rem;
+            }
+
+            .dt-page {
+                min-width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .table {
+                font-size: 0.8rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 0.4rem 0.5rem;
             }
         }
     </style>

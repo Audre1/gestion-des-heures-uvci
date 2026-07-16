@@ -55,13 +55,14 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-semibold"><i class="fa-solid fa-chart-line text-uvci-green me-2"></i>Progression du service statutaire ({{ $serviceStatutaire }}h)</span>
+                        <span class="fw-semibold"><i class="fa-solid fa-chart-line text-uvci-green me-2"></i>Progression
+                            du service statutaire ({{ $serviceStatutaire }}h)</span>
                         <span class="badge badge-soft-green fs-6">{{ $stats['taux_realisation'] }}%</span>
                     </div>
                     <div class="progress" style="height: 12px;">
                         <div class="progress-bar bg-success" role="progressbar"
-                             style="width: {{ min($stats['taux_realisation'], 100) }}%;"
-                             aria-valuenow="{{ $stats['taux_realisation'] }}" aria-valuemin="0" aria-valuemax="100">
+                            style="width: {{ min($stats['taux_realisation'], 100) }}%;"
+                            aria-valuenow="{{ $stats['taux_realisation'] }}" aria-valuemin="0" aria-valuemax="100">
                         </div>
                     </div>
                     <div class="d-flex justify-content-between small text-muted mt-1">
@@ -100,7 +101,7 @@
                                     <td>{{ $a['type'] }}</td>
                                     <td class="fw-semibold">{{ $a['volume'] }}</td>
                                     <td>
-                                        <span class="badge badge-soft-{{ $a['badge'] }}">{{ $a['statut'] }}</span>
+                                        <span class="badge badge-soft-{{ $a['badge'] }}">{{ ucfirst(str_replace('_', ' ', $a['statut'])) }}</span>
                                     </td>
                                 </tr>
                             @empty
@@ -121,15 +122,20 @@
         <div class="col-lg-5">
             {{-- Résumé --}}
             <div class="card mb-3">
-                <div class="card-header"><i class="fa-solid fa-chart-simple text-uvci-purple me-2"></i>Récapitulatif</div>
+                <div class="card-header"><i class="fa-solid fa-chart-simple text-uvci-purple me-2"></i>Récapitulatif
+                </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted">Activités validées</span>
                         <span class="fw-semibold badge-soft-green badge">{{ $stats['activites_validees'] }}</span>
                     </div>
                     <div class="d-flex justify-content-between py-2 border-bottom">
-                        <span class="text-muted">En attente de validation</span>
-                        <span class="fw-semibold badge-soft-amber badge">{{ $stats['activites_en_attente'] }}</span>
+                        <span class="text-muted">Activités en cours</span>
+                        <span class="fw-semibold badge-soft-amber badge">{{ $stats['activites_en_cours'] }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Activités rejetées</span>
+                        <span class="fw-semibold badge-soft-red badge">{{ $stats['activites_rejetees'] }}</span>
                     </div>
                     <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted">Heures complémentaires</span>
@@ -150,16 +156,16 @@
                         <a href="{{ route('espace.activites') }}" class="btn btn-uvci">
                             <i class="fa-solid fa-plus me-1"></i> Ajouter une activité
                         </a>
-                        <a href="{{ route('espace.volume') }}" class="btn btn-uvci-outline">
+                        <a href="{{ route('espace.volume') }}" class="btn btn-light border">
                             <i class="fa-solid fa-stopwatch me-1"></i> Voir mon volume horaire
                         </a>
-                        <a href="{{ route('espace.complementaires') }}" class="btn btn-uvci-outline">
+                        <a href="{{ route('espace.complementaires') }}" class="btn btn-light border">
                             <i class="fa-solid fa-clock me-1"></i> Heures complémentaires
                         </a>
-                        <a href="{{ route('espace.ressources') }}" class="btn btn-uvci-outline">
+                        <a href="{{ route('espace.ressources') }}" class="btn btn-light border">
                             <i class="fa-solid fa-book-open me-1"></i> Mes ressources
                         </a>
-                        <a href="{{ route('espace.documents') }}" class="btn btn-uvci-outline">
+                        <a href="{{ route('espace.documents') }}" class="btn btn-light border">
                             <i class="fa-solid fa-download me-1"></i> Mes documents
                         </a>
                     </div>

@@ -196,10 +196,12 @@ class EspaceController extends Controller
 
     public function documents()
     {
+        // Récupérer toutes les années académiques
+        $annees = AnneeAcademique::where('statut', '!=', 'a_venir')->orderBy('libelle', 'desc')->get();
         if (function_exists('logActivite')) {
             logActivite('consultation', 'Consultation des documents par l\'enseignant');
         }
 
-        return view('espace.documents');
+        return view('espace.documents', compact('annees'));
     }
 }
