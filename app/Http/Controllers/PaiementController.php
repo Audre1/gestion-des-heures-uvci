@@ -86,7 +86,9 @@ class PaiementController extends Controller
 
         // Calculer le service statutaire et heures complémentaires
         $serviceStatutaire = $this->getServiceStatutaire($enseignant->grade->libelle ?? null, $enseignant->statut ?? null);
-        $heuresComplementaires = ($enseignant->statut !== 'Vacataire') ? max(0, $vhtTotal - $serviceStatutaire) : 0;
+        $heuresComplementaires = ($enseignant->statut === 'Vacataire')
+            ? $vhtTotal // Pour les vacataires, tout est complémentaire
+            : max(0, $vhtTotal - $serviceStatutaire); // Pour les permanents, heures au-delà du service statutaire
 
         // Récupérer le taux horaire
         $tauxHoraire = $enseignant->getTauxHoraire($request->id_annee);

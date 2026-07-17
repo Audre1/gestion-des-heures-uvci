@@ -80,8 +80,11 @@ class DocumentController extends Controller
         $annee = $anneeId ? AnneeAcademique::find($anneeId) : AnneeAcademique::where('statut', 'en_cours')->first();
 
         // Récupérer le service statutaire depuis les paramètres de calcul de l'année
+        // Uniquement pour les permanents
         $params = $annee ? ParametreCalcul::where('annee_id', $annee->id)->first() : null;
-        $serviceStatutaire = $params ? $params->service_statutaire : 10;
+        $serviceStatutaire = ($enseignant->statut === 'Permanent')
+            ? ($params ? $params->service_statutaire : 192)
+            : 0; // Pour les vacataires, pas de service statutaire
 
         $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant, $annee) {
             $query->where('id_enseignant', $idEnseignant);
@@ -93,7 +96,11 @@ class DocumentController extends Controller
             ->get();
 
         $volumeRealise = $activites->sum('volume_horaire');
-        $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
+
+        // Calcul des heures complémentaires selon le statut
+        $heuresComplementaires = ($enseignant->statut === 'Permanent')
+            ? max(0, $volumeRealise - $serviceStatutaire)
+            : $volumeRealise; // Pour les vacataires, tout est complémentaire
 
         if (function_exists('logActivite')) {
             logActivite('téléchargement', 'Téléchargement de la fiche individuelle');
@@ -136,8 +143,11 @@ class DocumentController extends Controller
         $annee = $anneeId ? AnneeAcademique::find($anneeId) : AnneeAcademique::where('statut', 'en_cours')->first();
 
         // Récupérer le service statutaire depuis les paramètres de calcul de l'année
+        // Uniquement pour les permanents
         $params = $annee ? ParametreCalcul::where('annee_id', $annee->id)->first() : null;
-        $serviceStatutaire = $params ? $params->service_statutaire : 10;
+        $serviceStatutaire = ($enseignant->statut === 'Permanent')
+            ? ($params ? $params->service_statutaire : 192)
+            : 0; // Pour les vacataires, pas de service statutaire
 
         $activites = ActivitePedagogique::whereHas('affectationCours', function ($query) use ($idEnseignant, $annee) {
             $query->where('id_enseignant', $idEnseignant);
@@ -152,7 +162,11 @@ class DocumentController extends Controller
             ->get();
 
         $volumeRealise = $activites->sum('volume_horaire');
-        $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
+
+        // Calcul des heures complémentaires selon le statut
+        $heuresComplementaires = ($enseignant->statut === 'Permanent')
+            ? max(0, $volumeRealise - $serviceStatutaire)
+            : $volumeRealise; // Pour les vacataires, tout est complémentaire
 
         if (function_exists('logActivite')) {
             logActivite('téléchargement', 'Téléchargement de l\'état des heures');

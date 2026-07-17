@@ -18,7 +18,7 @@ use App\Http\Controllers\ExportController;
 | Web Routes
 |--------------------------------------------------------------------------
 | Les middlewares de rôles sont appliqués selon les règles définies dans la sidebar :
-|   - admin      → Administration   
+|   - admin      → Administration
 |   - secretaire → Gestion pédagogique
 |   - enseignant → Espace Enseignant
 */
@@ -26,7 +26,7 @@ use App\Http\Controllers\ExportController;
 // ─── Authentification (public) ──────────────────────────────────────────────
 
 Route::get('/connexion', [AuthController::class, 'login'])->name('login');
-Route::post('/connexion', [AuthController::class, 'authenticate'])->name('login.authenticate');
+Route::post('/connexion', [AuthController::class, 'authenticate'])->middleware('auto.backup')->name('login.authenticate');
 Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/mot-de-passe-oublie', [AuthController::class, 'forgotPassword'])->name('password.request');
@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/sauvegardes', [AdminController::class, 'sauvegardes'])->name('sauvegardes.index');
         Route::post('/sauvegardes', [AdminController::class, 'createBackup'])->name('sauvegardes.create');
+        Route::put('/sauvegardes/settings', [AdminController::class, 'updateBackupSettings'])->name('sauvegardes.update-settings');
         Route::get('/sauvegardes/{filename}/download', [AdminController::class, 'downloadBackup'])->name('sauvegardes.download');
         Route::post('/sauvegardes/{filename}/restore', [AdminController::class, 'restoreBackup'])->name('sauvegardes.restore');
         Route::delete('/sauvegardes/{filename}', [AdminController::class, 'deleteBackup'])->name('sauvegardes.destroy');

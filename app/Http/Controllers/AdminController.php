@@ -436,10 +436,18 @@ class AdminController extends Controller
         $lastBackupDate = $backupService->getLastBackupDate();
         $totalSize = $backupService->getTotalSize();
 
+        // Récupérer les paramètres de sauvegarde
+        $parametre = ParametreCalcul::anneeActive()->first();
+        $backupSettings = [
+            'delai' => $parametre ? $parametre->sauvegarde_auto_delai : 24,
+            'rotation' => $parametre ? $parametre->sauvegarde_auto_rotation : 7,
+        ];
+
         return view('admin.sauvegardes', [
             'backups' => $backups,
             'lastBackupDate' => $lastBackupDate,
             'totalSize' => $totalSize,
+            'backupSettings' => $backupSettings,
         ]);
     }
 
@@ -512,6 +520,42 @@ class AdminController extends Controller
             return redirect()
                 ->route('sauvegardes.index')
                 ->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+        }
+    }
+
+    // === Update backup settings ===
+    public function updateBackupSettings(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'sauvegarde_auto_delai' => 'required|integer|min:1|max:168',
+            'sauvegarde_auto_rotation' => 'required|integer|min:1|max:30',
+        ]);
+
+        try {
+            $parametre = ParametreCalcul::anneeActive()->first();
+
+            if (!$parametre) {
+                return redirect()
+                    ->route('sauvegardes.index')
+                    ->with('error', 'Aucune année académique active. Veuillez activer une année académique.');
+            }
+
+            $parametre->update([
+                'sauvegarde_auto_delai' => $validated['sauvegarde_auto_delai'],
+                'sauvegarde_auto_rotation' => $validated['sauvegarde_auto_rotation'],
+            ]);
+
+            if (function_exists('logActivite')) {
+                logActivite('modification', 'Mise à jour des paramètres de sauvegarde automatique', $parametre);
+            }
+
+            return redirect()
+                ->route('sauvegardes.index')
+                ->with('success', 'Paramètres de sauvegarde mis à jour avec succès.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('sauvegardes.index')
+                ->with('error', 'Erreur lors de la mise à jour : ' . $e->getMessage());
         }
     }
 }

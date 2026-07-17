@@ -36,11 +36,61 @@
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="stat-icon blue"><i class="fa-solid fa-shield-halved"></i></div>
                     <div>
-                        <div class="stat-value">Manuelle</div>
+                        <div class="stat-value">Automatique</div>
                         <div class="stat-label">Fréquence</div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Configuration des sauvegardes automatiques --}}
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa-solid fa-gears text-uvci-purple me-2"></i>
+            Configuration des sauvegardes automatiques
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ route('sauvegardes.update-settings') }}">
+                @csrf
+                @method('PUT')
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Délai entre sauvegardes</label>
+                        <div class="input-group">
+                            <input type="number" name="sauvegarde_auto_delai"
+                                class="form-control @error('sauvegarde_auto_delai') is-invalid @enderror"
+                                value="{{ $backupSettings['delai'] ?? 24 }}" required min="1" max="168">
+                            <span class="input-group-text">heures</span>
+                            @error('sauvegarde_auto_delai')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <small class="text-muted">Délai minimum avant de créer une nouvelle sauvegarde automatique lors
+                            de la connexion admin.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Rotation des sauvegardes</label>
+                        <div class="input-group">
+                            <input type="number" name="sauvegarde_auto_rotation"
+                                class="form-control @error('sauvegarde_auto_rotation') is-invalid @enderror"
+                                value="{{ $backupSettings['rotation'] ?? 7 }}" required min="1" max="30">
+                            <span class="input-group-text">sauvegardes</span>
+                            @error('sauvegarde_auto_rotation')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <small class="text-muted">Nombre de sauvegardes automatiques à conserver (les plus anciennes
+                            sont supprimées).</small>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-sm btn-uvci">
+                        <i class="fa-solid fa-floppy-disk me-1"></i>
+                        Enregistrer la configuration
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -58,7 +108,13 @@
                 <td><i class="fa-solid fa-file-zipper text-uvci-purple me-2"></i>{{ $backup['filename'] }}</td>
                 <td>{{ $backup['date'] }}</td>
                 <td>{{ $backup['size'] }}</td>
-                <td><span class="badge badge-soft-gray">Manuelle</span></td>
+                <td>
+                    @if (str_starts_with($backup['filename'], 'backup_auto_'))
+                        <span class="badge badge-soft-blue">Automatique</span>
+                    @else
+                        <span class="badge badge-soft-gray">Manuelle</span>
+                    @endif
+                </td>
                 <td>
                     <div class="action-btns justify-content-end">
                         <a href="{{ route('sauvegardes.download', $backup['filename']) }}" class="btn btn-light border"
@@ -81,7 +137,8 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow">
                         <div class="modal-header bg-warning text-dark">
-                            <h5 class="modal-title fw-bold" id="restoreBackupModalLabel{{ md5($backup['filename']) }}">
+                            <h5 class="modal-title fw-bold"
+                                id="restoreBackupModalLabel{{ md5($backup['filename']) }}">
                                 <i class="fa-solid fa-rotate-left me-2"></i>
                                 Confirmer la restauration
                             </h5>
@@ -132,7 +189,8 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow">
                         <div class="modal-header bg-danger text-white">
-                            <h5 class="modal-title fw-bold" id="deleteBackupModalLabel{{ md5($backup['filename']) }}">
+                            <h5 class="modal-title fw-bold"
+                                id="deleteBackupModalLabel{{ md5($backup['filename']) }}">
                                 <i class="fa-solid fa-triangle-exclamation me-2"></i>
                                 Confirmer la suppression
                             </h5>

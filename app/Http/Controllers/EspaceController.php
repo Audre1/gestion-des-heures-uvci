@@ -51,11 +51,20 @@ class EspaceController extends Controller
 
         $nombreActivites = $activites->count();
 
-        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
-        $params = ParametreCalcul::anneeActive()->first();
-        $serviceStatutaire = $params ? $params->service_statutaire : 10;
+        // Récupérer l'enseignant et son statut
+        $enseignant = Enseignant::with('grade')->find($idEnseignant);
+        $statutEnseignant = $enseignant->statut; // 'Permanent' ou 'Vacataire'
 
-        $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
+        // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
+        // Uniquement pour les permanents
+        $params = ParametreCalcul::anneeActive()->first();
+        $serviceStatutaire = ($statutEnseignant === 'Permanent')
+            ? ($params ? $params->service_statutaire : 192)
+            : 0;
+
+        $heuresComplementaires = ($statutEnseignant === 'Permanent')
+            ? max(0, $volumeRealise - $serviceStatutaire)
+            : $volumeRealise; // Pour les vacataires, tout est complémentaire
 
         $evolutionMensuelle = collect([
             'Jan' => 0,
@@ -81,8 +90,6 @@ class EspaceController extends Controller
         // Formater les données pour Chart.js
         $chartLabels = array_keys($evolutionMensuelle->toArray());
         $chartData = array_values($evolutionMensuelle->toArray());
-
-        $enseignant = Enseignant::with('grade')->find($idEnseignant);
 
         // Récupérer le taux horaire en utilisant la méthode du modèle
         $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
@@ -116,9 +123,16 @@ class EspaceController extends Controller
     {
         $idEnseignant = Auth::user()->enseignant->id;
 
+        // Récupérer l'enseignant et son statut
+        $enseignant = Enseignant::with('grade')->find($idEnseignant);
+        $statutEnseignant = $enseignant->statut; // 'Permanent' ou 'Vacataire'
+
         // Récupérer le service statutaire depuis les paramètres de calcul de l'année active
+        // Uniquement pour les permanents
         $params = ParametreCalcul::anneeActive()->first();
-        $serviceStatutaire = $params ? $params->service_statutaire : 10;
+        $serviceStatutaire = ($statutEnseignant === 'Permanent')
+            ? ($params ? $params->service_statutaire : 192)
+            : 0; // Pour les vacataires, pas de service statutaire
 
         $activites = ActivitePedagogique::query()
             ->whereHas('affectationCours', function ($query) use ($idEnseignant) {
@@ -149,11 +163,10 @@ class EspaceController extends Controller
 
         $volumeRealise = $activites->sum('volume_horaire');
 
-
-        $heuresComplementaires = max(0, $volumeRealise - $serviceStatutaire);
-
-
-        $enseignant = Enseignant::with('grade')->find($idEnseignant);
+        // Calcul des heures complémentaires selon le statut
+        $heuresComplementaires = ($statutEnseignant === 'Permanent')
+            ? max(0, $volumeRealise - $serviceStatutaire)
+            : $volumeRealise; // Pour les vacataires, tout est complémentaire
 
         // Récupérer le taux horaire en utilisant la méthode du modèle
         $anneeActive = AnneeAcademique::where('statut', 'en_cours')->first();
