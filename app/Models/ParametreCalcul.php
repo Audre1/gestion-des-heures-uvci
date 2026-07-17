@@ -15,6 +15,8 @@ class ParametreCalcul extends Model
         'sequences_par_credit',
         'service_statutaire',
         'reduction_mise_a_jour',
+        'sauvegarde_auto_delai',
+        'sauvegarde_auto_rotation',
     ];
 
     protected $casts = [
@@ -22,6 +24,8 @@ class ParametreCalcul extends Model
         'sequences_par_credit'  => 'integer',
         'service_statutaire'    => 'integer',
         'reduction_mise_a_jour' => 'integer',
+        'sauvegarde_auto_delai' => 'integer',
+        'sauvegarde_auto_rotation' => 'integer',
     ];
 
     // ─── Relation ───────────────────────────────────────────

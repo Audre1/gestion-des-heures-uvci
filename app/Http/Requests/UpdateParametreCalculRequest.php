@@ -19,6 +19,10 @@ class UpdateParametreCalculRequest extends FormRequest
             'sequences_par_credit'  => 'required|integer|min:1|max:200|gt:heures_par_credit',
             'service_statutaire'    => 'required|integer|min:1|max:500',
             'reduction_mise_a_jour' => 'required|integer|min:0|max:99',
+
+            // Règles de sauvegarde automatique
+            'sauvegarde_auto_delai' => 'required|integer|min:1|max:168',
+            'sauvegarde_auto_rotation' => 'required|integer|min:1|max:30',
         ];
     }
 
@@ -45,6 +49,16 @@ class UpdateParametreCalculRequest extends FormRequest
             'reduction_mise_a_jour.integer'  => 'La réduction mise à jour doit être un entier.',
             'reduction_mise_a_jour.min'      => 'La réduction mise à jour ne peut être négative.',
             'reduction_mise_a_jour.max'      => 'La réduction mise à jour ne peut excéder 100%.',
+
+            'sauvegarde_auto_delai.required' => 'Le délai de sauvegarde est requis.',
+            'sauvegarde_auto_delai.integer'  => 'Le délai de sauvegarde doit être un entier.',
+            'sauvegarde_auto_delai.min'      => 'Le délai de sauvegarde doit être au moins 1 heure.',
+            'sauvegarde_auto_delai.max'      => 'Le délai de sauvegarde ne peut excéder 168 heures (7 jours).',
+
+            'sauvegarde_auto_rotation.required' => 'La rotation de sauvegarde est requise.',
+            'sauvegarde_auto_rotation.integer'  => 'La rotation de sauvegarde doit être un entier.',
+            'sauvegarde_auto_rotation.min'      => 'La rotation de sauvegarde doit être au moins 1.',
+            'sauvegarde_auto_rotation.max'      => 'La rotation de sauvegarde ne peut excéder 30.',
 
             '*.numeric'                      => 'Ce champ doit être un nombre.',
             '*.min'                          => 'Ce champ doit être positif.',

@@ -54,6 +54,42 @@ class BackupService
     }
 
     /**
+     * Crée une sauvegarde automatique (avec rotation)
+     */
+    public function autoBackup(): string
+    {
+        $filename = 'backup_auto_' . date('Y-m-d_H-i-s') . '.sql';
+        $filepath = $this->backupPath . '/' . $filename;
+
+        Log::info('Début de la sauvegarde automatique', ['filename' => $filename]);
+
+        try {
+            // Utiliser PDO pour créer le dump
+            $sql = $this->getDatabaseDump();
+
+            // Écrire le fichier
+            File::put($filepath, $sql);
+
+            Log::info('Sauvegarde automatique réussie', ['filename' => $filename]);
+
+            // Récupérer les paramètres de rotation depuis la base
+            $rotationCount = $this->getBackupRotationCount();
+
+            // Rotation des sauvegardes automatiques
+            $this->rotateAutoBackups($rotationCount);
+
+            if (function_exists('logActivite')) {
+                logActivite('sauvegarde_auto', 'Sauvegarde automatique créée : ' . $filename);
+            }
+
+            return $filename;
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la sauvegarde automatique', ['error' => $e->getMessage(), 'filename' => $filename]);
+            throw new \Exception('Erreur lors de la sauvegarde automatique : ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Génère le dump SQL de la base de données
      */
     protected function getDatabaseDump(): string
@@ -234,14 +270,54 @@ class BackupService
      */
     protected function parseSqlStatements(string $sql): array
     {
-        // Séparer les instructions par point-virgule
-        $statements = explode(';', $sql);
+        $statements = [];
+        $currentStatement = '';
+        $inComment = false;
+        $inString = false;
+        $stringChar = '';
+        $lines = explode("\n", $sql);
 
-        // Filtrer les instructions vides et les commentaires
-        $statements = array_filter($statements, function ($statement) {
-            $statement = trim($statement);
-            return !empty($statement) && !str_starts_with($statement, '--') && !str_starts_with($statement, '/*');
-        });
+        foreach ($lines as $line) {
+            $trimmedLine = trim($line);
+
+            // Ignorer les lignes de commentaires simples
+            if (str_starts_with($trimmedLine, '--') || empty($trimmedLine)) {
+                continue;
+            }
+
+            // Gérer les blocs de commentaires multi-lignes
+            if (str_starts_with($trimmedLine, '/*') || str_ends_with($trimmedLine, '*/')) {
+                continue;
+            }
+
+            $currentStatement .= $line . "\n";
+
+            // Vérifier si la ligne se termine par un point-virgule (hors des chaînes)
+            if (!$inString && str_ends_with($trimmedLine, ';')) {
+                $statements[] = trim($currentStatement);
+                $currentStatement = '';
+            }
+
+            // Gérer les chaînes de caractères pour éviter de couper à l'intérieur
+            for ($i = 0; $i < strlen($line); $i++) {
+                $char = $line[$i];
+
+                if ($char === "'" || $char === '"') {
+                    if (!$inString) {
+                        $inString = true;
+                        $stringChar = $char;
+                    } elseif ($char === $stringChar && $line[$i - 1] !== '\\') {
+                        $inString = false;
+                        $stringChar = '';
+                    }
+                }
+            }
+        }
+
+        // Ajouter la dernière instruction si elle n'est pas vide
+        if (!empty(trim($currentStatement))) {
+            $statements[] = trim($currentStatement);
+        }
 
         return $statements;
     }
@@ -283,5 +359,103 @@ class BackupService
         }
 
         return $backups[0]['date'];
+    }
+
+    /**
+     * Vérifie si une sauvegarde automatique récente existe (dans les dernières 24h)
+     */
+    public function hasRecentAutoBackup(int $hours = 24): bool
+    {
+        $backups = $this->getBackups();
+
+        if (empty($backups)) {
+            return false;
+        }
+
+        // Filtrer uniquement les sauvegardes automatiques
+        $autoBackups = array_filter($backups, function ($backup) {
+            return str_starts_with($backup['filename'], 'backup_auto_');
+        });
+
+        if (empty($autoBackups)) {
+            return false;
+        }
+
+        // Vérifier la plus récente
+        $latestBackup = reset($autoBackups);
+        $lastBackupTime = $latestBackup['timestamp'];
+        $threshold = time() - ($hours * 3600);
+
+        return $lastBackupTime > $threshold;
+    }
+
+    /**
+     * Récupère le délai de sauvegarde automatique depuis les paramètres
+     */
+    public function getBackupDelay(): int
+    {
+        try {
+            $parametre = \App\Models\ParametreCalcul::anneeActive()->first();
+            return $parametre ? $parametre->sauvegarde_auto_delai ?? 24 : 24;
+        } catch (\Exception $e) {
+            Log::warning('Impossible de récupérer le délai de sauvegarde, utilisation de la valeur par défaut', [
+                'error' => $e->getMessage()
+            ]);
+            return 24;
+        }
+    }
+
+    /**
+     * Récupère le nombre de sauvegardes automatiques à conserver depuis les paramètres
+     */
+    public function getBackupRotationCount(): int
+    {
+        try {
+            $parametre = \App\Models\ParametreCalcul::anneeActive()->first();
+            return $parametre ? $parametre->sauvegarde_auto_rotation ?? 7 : 7;
+        } catch (\Exception $e) {
+            Log::warning('Impossible de récupérer la rotation de sauvegarde, utilisation de la valeur par défaut', [
+                'error' => $e->getMessage()
+            ]);
+            return 7;
+        }
+    }
+
+    /**
+     * Rotation des sauvegardes automatiques
+     * Garde les $keepCount dernières sauvegardes automatiques
+     */
+    protected function rotateAutoBackups(int $keepCount = 7): void
+    {
+        $files = File::files($this->backupPath);
+        $autoBackups = [];
+
+        foreach ($files as $file) {
+            $filename = $file->getFilename();
+            if (str_starts_with($filename, 'backup_auto_') && str_ends_with($filename, '.sql')) {
+                $autoBackups[] = [
+                    'filename' => $filename,
+                    'path' => $file->getPathname(),
+                    'timestamp' => $file->getMTime(),
+                ];
+            }
+        }
+
+        // Trier par date décroissante
+        usort($autoBackups, function ($a, $b) {
+            return $b['timestamp'] <=> $a['timestamp'];
+        });
+
+        // Supprimer les sauvegardes au-delà de la limite
+        $toDelete = array_slice($autoBackups, $keepCount);
+
+        foreach ($toDelete as $backup) {
+            File::delete($backup['path']);
+            Log::info('Sauvegarde automatique supprimée par rotation', ['filename' => $backup['filename']]);
+
+            if (function_exists('logActivite')) {
+                logActivite('rotation_auto', 'Suppression automatique de la sauvegarde ' . $backup['filename']);
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'secretaire' => \App\Http\Middleware\CheckSecretaire::class,
             'enseignant' => \App\Http\Middleware\CheckEnseignant::class,
             'role'       => \App\Http\Middleware\CheckRole::class,
+            'auto.backup' => \App\Http\Middleware\AutoBackupMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -39,8 +39,16 @@ class RapportService
         $totalVHT = $activites->sum('volume_horaire');
         $totalSequences = $activites->sum('nb_sequences');
         $parametres = ParametreCalcul::where('annee_id', $annee->id)->first();
-        $serviceStatutaire = $parametres ? $parametres->service_statutaire : 192;
-        $heuresComplementaires = max(0, $totalVHT - $serviceStatutaire);
+
+        // Service statutaire uniquement pour les permanents
+        $serviceStatutaire = ($enseignant->statut === 'Permanent')
+            ? ($parametres ? $parametres->service_statutaire : 192)
+            : 0;
+
+        // Heures complémentaires selon le statut
+        $heuresComplementaires = ($enseignant->statut === 'Permanent')
+            ? max(0, $totalVHT - $serviceStatutaire)
+            : $totalVHT; // Pour les vacataires, tout est complémentaire
 
         // Récupérer le taux horaire
         $tauxHoraire = $enseignant->getTauxHoraire($annee->id);
@@ -92,7 +100,15 @@ class RapportService
                 ->get();
 
             $vht = $activites->sum('volume_horaire');
-            $heuresComplementaires = max(0, $vht - $serviceStatutaireGlobal);
+
+            // Service statutaire et heures complémentaires selon le statut
+            $serviceStatutaire = ($enseignant->statut === 'Permanent')
+                ? $serviceStatutaireGlobal
+                : 0;
+
+            $heuresComplementaires = ($enseignant->statut === 'Permanent')
+                ? max(0, $vht - $serviceStatutaire)
+                : $vht; // Pour les vacataires, tout est complémentaire
 
             $totalVHT += $vht;
             $totalHeuresComplementaires += $heuresComplementaires;
@@ -100,7 +116,7 @@ class RapportService
             $data[] = [
                 'enseignant' => $enseignant,
                 'vht' => $vht,
-                'service_statutaire' => $serviceStatutaireGlobal,
+                'service_statutaire' => $serviceStatutaire,
                 'heures_complementaires' => $heuresComplementaires,
                 'statut' => $enseignant->statut,
             ];
@@ -198,7 +214,15 @@ class RapportService
                 ->get();
 
             $vht = $activites->sum('volume_horaire');
-            $heuresComplementaires = max(0, $vht - $serviceStatutaireGlobal);
+
+            // Service statutaire et heures complémentaires selon le statut
+            $serviceStatutaire = ($enseignant->statut === 'Permanent')
+                ? $serviceStatutaireGlobal
+                : 0;
+
+            $heuresComplementaires = ($enseignant->statut === 'Permanent')
+                ? max(0, $vht - $serviceStatutaire)
+                : $vht; // Pour les vacataires, tout est complémentaire
 
             if ($heuresComplementaires > 0) {
                 $tauxHoraire = $enseignant->getTauxHoraire($annee->id);
@@ -210,7 +234,7 @@ class RapportService
                 $data[] = [
                     'enseignant' => $enseignant,
                     'vht' => $vht,
-                    'service_statutaire' => $serviceStatutaireGlobal,
+                    'service_statutaire' => $serviceStatutaire,
                     'heures_complementaires' => $heuresComplementaires,
                     'taux_horaire' => $tauxHoraire,
                     'montant' => $montant,
