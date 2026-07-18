@@ -74,12 +74,24 @@ Application web pour l'automatisation de la gestion des heures d'enseignement de
 - **Exports PDF / Excel** des tableaux de données
 - Interface **responsive** (sidebar rétractable sur mobile)
 
-## 📖 Manuel d'utilisation
+## 📖 Documentations
 
+### Manuel d'utilisation
 Un guide complet est disponible dans le fichier [`docs/MANUEL_UTILISATION.md`](docs/MANUEL_UTILISATION.md) couvrant l'ensemble des fonctionnalités pour les trois rôles :
 - **Administrateur** : gestion des comptes, paramétrage, sauvegardes
 - **Secrétaire** : gestion pédagogique, activités, paiements, rapports
 - **Enseignant** : espace personnel, consultation, documents
+
+### Documentation technique
+La documentation technique détaillée est disponible dans le fichier [`docs/DOCUMENTATION_TECHNIQUE.md`](docs/DOCUMENTATION_TECHNIQUE.md) couvrant :
+- Architecture MVC et flux de navigation
+- Technologies utilisées et structure des dossiers
+- Modèle conceptuel des données (16 tables) avec toutes les relations
+- Modules et fonctionnalités avec extraits de code
+- Sécurité (middleware, validation, CSRF, soft deletes)
+- Sauvegarde et restauration
+- Déploiement (Nginx, optimisation)
+- Maintenance et journal des versions
 
 ## Base de données
 
