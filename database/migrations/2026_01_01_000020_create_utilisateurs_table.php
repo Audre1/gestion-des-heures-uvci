@@ -24,7 +24,6 @@ return new class extends Migration
             $table->timestamp('date_creation')->useCurrent();
             $table->enum('statut_compte', ['actif', 'inactif', 'suspendu'])->default('actif');
             $table->rememberToken();
-            // FK vers roles.id (unsignedBigInteger)
             $table->unsignedBigInteger('id_role');
             $table->foreign('id_role')->references('id')->on('roles')->restrictOnDelete();
             $table->timestamps();
