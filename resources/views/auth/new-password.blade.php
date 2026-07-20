@@ -3,9 +3,9 @@
 @section('title', 'Nouveau mot de passe')
 
 @section('content')
-    <a href="{{ route('password.reset', ['email' => $email]) }}" class="text-muted small d-inline-flex align-items-center gap-1 mb-4">
+    {{-- <a href="{{ route('password.reset', ['email' => $email]) }}" class="text-muted small d-inline-flex align-items-center gap-1 mb-4">
         <i class="fa-solid fa-arrow-left"></i> Retour
-    </a>
+    </a> --}}
 
     <h2>Nouveau mot de passe</h2>
     <p class="subtitle">

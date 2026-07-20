@@ -3,9 +3,9 @@
 @section('title', 'Vérification du code')
 
 @section('content')
-    <a href="{{ route('password.request') }}" class="text-muted small d-inline-flex align-items-center gap-1 mb-4">
+    {{-- <a href="{{ route('password.request') }}" class="text-muted small d-inline-flex align-items-center gap-1 mb-4">
         <i class="fa-solid fa-arrow-left"></i> Retour
-    </a>
+    </a> --}}
 
     <h2>Vérification du code</h2>
     <p class="subtitle">
