@@ -113,6 +113,14 @@ class AdminController extends Controller
     public function destroy(int $id)
     {
         $utilisateur = Utilisateur::findOrFail($id);
+
+        // Empêcher la suppression de l'utilisateur connecté
+        if ($id === auth()->id()) {
+            return redirect()
+                ->route('utilisateurs.index')
+                ->with('error', 'Impossible de supprimer votre propre compte.');
+        }
+
         $utilisateur->delete();
 
         if (function_exists('logActivite')) {
