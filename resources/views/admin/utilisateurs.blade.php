@@ -62,9 +62,8 @@
                             <i class="fa-solid fa-pen text-uvci-green"></i>
                         </button>
 
-                        <button type="button" class="btn btn-light border" title="Supprimer" data-bs-toggle="modal"
-                            data-bs-target="#deleteModal{{ $user->id }}">
-                            <i class="fa-solid fa-trash text-danger"></i>
+                        <button type="button" class="btn btn-light border {{ $user->id === auth()->id() ? 'disabled opacity-50' : '' }}" title="{{ $user->id === auth()->id() ? 'Impossible de supprimer votre propre compte' : 'Supprimer' }}" {{ $user->id === auth()->id() ? 'disabled' : '' }} {{ $user->id !== auth()->id() ? 'data-bs-toggle="modal" data-bs-target="#deleteModal' . $user->id . '"' : '' }}>
+                            <i class="fa-solid fa-trash {{ $user->id === auth()->id() ? 'text-muted' : 'text-danger' }}"></i>
                         </button>
                     </div>
                 </td>
