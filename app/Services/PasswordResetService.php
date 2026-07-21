@@ -292,7 +292,7 @@ class PasswordResetService
             return ['success' => false, 'message' => 'Trop de tentatives échouées. Veuillez réessayer dans 60 minutes.'];
         }
 
-        // ✅ Code valide
+        // Code valide
         // Marquer la vérification comme réussie dans le cache (durée courte : 10 min)
         // Le code OTP reste dans le cache pour la vérification finale dans updatePassword
         Cache::put($this->verifiedKey($email), true, now()->addMinutes(10));

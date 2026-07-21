@@ -13,6 +13,12 @@
     </div>
 @endif
 
+@if (session('status'))
+    <div class="alert alert-success text-center">
+        <div>{{ session('status') }}</div>
+    </div>
+@endif
+
 <form action="{{ route('login.authenticate') }}" method="POST">
     @csrf
 
