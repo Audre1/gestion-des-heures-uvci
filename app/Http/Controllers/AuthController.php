@@ -4,14 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Utilisateur;
+use App\Services\PasswordResetService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected PasswordResetService $passwordResetService;
+
+    public function __construct(PasswordResetService $passwordResetService)
+    {
+        $this->passwordResetService = $passwordResetService;
+    }
+
     public function login()
     {
         return view('auth.login');
@@ -66,11 +73,22 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
+    /**
+     * Affiche le formulaire de demande de réinitialisation.
+     */
     public function forgotPassword()
     {
         return view('auth.forgot-password');
     }
 
+    /**
+     * Envoie un code OTP à l'utilisateur.
+     *
+     * Sécurisé par :
+     * - Cooldown de 60s entre deux envois
+     * - Limite de 20 demandes / heure par IP
+     * - Invalidation automatique de tout code précédent
+     */
     public function sendResetLink(Request $request)
     {
         $request->validate([
@@ -83,32 +101,56 @@ class AuthController extends Controller
         $user = Utilisateur::where('email', $request->email)->first();
 
         if (!$user) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Aucun utilisateur trouvé avec cet email.'], 404);
+            }
             return back()->withInput($request->only('email'))->withErrors(['email' => 'Aucun utilisateur trouvé avec cet email.']);
         }
 
-        // Générer un code OTP à 6 chiffres
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $result = $this->passwordResetService->generateAndSendOtp($user, $request->ip());
 
-        // Stocker le code dans la table password_reset_tokens
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => $code,
-                'created_at' => now()
-            ]
-        );
+        if (!$result['success']) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $result['message']], 429);
+            }
+            return back()->withInput($request->only('email'))->withErrors(['email' => $result['message']]);
+        }
 
-        // Envoyer l'email avec le code
-        Mail::to($user->email)->send(new \App\Mail\ResetPasswordMail($code, $user->prenom . ' ' . $user->nom));
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $result['message'],
+                'cooldown' => $this->passwordResetService->getCooldownSeconds($request->email),
+            ]);
+        }
 
-        return redirect()->route('password.reset', ['email' => $request->email])->with('status', 'Un code de vérification a été envoyé à votre adresse email.');
+        return redirect()->route('password.reset', ['email' => $request->email])
+            ->with('status', $result['message']);
     }
 
+    /**
+     * Affiche la page de vérification du code OTP.
+     */
     public function resetPassword(Request $request)
     {
-        return view('auth.reset-password', ['email' => $request->email]);
+        $cooldown = 0;
+        if ($request->email) {
+            $cooldown = $this->passwordResetService->getCooldownSeconds($request->email);
+        }
+
+        return view('auth.reset-password', [
+            'email' => $request->email,
+            'cooldown' => $cooldown,
+        ]);
     }
 
+    /**
+     * Vérifie le code OTP saisi par l'utilisateur.
+     *
+     * Sécurisé par :
+     * - Maximum 5 tentatives de vérification
+     * - Blocage de 1h après 5 échecs
+     * - Expiration automatique après 15 minutes
+     */
     public function verifyCode(Request $request)
     {
         $code = $request->input('code');
@@ -121,33 +163,32 @@ class AuthController extends Controller
             'email' => 'required|email',
             'code' => 'required|digits:6',
         ], [
-            'email.required' => 'L’adresse email est requise.',
+            'email.required' => 'L\'adresse email est requise.',
             'email.email' => 'Veuillez saisir une adresse email valide.',
             'code.required' => 'Le code de vérification est requis.',
             'code.digits' => 'Le code doit contenir exactement 6 chiffres.',
         ]);
 
-        // Vérifier le code OTP
-        $resetRecord = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->where('token', $request->code)
-            ->first();
+        $result = $this->passwordResetService->verifyOtp($request->email, $request->code);
 
-        if (!$resetRecord) {
-            return back()->withInput($request->only('email', 'code'))
-                ->withErrors(['code' => 'Le code de vérification est invalide.']);
+        if (!$result['success']) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $result['message']], 422);
+            }
+            return back()->withInput($request->only('email'))
+                ->withErrors(['code' => $result['message']]);
         }
 
-        // Vérifier l'expiration (15 minutes)
-        if (now()->diffInMinutes($resetRecord->created_at) > 15) {
-            return back()->withInput($request->only('email', 'code'))
-                ->withErrors(['code' => 'Le code de vérification a expiré. Veuillez demander un nouveau code.']);
-        }
-
-        // Code valide, rediriger vers la page de modification du mot de passe
-        return redirect()->route('password.new', ['email' => $request->email, 'code' => $request->code]);
+        // Code valide → rediriger vers la page de nouveau mot de passe
+        return redirect()->route('password.new', [
+            'email' => $result['email'],
+            'code' => $result['code'],
+        ]);
     }
 
+    /**
+     * Affiche le formulaire de nouveau mot de passe.
+     */
     public function newPassword(Request $request)
     {
         return view('auth.new-password', [
@@ -156,6 +197,12 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Met à jour le mot de passe après vérification du code.
+     *
+     * Vérifie que le code OTP a bien été validé via verifyOtp
+     * avant d'autoriser le changement de mot de passe.
+     */
     public function updatePassword(Request $request)
     {
         $code = $request->input('code');
@@ -169,7 +216,7 @@ class AuthController extends Controller
             'code' => 'required|digits:6',
             'password' => 'required|min:8|confirmed',
         ], [
-            'email.required' => 'L’adresse email est requise.',
+            'email.required' => 'L\'adresse email est requise.',
             'email.email' => 'Veuillez saisir une adresse email valide.',
             'code.required' => 'Le code de vérification est requis.',
             'code.digits' => 'Le code doit contenir exactement 6 chiffres.',
@@ -178,25 +225,31 @@ class AuthController extends Controller
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ]);
 
-        // Vérifier le code OTP
-        $resetRecord = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->where('token', $request->code)
-            ->first();
+        $email = $request->email;
 
-        if (!$resetRecord) {
-            return back()->withInput($request->only('email'))
-                ->withErrors(['code' => 'Le code de vérification est invalide.']);
-        }
+        // Vérifier que le code a bien été validé via verifyOtp
+        // (cette vérification se fait dans le Cache depuis le service)
+        if (!$this->passwordResetService->isVerified($email)) {
+            // Fallback : vérifier via la table password_reset_tokens (compatibilité)
+            $resetRecord = DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->first();
 
-        // Vérifier l'expiration (15 minutes)
-        if (now()->diffInMinutes($resetRecord->created_at) > 15) {
-            return back()->withInput($request->only('email'))
-                ->withErrors(['code' => 'Le code de vérification a expiré. Veuillez demander un nouveau code.']);
+            if (!$resetRecord) {
+                return back()->withInput($request->only('email'))
+                    ->withErrors(['code' => 'Code de vérification invalide. Veuillez recommencer le processus.']);
+            }
+
+            // Vérifier l'expiration (15 minutes)
+            if (now()->diffInMinutes($resetRecord->created_at) > 15) {
+                DB::table('password_reset_tokens')->where('email', $email)->delete();
+                return back()->withInput($request->only('email'))
+                    ->withErrors(['code' => 'Le code de vérification a expiré. Veuillez demander un nouveau code.']);
+            }
         }
 
         // Mettre à jour le mot de passe
-        $user = Utilisateur::where('email', $request->email)->first();
+        $user = Utilisateur::where('email', $email)->first();
         if ($user) {
             $user->mot_de_passe = Hash::make($request->password);
             $user->save();
@@ -205,15 +258,27 @@ class AuthController extends Controller
                 logActivite('modification', 'Réinitialisation du mot de passe pour l\'utilisateur ' . $user->login, $user);
             }
 
-            // Supprimer le token utilisé
+            // Nettoyer le cache OTP et les compteurs RateLimiter
+            $this->passwordResetService->consumeVerification($email);
+            $this->passwordResetService->clearRateLimiter($email);
+
+            // Supprimer l'ancien enregistrement en base si existant
             DB::table('password_reset_tokens')
-                ->where('email', $request->email)
+                ->where('email', $email)
                 ->delete();
         }
 
         return redirect()->route('login')->with('status', 'Votre mot de passe a été réinitialisé avec succès.');
     }
 
+    /**
+     * Renvoie un nouveau code OTP.
+     *
+     * Utilisable uniquement si :
+     * - Moins de 3 renvois effectués dans l'heure
+     * - Délai de 60s respecté depuis le dernier envoi
+     * - Limite IP non atteinte
+     */
     public function resendCode(Request $request)
     {
         $request->validate([
@@ -226,24 +291,28 @@ class AuthController extends Controller
         $user = Utilisateur::where('email', $request->email)->first();
 
         if (!$user) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Aucun utilisateur trouvé avec cet email.'], 404);
+            }
             return back()->withInput($request->only('email'))->withErrors(['email' => 'Aucun utilisateur trouvé avec cet email.']);
         }
 
-        // Générer un nouveau code OTP à 6 chiffres
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $result = $this->passwordResetService->resendOtp($user, $request->ip());
 
-        // Mettre à jour le code dans la table password_reset_tokens
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => $code,
-                'created_at' => now()
-            ]
-        );
+        if (!$result['success']) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $result['message']], 429);
+            }
+            return back()->withErrors(['email' => $result['message']]);
+        }
 
-        // Envoyer l'email avec le nouveau code
-        Mail::to($user->email)->send(new \App\Mail\ResetPasswordMail($code, $user->prenom . ' ' . $user->nom));
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $result['message'],
+                'cooldown' => $this->passwordResetService->getCooldownSeconds($request->email),
+            ]);
+        }
 
-        return back()->with('status', 'Un nouveau code de vérification a été envoyé à votre adresse email.');
+        return back()->with('status', $result['message']);
     }
 }

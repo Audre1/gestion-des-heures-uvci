@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Connexion') — UVCI</title>
     <link rel="icon" href="{{ asset('images/logo-simple.png') }}">
-
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     {{-- Font Awesome 6 --}}
@@ -54,7 +53,7 @@
             const authVisual = document.getElementById('authVisual');
 
             if (authVisual) {
-                const randomBg = Math.floor(Math.random() * 7) + 1;
+                const randomBg = Math.random() < 0.5 ? 2 : 6;
 
                 authVisual.style.backgroundImage = `
                 linear-gradient(
@@ -65,6 +64,7 @@
                 ),
                 url('/images/auth-bg-${randomBg}.jpg')
             `;
+
                 authVisual.style.backgroundSize = 'cover';
                 authVisual.style.backgroundPosition = 'center';
                 authVisual.style.backgroundRepeat = 'no-repeat';
