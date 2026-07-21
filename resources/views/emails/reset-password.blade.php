@@ -4,198 +4,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Réinitialisation de mot de passe - UVCI</title>
+    <title>Réinitialisation de votre mot de passe</title>
+
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6fb;
             margin: 0;
-            padding: 20px;
-            color: #1f2937;
+            padding: 25px 0;
+            background: #f5f6f8;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #374151;
+        }
+
+        .wrapper {
+            width: 100%;
         }
 
         .container {
             max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin: auto;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
         }
 
         .header {
-            background: #00a54e;
-            padding: 40px 30px;
             text-align: center;
+            padding: 35px 30px 25px;
+            border-bottom: 4px solid #00a54e;
         }
 
-        .logo {
-            background: white;
-            border-radius: 12px;
-            padding: 15px 25px;
-            display: inline-block;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            color: #00a54e;
-            margin: 0;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            margin: 0;
-        }
-
-        .content {
-            padding: 40px 30px;
-        }
-
-        .greeting {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
+        .header img {
+            height: 60px;
             margin-bottom: 15px;
         }
 
-        .message {
-            color: #4b5563;
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin-top: 8px;
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        .content {
+            padding: 35px;
             line-height: 1.7;
-            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .content p {
+            margin: 0 0 18px;
         }
 
         .code-box {
-            background: linear-gradient(135deg, rgba(0, 165, 78, 0.1) 0%, rgba(145, 38, 143, 0.1) 100%);
-            border: 2px solid #00a54e;
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
             margin: 30px 0;
+            text-align: center;
+            background: #f8fafc;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 25px;
         }
 
-        .code-label {
-            font-size: 14px;
+        .code-title {
+            font-size: 13px;
             color: #6b7280;
-            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 12px;
         }
 
         .code {
-            font-size: 36px;
-            font-weight: 800;
-            color: #91268f;
+            font-size: 34px;
+            font-weight: bold;
+            color: #00a54e;
             letter-spacing: 8px;
-            margin: 0;
         }
 
-        .warning {
-            background: #fef3e2;
-            border-left: 4px solid #d97706;
-            padding: 15px;
-            border-radius: 8px;
+        .info {
+            background: #f9fafb;
+            border-left: 4px solid #00a54e;
+            padding: 16px;
             margin: 25px 0;
+            color: #4b5563;
             font-size: 14px;
-            color: #92400e;
         }
 
-        .warning strong {
-            color: #b45309;
+        .signature {
+            margin-top: 30px;
         }
 
         .footer {
-            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            background: #fafafa;
             padding: 25px 30px;
             text-align: center;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .footer p {
-            color: #6b7280;
             font-size: 13px;
-            margin: 5px 0;
+            color: #6b7280;
+            line-height: 1.6;
         }
 
         .footer a {
             color: #00a54e;
             text-decoration: none;
-            font-weight: 600;
         }
 
-        .footer a:hover {
-            text-decoration: underline;
-        }
+        @media only screen and (max-width:600px) {
 
-        .button {
-            display: inline-block;
-            background: linear-gradient(135deg, #00a54e 0%, #91268f 100%);
-            color: white;
-            padding: 14px 30px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            margin: 20px 0;
+            .content,
+            .header,
+            .footer {
+                padding: 25px;
+            }
+
+            .code {
+                font-size: 28px;
+                letter-spacing: 6px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <img src="{{ asset('images/logo-simple.png') }}" alt="UVCI Logo" style="height: 50px;">
-            </div>
-            <h1>Réinitialisation de mot de passe</h1>
-            <p>Gestion des Heures des Enseignants</p>
-        </div>
 
-        <div class="content">
-            <p class="greeting">Bonjour {{ $nom }},</p>
+    <div class="wrapper">
 
-            <p class="message">
-                Vous avez demandé la réinitialisation de votre mot de passe pour accéder à la plateforme de gestion des
-                heures des enseignants de l'Université Virtuelle de Côte d'Ivoire.
-            </p>
+        <div class="container">
 
-            <p class="message">
-                Voici votre code de vérification à 6 chiffres :
-            </p>
+            <div class="header">
+                <img src="{{ asset('images/logo-simple.png') }}" alt="UVCI">
 
-            <div class="code-box">
-                <p class="code-label">Code de vérification</p>
-                <p class="code">{{ $code }}</p>
+                <h1>Réinitialisation de votre mot de passe</h1>
+
+                <p>
+                    Plateforme de gestion des heures des enseignants
+                </p>
             </div>
 
-            <div class="warning">
-                <strong>⚠️ Important :</strong> Ce code expire dans 15 minutes. Ne le partagez avec personne. Si vous
-                n'avez pas demandé cette réinitialisation, ignorez cet email.
+            <div class="content">
+
+                <p>Bonjour <strong>{{ $nom }}</strong>,</p>
+
+                <p>
+                    Nous avons reçu une demande de réinitialisation du mot de passe associé à votre compte.
+                </p>
+
+                <p>
+                    Pour poursuivre cette opération, veuillez saisir le code de vérification ci-dessous sur la page de réinitialisation.
+                </p>
+
+                <div class="code-box">
+
+                    <div class="code-title">
+                        Code de vérification
+                    </div>
+
+                    <div class="code">
+                        {{ $code }}
+                    </div>
+
+                </div>
+
+                <div class="info">
+                    <strong>À noter :</strong> ce code est valable pendant
+                    <strong>15 minutes</strong>.
+                    Si vous n'êtes pas à l'origine de cette demande,
+                    vous pouvez simplement ignorer cet email.
+                    Votre mot de passe ne sera pas modifié sans la saisie de ce code.
+                </div>
+
+                {{-- <p>
+                    Si vous rencontrez des difficultés pour accéder à votre compte,
+                    vous pouvez contacter l'équipe en charge de la plateforme.
+                </p> --}}
+
             </div>
 
-            <p class="message">
-                Si vous avez des questions ou besoin d'assistance, n'hésitez pas à contacter le support technique.
-            </p>
+            <div class="footer">
+
+                <p>
+                    Cet email a été envoyé automatiquement par la plateforme de gestion des heures des enseignants.
+                </p>
+
+                <p>
+                    © {{ date('Y') }} Université Virtuelle de Côte d'Ivoire
+                </p>
+
+            </div>
+
         </div>
 
-        <div class="footer">
-            <p>© {{ date('Y') }} Université Virtuelle de Côte d'Ivoire</p>
-            <p>Tous droits réservés</p>
-            <p>
-                <a href="#">Support Technique</a> •
-                <a href="#">Politique de confidentialité</a>
-            </p>
-        </div>
     </div>
+
 </body>
 
 </html>
